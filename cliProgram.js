@@ -1,28 +1,42 @@
 const {Command} = require('commander')
 const path = require('path')
 const {Runner} = require('./Runner')
+const packageInfo = require('./package.json')
 
-const getProgram = (workingDir) => new Command()
-    .name('gushio')
-    .description('Run js files like you run bash scripts')
-    .version('0.0.0')
-    .option('-s, --script <path>', 'path to the script')
-    .action(async (options, command) => {
-        const scriptPath = options.script
-        if (!scriptPath) {
-            return
+class Program {
+
+    commandAction(workingDir) {
+        return async (options, command) => {
+            const scriptPath = options.script
+            if (!scriptPath) {
+                return
+            }
+
+            const runner = Runner.fromPath(command.rawArgs[1], path.resolve(workingDir, scriptPath))
+            await runner.run(command.args)
         }
-        const resolvedScriptPath = path.resolve(workingDir, scriptPath)
-        const runner = Runner.fromPath(command.rawArgs[1], resolvedScriptPath)
-        await runner.run(command.args)
-    })
+    }
 
-const start = () => getProgram(process.cwd())
-    .parseAsync(process.argv)
-    .then(() => process.exit(0))
-    .catch(error => {
-        console.error(error)
-        process.exit(error.errorCode || 1)
-    })
+    getCommand(workingDir) {
+        return new Command()
+            .name(packageInfo.name)
+            .description(packageInfo.description)
+            .version(packageInfo.version)
+            .option('-s, --script <path>', 'path to the script')
+            .action(this.commandAction(workingDir))
+    }
 
-module.exports = {start, getProgram}
+    async start() {
+        try {
+            await this.getCommand(process.cwd()).parseAsync(process.argv)
+            process.exit(0)
+        } catch (error) {
+            console.error(error)
+            process.exit(error.errorCode || 1)
+        }
+    }
+}
+
+const start = () => new Program().start()
+
+module.exports = {start, Program}

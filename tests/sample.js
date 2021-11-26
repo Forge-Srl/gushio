@@ -15,7 +15,7 @@ module.exports = {
         ],
     },
     deps: { /* TODO */ },
-    run: ($, c, e) => async (args, options) => {
+    run: ({'shelljs': $, 'ansi-colors': c, 'enquirer': e}) => async (args, options) => {
         console.log(c.red('args -->'), args)
         console.log(c.green.bold('options -->'), options)
     },

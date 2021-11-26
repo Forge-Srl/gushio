@@ -3,10 +3,6 @@ const {LoadingError, RunningError} = require('./errors')
 
 class Runner {
 
-    static runningError(path, message) {
-        return new Error(`Error while running '${path}': ${message}`)
-    }
-
     static load(scriptPath) {
         try {
             return require(scriptPath)
@@ -65,6 +61,13 @@ class Runner {
         return new Runner(application, scriptPath, cli, runFunction)
     }
 
+    get runnableFunction() {
+        const dependencies = ['shelljs', 'ansi-colors', 'enquirer']
+        const injectedDependencies = Object.assign({}, ...dependencies
+            .map(dependency => ({[dependency]: require(dependency)})))
+        return this.func(injectedDependencies)
+    }
+
     constructor(application, scriptPath, cli, func) {
         this.application = application
         this.scriptPath = scriptPath
@@ -88,15 +91,10 @@ class Runner {
             command.option(option.flags, option.description, option.default)
         }
 
-        const shelljs = require('shelljs')
-        const colors = require('ansi-colors')
-        const enquirer = require('enquirer')
-        const runnableFunction = this.func(shelljs, colors, enquirer)
-
         return command.action(async (...args) => {
             const command = args.pop()
             const cliOptions = args.pop()
-            await runnableFunction(args, cliOptions)
+            await this.runnableFunction(args, cliOptions)
         })
     }
 

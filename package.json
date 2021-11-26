@@ -1,10 +1,10 @@
 {
   "name": "gushio",
   "version": "1.0.0",
-  "description": "",
+  "description": "Like bash scripts, but in JavaScript!",
   "main": "cliProgram.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "sample": "node ./cli.js -s tests/sample.js -- someQuix --baz asd"
   },
   "bin": {
@@ -18,5 +18,8 @@
     "enquirer": "^2.3.6",
     "shelljs": "^0.8.4",
     "ansi-colors": "^4.1.1"
+  },
+  "devDependencies": {
+    "jest": "^27.3.1"
   }
 }
