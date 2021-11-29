@@ -50,15 +50,55 @@ class Runner {
         }
     }
 
+    static checkDependencies(scriptPath, dependencies) {
+        if (!dependencies) {
+            return
+        }
+
+        if (!Array.isArray(dependencies)) {
+            throw new LoadingError(scriptPath, 'deps is not an Array')
+        }
+
+        for (const dependency of dependencies) {
+            if (!dependency.name) {
+                throw new LoadingError(scriptPath, 'dependencies must have a "name" field')
+            }
+        }
+
+        const duplicateCandidates = dependencies.map(d => d.name).filter((item, index) => dependencies.indexOf(item) !== index)
+        for (const duplicate of duplicateCandidates) {
+            const dependencyDuplicates = dependencies.filter(dep => dep.name === duplicate)
+
+            if (dependencyDuplicates.length !== new Set(dependencyDuplicates.map(dep => dep.alias)).size) {
+                throw new LoadingError(scriptPath, `dependency "${duplicate}" has been imported multiple times without different aliases`)
+            }
+        }
+    }
+
     static fromPath(application, scriptPath) {
-        const script = this.load(scriptPath)
-        const runFunction = script.run
-        const cli = script.cli
+        return this.fromJsonObject(application, scriptPath, this.load(scriptPath))
+    }
+
+    static fromJsonObject(application, scriptPath, scriptObject) {
+        const runFunction = scriptObject.run
+        const cli = scriptObject.cli
+        const dependencies = scriptObject.deps
 
         this.checkRunFunction(scriptPath, runFunction)
         this.checkCliObject(scriptPath, cli)
+        this.checkDependencies(scriptPath, dependencies)
 
-        return new Runner(application, scriptPath, cli, runFunction)
+        return new Runner(application, scriptPath, runFunction, cli, dependencies)
+    }
+
+    constructor(application, scriptPath, func, cli, dependencies) {
+        this.application = application
+        this.scriptPath = scriptPath
+        this.func = func
+        this.cli = cli || {}
+        this.cli.arguments = this.cli.arguments || []
+        this.cli.options = this.cli.options || []
+        this.dependencies = dependencies || []
     }
 
     get runnableFunction() {
@@ -66,15 +106,6 @@ class Runner {
         const injectedDependencies = Object.assign({}, ...dependencies
             .map(dependency => ({[dependency]: require(dependency)})))
         return this.func(injectedDependencies)
-    }
-
-    constructor(application, scriptPath, cli, func) {
-        this.application = application
-        this.scriptPath = scriptPath
-        this.cli = cli || {}
-        this.cli.arguments = this.cli.arguments || []
-        this.cli.options = this.cli.options || []
-        this.func = func
     }
 
     makeCommand() {

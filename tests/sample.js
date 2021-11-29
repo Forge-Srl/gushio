@@ -14,7 +14,10 @@ module.exports = {
             {flags: '-B, --baz <baam>', description: 'the baz flag'},
         ],
     },
-    deps: { /* TODO */ },
+    deps: [
+        {name: 'node-fetch', version: '^3.1.0'},
+        {name: 'node-fetch', version: '^3.0.0', alias: 'old-fetch'}
+    ],
     run: ({'shelljs': $, 'ansi-colors': c, 'enquirer': e}) => async (args, options) => {
         console.log(c.red('args -->'), args)
         console.log(c.green.bold('options -->'), options)
