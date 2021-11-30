@@ -1,168 +1,43 @@
 describe('Runner', () => {
-    let Runner, LoadingError, RunningError
+    let Runner, LoadingError, RunningError, ScriptChecker, dependenciesUtils, Command
 
     beforeEach(() => {
         jest.resetModules()
+
+        jest.mock('../ScriptChecker')
+        ScriptChecker = require('../ScriptChecker').ScriptChecker
+
+        jest.mock('../dependenciesUtils')
+        dependenciesUtils = require('../dependenciesUtils')
+
+        jest.mock('commander')
+        Command = require('commander').Command
 
         Runner = require('../Runner').Runner
         LoadingError = require('../errors').LoadingError
         RunningError = require('../errors').RunningError
     })
 
-    describe('load', () => {
-
+    describe('fromPath', () => {
         test('invalid package', () => {
             const scriptPath = './invalid_script_path'
-            expect(() => Runner.load(scriptPath)).toThrow(new LoadingError(scriptPath, 'file not found'))
+            expect(() => Runner.fromPath('appPath', scriptPath)).toThrow(new LoadingError(scriptPath, 'file not found'))
         })
 
         test('valid package', () => {
             jest.mock('valid_script_path', () => ({someKey: 'someValue'}), { virtual: true })
             const dummy = require('valid_script_path')
-            expect(Runner.load('valid_script_path')).toStrictEqual(dummy)
+            Runner.fromJsonObject = (application, scriptPath, scriptObject) => {
+                expect(application).toBe('appPath')
+                expect(scriptPath).toBe('valid_script_path')
+                expect(scriptObject).toBe(dummy)
+                return 'runnerObj'
+            }
+            expect(Runner.fromPath('appPath', 'valid_script_path')).toBe('runnerObj')
         })
-    })
-
-    describe('checkRunFunction', () => {
-        const scriptPath = 'path'
-
-        test('no value', () => {
-            expect(() => Runner.checkRunFunction(scriptPath, undefined))
-                .toThrow(new LoadingError(scriptPath, 'run function is not exported'))
-        })
-
-        test('not a function', () => {
-            expect(() => Runner.checkRunFunction(scriptPath, 'not a function'))
-                .toThrow(new LoadingError(scriptPath, 'run is not a function'))
-        })
-
-        test('function', () => {
-            expect(() => Runner.checkRunFunction(scriptPath, () => {}))
-                .not.toThrow()
-        })
-    })
-
-    describe('checkCliObject', () => {
-        const scriptPath = 'path'
-
-        test('no value', () => {
-            expect(() => Runner.checkCliObject(scriptPath, undefined))
-                .not.toThrow()
-        })
-
-        test('empty object', () => {
-            expect(() => Runner.checkCliObject(scriptPath, {}))
-                .not.toThrow()
-        })
-
-        describe('arguments', () => {
-            test('not array', () => {
-                expect(() => Runner.checkCliObject(scriptPath, {arguments: 10}))
-                    .toThrow(new LoadingError(scriptPath, 'cli.arguments is not an Array'))
-            })
-
-            test('missing name field', () => {
-                expect(() => Runner.checkCliObject(scriptPath, {arguments: [
-                        {name: 'foo'},
-                        {invalid: 'name key is missing'},
-                        {name: 'bar', otherKey: 'other value'},
-                    ]}))
-                    .toThrow(new LoadingError(scriptPath, 'arguments must have a "name" field'))
-            })
-
-            test('valid', () => {
-                expect(() => Runner.checkCliObject(scriptPath, {arguments: [
-                        {name: 'foo'},
-                        {name: 'bar', otherKey: 'other value'}
-                    ]}))
-                    .not.toThrow()
-            })
-        })
-
-        describe('options', () => {
-            test('not array', () => {
-                expect(() => Runner.checkCliObject(scriptPath, {options: 10}))
-                    .toThrow(new LoadingError(scriptPath, 'cli.options is not an Array'))
-            })
-
-            test('missing flags field', () => {
-                expect(() => Runner.checkCliObject(scriptPath, {options: [
-                        {flags: 'foo'},
-                        {invalid: 'flags key is missing'},
-                        {flags: 'bar', otherKey: 'other value'},
-                    ]}))
-                    .toThrow(new LoadingError(scriptPath, 'options must have a "flags" field'))
-            })
-
-            test('valid', () => {
-                expect(() => Runner.checkCliObject(scriptPath, {options: [
-                        {flags: 'foo'},
-                        {flags: 'bar', otherKey: 'other value'}
-                    ]}))
-                    .not.toThrow()
-            })
-        })
-    })
-
-    describe('checkDependencies', () => {
-        const scriptPath = 'path'
-
-        test('no value', () => {
-            expect(() => Runner.checkDependencies(scriptPath, undefined))
-                .not.toThrow()
-        })
-
-        test('not array', () => {
-            expect(() => Runner.checkDependencies(scriptPath, 'not an array'))
-                .toThrow(new LoadingError(scriptPath, 'deps is not an Array'))
-        })
-
-        test('dependency name missing', () => {
-            expect(() => Runner.checkDependencies(scriptPath, [
-                {name: 'dep1'},
-                {notNameKey: 'otherValue'},
-                {name: 'dep2'},
-            ])).toThrow(new LoadingError(scriptPath, 'dependencies must have a "name" field'))
-        })
-
-        test('dependency duplicate without alias', () => {
-            expect(() => Runner.checkDependencies(scriptPath, [
-                {name: 'dep1'},
-                {name: 'dep2'},
-                {name: 'dep1'},
-            ])).toThrow(new LoadingError(scriptPath, 'dependency "dep1" has been imported multiple times without different aliases'))
-        })
-
-        test('valid', () => {
-            expect(() => Runner.checkDependencies(scriptPath, [
-                {name: 'dep1'},
-                {name: 'dep2'},
-                {name: 'dep1', alias: 'dep1-variant1'},
-                {name: 'dep3'},
-                {name: 'dep1', alias: 'dep1-variant2'},
-                {name: 'dep2', alias: 'other'},
-            ])).not.toThrow()
-        })
-    })
-
-    test('fromPath', () => {
-        Runner.load = scriptPath => {
-            expect(scriptPath).toBe('somePath')
-            return 'script'
-        }
-        Runner.fromJsonObject = (application, scriptPath, scriptObject) => {
-            expect(application).toBe('appPath')
-            expect(scriptPath).toBe('somePath')
-            expect(scriptObject).toBe('script')
-            return 'runnerObj'
-        }
-        expect(Runner.fromPath('appPath', 'somePath')).toBe('runnerObj')
     })
 
     test('fromJsonObject', () => {
-        Runner.checkRunFunction = jest.fn()
-        Runner.checkCliObject = jest.fn()
-        Runner.checkDependencies = jest.fn()
         const scriptPath = 'somePath'
         const scriptObject = {
             cli: {
@@ -172,11 +47,15 @@ describe('Runner', () => {
             run: 'run',
             deps: ['dep1', 'dep2']
         }
+        const checkScriptObject = jest.fn()
+        ScriptChecker.mockImplementationOnce(path => {
+            expect(path).toBe(scriptPath)
+            return {checkScriptObject}
+        })
+
         expect(Runner.fromJsonObject('appPath', scriptPath, scriptObject))
             .toStrictEqual(new Runner('appPath', scriptPath, scriptObject.run, scriptObject.cli, scriptObject.deps))
-        expect(Runner.checkRunFunction).toHaveBeenCalledWith(scriptPath, scriptObject.run)
-        expect(Runner.checkCliObject).toHaveBeenCalledWith(scriptPath, scriptObject.cli)
-        expect(Runner.checkDependencies).toHaveBeenCalledWith(scriptPath, scriptObject.deps)
+        expect(checkScriptObject).toHaveBeenCalledWith(scriptObject)
     })
 
     test('constructor', () => {
@@ -194,19 +73,144 @@ describe('Runner', () => {
             .toStrictEqual(new Runner('app', 'script', 'func', {arguments: ['arg'], options: ['opt']}, []))
     })
 
-    test('runnableFunction', () => {
+    test('getDependenciesVersionsAndNames', () => {
+        dependenciesUtils.dependencyDescriptor
+            .mockImplementation((name, version, alias) => ({name, npmInstallVersion: version + alias}))
+
+        const runner = new Runner('appPath', 'scriptPath', 'run', undefined, [
+            {name: 'name1', version: 'version1', alias: 'alias1'},
+            {name: 'name2', version: 'version2', alias: 'alias2'},
+            {name: 'name3', version: 'version3', alias: 'alias3'},
+        ])
+
+        expect(runner.getDependenciesVersionsAndNames()).toStrictEqual({
+            names: ['name1', 'name2', 'name3'],
+            versions: ['version1alias1', 'version2alias2', 'version3alias3']
+        })
+    })
+
+    test('setOptions', () => {
+        const runner = new Runner('appPath', 'scriptPath', 'run')
+        expect(runner.options).toBeUndefined()
+        expect(runner.setOptions('options')).toBe(runner)
+        expect(runner.options).toBe('options')
+    })
+
+    test('setLogger', () => {
+        const runner = new Runner('appPath', 'scriptPath', 'run')
+        expect(runner.logger).toBeUndefined()
+        expect(runner.setLogger('logger')).toBe(runner)
+        expect(runner.logger).toBe('logger')
+    })
+
+    describe('installDependency', () => {
+        let runner
+
+        beforeEach(() => {
+            runner = new Runner('appPath', 'scriptPath', 'run')
+            runner.logger = {info: jest.fn()}
+            runner.options = {verboseLogging: true}
+        })
+
+        test('already installed', async () => {
+            await runner.installDependency('dep')
+            expect(runner.logger.info).toHaveBeenNthCalledWith(1, 'Installing dependency dep')
+            expect(dependenciesUtils.checkDependencyInstalled).toHaveBeenCalledWith('.gushio', 'dep', false)
+            expect(dependenciesUtils.installDependency).not.toHaveBeenCalled()
+            expect(runner.logger.info).toHaveBeenNthCalledWith(2, 'Dependency dep already installed')
+        })
+
+        test('missing dependency', async () => {
+            dependenciesUtils.checkDependencyInstalled.mockRejectedValueOnce(new Error('kaboom'))
+
+            await runner.installDependency('dep')
+            expect(runner.logger.info).toHaveBeenNthCalledWith(1, 'Installing dependency dep')
+            expect(dependenciesUtils.checkDependencyInstalled).toHaveBeenCalledWith('.gushio', 'dep', false)
+            expect(dependenciesUtils.installDependency).toHaveBeenCalledWith('.gushio', 'dep', false)
+            expect(runner.logger.info).toHaveBeenNthCalledWith(2, 'Dependency dep successfully installed')
+        })
+    })
+
+    test('getCommandPreActionHook', async () => {
+        const runner = new Runner('appPath', 'scriptPath', 'run')
+        runner.logger = {info: jest.fn()}
+        runner.installDependency = jest.fn()
+
+        const hook = runner.getCommandPreActionHook(['dep1', 'dep2'])
+        await hook()
+
+        expect(runner.logger.info).toHaveBeenNthCalledWith(1, 'Checking dependencies')
+        expect(dependenciesUtils.ensureNodeModulesExists).toHaveBeenCalledWith('.gushio')
+        expect(runner.installDependency).toHaveBeenNthCalledWith(1, 'dep1')
+        expect(runner.installDependency).toHaveBeenNthCalledWith(2, 'dep2')
+    })
+
+    test('getCommandAction', () => {
         throw 'TODO'
     })
 
     test('makeCommand', () => {
-        throw 'TODO'
+        const runner = new Runner('appPath', 'scriptPath', 'run', {
+            description: 'appDesc',
+            version: 'version',
+            arguments: [
+                {name: 'name1', description: 'desc1', default: 'def1'},
+                {name: 'name2', description: 'desc2', default: 'def2'},
+            ],
+            options: [
+                {flags: 'flag1', description: 'desc_flag1', default: 'def_flag1'},
+                {flags: 'flag2', description: 'desc_flag2', default: 'def_flag2'},
+            ]
+        })
+        runner.getDependenciesVersionsAndNames = () => ({versions: 'versions', names: 'names'})
+        runner.getCommandPreActionHook = (versions) => {
+            expect(versions).toBe('versions')
+            return 'hook'
+        }
+        runner.getCommandAction = (names) => {
+            expect(names).toBe('names')
+            return 'action'
+        }
+
+        const command = {
+            name: name => {
+                expect(name).toBe('scriptPath')
+                return command
+            },
+            description: description => {
+                expect(description).toBe('appDesc')
+                return command
+            },
+            version: version => {
+                expect(version).toBe('version')
+                return command
+            },
+            argument: jest.fn(),
+            option: jest.fn(),
+            hook: (event, hook) => {
+                expect(event).toBe('preAction')
+                expect(hook).toBe('hook')
+                return command
+            },
+            action: (action) => {
+                expect(action).toBe('action')
+                return command
+            }
+        }
+        Command.mockImplementationOnce(() => command)
+
+        expect(runner.makeCommand()).toBe(command)
+        expect(command.argument).toHaveBeenNthCalledWith(1, 'name1', 'desc1', 'def1')
+        expect(command.argument).toHaveBeenNthCalledWith(2, 'name2', 'desc2', 'def2')
+        expect(command.option).toHaveBeenNthCalledWith(1, 'flag1', 'desc_flag1', 'def_flag1')
+        expect(command.option).toHaveBeenNthCalledWith(2, 'flag2', 'desc_flag2', 'def_flag2')
     })
 
     describe('run', () => {
         test('failure', async () => {
             const runner = new Runner('appPath', 'scriptPath', 'run')
             runner.makeCommand = () => ({
-                parseAsync: jest.fn().mockRejectedValueOnce('kaboom!!!')
+                parseAsync: jest.fn().mockRejectedValueOnce(new Error('kaboom!!!'))
             })
             await expect(async () => await runner.run(['arg1', 'arg2'])).rejects.toThrow(new RunningError('scriptPath', 'kaboom!!!'))
         })

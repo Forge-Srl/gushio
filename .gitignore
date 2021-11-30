@@ -1,1 +1,3 @@
 /node_modules/
+/.gushio/
+/.idea/runConfigurations/All_Tests.xml

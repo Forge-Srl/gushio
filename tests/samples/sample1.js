@@ -15,11 +15,14 @@ module.exports = {
         ],
     },
     deps: [
-        {name: 'node-fetch', version: '^3.1.0'},
-        {name: 'node-fetch', version: '^3.0.0', alias: 'old-fetch'}
+        {name: 'is-odd'},
     ],
-    run: ({'shelljs': $, 'ansi-colors': c, 'enquirer': e}) => async (args, options) => {
+    run: async ({'shelljs': $, 'ansi-colors': c, 'enquirer': e, 'is-odd': odd}, args, options) => {
         console.log(c.red('args -->'), args)
         console.log(c.green.bold('options -->'), options)
+        console.log($ === require('shelljs'))
+        for (let i = 0; i < 10; i++) {
+            console.log(`Test ${i} is odd: ${odd(i)}`)
+        }
     },
 }

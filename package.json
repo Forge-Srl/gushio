@@ -5,7 +5,7 @@
   "main": "cliProgram.js",
   "scripts": {
     "test": "jest",
-    "sample": "node ./cli.js -s tests/sample.js -- someQuix --baz asd"
+    "sample": "node ./cli.js -s tests/samples/sample1.js -- someQuix --baz asd"
   },
   "bin": {
     "gushio": "cli.js"

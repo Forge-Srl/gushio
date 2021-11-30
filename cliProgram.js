@@ -1,9 +1,13 @@
 const {Command} = require('commander')
 const path = require('path')
-const {Runner} = require('./Runner')
 const packageInfo = require('./package.json')
+const {Runner} = require('./Runner')
 
 class Program {
+
+    constructor(logger) {
+        this.logger = logger
+    }
 
     commandAction(workingDir) {
         return async (options, command) => {
@@ -13,6 +17,8 @@ class Program {
             }
 
             const runner = Runner.fromPath(command.rawArgs[1], path.resolve(workingDir, scriptPath))
+                .setLogger(this.logger)
+                .setOptions({verboseLogging: options.verbose})
             await runner.run(command.args)
         }
     }
@@ -23,6 +29,7 @@ class Program {
             .description(packageInfo.description)
             .version(packageInfo.version)
             .option('-s, --script <path>', 'path to the script')
+            .option('-v, --verbose', 'enable verbose logging')
             .action(this.commandAction(workingDir))
     }
 
@@ -31,12 +38,15 @@ class Program {
             await this.getCommand(process.cwd()).parseAsync(process.argv)
             process.exit(0)
         } catch (error) {
-            console.error(error)
+            this.logger.error(error.message)
             process.exit(error.errorCode || 1)
         }
     }
 }
 
-const start = () => new Program().start()
+const start = () => {
+    const {Logger} = require('./Logger')
+    return new Program(new Logger()).start()
+}
 
 module.exports = {start, Program}

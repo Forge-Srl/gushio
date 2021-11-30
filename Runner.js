@@ -1,94 +1,27 @@
 const {Command} = require('commander')
 const {LoadingError, RunningError} = require('./errors')
+const {requireScriptDependency, dependencyDescriptor, ensureNodeModulesExists, checkDependencyInstalled, installDependency} = require('./dependenciesUtils')
+const {ScriptChecker} = require('./ScriptChecker')
+
+const gushioFolder = '.gushio'
 
 class Runner {
 
-    static load(scriptPath) {
+    static fromPath(application, scriptPath) {
+        let scriptObject
         try {
-            return require(scriptPath)
+            scriptObject = require(scriptPath)
         } catch (e) {
             throw new LoadingError(scriptPath, 'file not found')
         }
-    }
-
-    static checkRunFunction(scriptPath, runFunction) {
-        if (!runFunction) {
-            throw new LoadingError(scriptPath, 'run function is not exported')
-        }
-        if (typeof runFunction !== 'function') {
-            throw new LoadingError(scriptPath, 'run is not a function')
-        }
-    }
-
-    static checkCliObject(scriptPath, cli) {
-        if (!cli) {
-            return
-        }
-
-        if (cli.arguments) {
-            if (!Array.isArray(cli.arguments)) {
-                throw new LoadingError(scriptPath, 'cli.arguments is not an Array')
-            }
-
-            for (const argument of cli.arguments) {
-                if (!argument.name) {
-                    throw new LoadingError(scriptPath, 'arguments must have a "name" field')
-                }
-            }
-        }
-
-        if (cli.options) {
-            if (!Array.isArray(cli.options)) {
-                throw new LoadingError(scriptPath, 'cli.options is not an Array')
-            }
-
-            for (const option of cli.options) {
-                if (!option.flags) {
-                    throw new LoadingError(scriptPath, 'options must have a "flags" field')
-                }
-            }
-        }
-    }
-
-    static checkDependencies(scriptPath, dependencies) {
-        if (!dependencies) {
-            return
-        }
-
-        if (!Array.isArray(dependencies)) {
-            throw new LoadingError(scriptPath, 'deps is not an Array')
-        }
-
-        for (const dependency of dependencies) {
-            if (!dependency.name) {
-                throw new LoadingError(scriptPath, 'dependencies must have a "name" field')
-            }
-        }
-
-        const duplicateCandidates = dependencies.map(d => d.name).filter((item, index) => dependencies.indexOf(item) !== index)
-        for (const duplicate of duplicateCandidates) {
-            const dependencyDuplicates = dependencies.filter(dep => dep.name === duplicate)
-
-            if (dependencyDuplicates.length !== new Set(dependencyDuplicates.map(dep => dep.alias)).size) {
-                throw new LoadingError(scriptPath, `dependency "${duplicate}" has been imported multiple times without different aliases`)
-            }
-        }
-    }
-
-    static fromPath(application, scriptPath) {
-        return this.fromJsonObject(application, scriptPath, this.load(scriptPath))
+        return this.fromJsonObject(application, scriptPath, scriptObject)
     }
 
     static fromJsonObject(application, scriptPath, scriptObject) {
-        const runFunction = scriptObject.run
-        const cli = scriptObject.cli
-        const dependencies = scriptObject.deps
+        const checker = new ScriptChecker(scriptPath)
+        checker.checkScriptObject(scriptObject)
 
-        this.checkRunFunction(scriptPath, runFunction)
-        this.checkCliObject(scriptPath, cli)
-        this.checkDependencies(scriptPath, dependencies)
-
-        return new Runner(application, scriptPath, runFunction, cli, dependencies)
+        return new Runner(application, scriptPath, scriptObject.run, scriptObject.cli, scriptObject.deps)
     }
 
     constructor(application, scriptPath, func, cli, dependencies) {
@@ -101,11 +34,65 @@ class Runner {
         this.dependencies = dependencies || []
     }
 
-    get runnableFunction() {
-        const dependencies = ['shelljs', 'ansi-colors', 'enquirer']
-        const injectedDependencies = Object.assign({}, ...dependencies
-            .map(dependency => ({[dependency]: require(dependency)})))
-        return this.func(injectedDependencies)
+    getDependenciesVersionsAndNames() {
+        const dependencies = this.dependencies.map(rawDep => dependencyDescriptor(rawDep.name, rawDep.version, rawDep.alias))
+
+        return {
+            versions: dependencies.map(d => d.npmInstallVersion),
+            names: dependencies.map(d => d.name)
+        }
+    }
+
+    setOptions(options) {
+        this.options = options
+        return this
+    }
+
+    setLogger(logger) {
+        this.logger = logger
+        return this
+    }
+
+    async installDependency(npmInstallVersion) {
+        this.logger.info(`Installing dependency ${npmInstallVersion}`)
+        try {
+            await checkDependencyInstalled(gushioFolder, npmInstallVersion, !this.options.verboseLogging)
+            this.logger.info(`Dependency ${npmInstallVersion} already installed`)
+        } catch (e) {
+            await installDependency(gushioFolder, npmInstallVersion, !this.options.verboseLogging)
+            this.logger.info(`Dependency ${npmInstallVersion} successfully installed`)
+        }
+    }
+
+    getCommandPreActionHook(dependenciesVersions) {
+        return async (thisCommand, actionCommand) => {
+            this.logger.info('Checking dependencies')
+            await ensureNodeModulesExists(gushioFolder)
+
+            for (const dependency of dependenciesVersions) {
+                await this.installDependency(dependency)
+            }
+        }
+    }
+
+    getCommandAction(dependenciesNames) {
+        const dependencies = ['shelljs', 'ansi-colors', 'enquirer', ...dependenciesNames]
+
+        return async (...args) => {
+            const command = args.pop()
+            const cliOptions = args.pop()
+
+            if (this.options.verboseLogging) {
+                this.logger.info(`Running with arguments ${JSON.stringify(args)}`)
+                this.logger.info(`Running with options ${JSON.stringify(cliOptions)}`)
+                this.logger.info(`Running with dependencies ${JSON.stringify(dependencies)}`)
+            }
+
+            const injectedDependencies = Object.assign({}, ...dependencies
+                .map(dependency => ({[dependency]: requireScriptDependency(dependency, `./${gushioFolder}`)})))
+
+            await this.func(injectedDependencies, args, cliOptions)
+        }
     }
 
     makeCommand() {
@@ -122,11 +109,12 @@ class Runner {
             command.option(option.flags, option.description, option.default)
         }
 
-        return command.action(async (...args) => {
-            const command = args.pop()
-            const cliOptions = args.pop()
-            await this.runnableFunction(args, cliOptions)
-        })
+        // TODO: add command.addHelpText support in cli?
+
+        const dependencies = this.getDependenciesVersionsAndNames()
+        return command
+            .hook('preAction', this.getCommandPreActionHook(dependencies.versions))
+            .action(this.getCommandAction(dependencies.names))
     }
 
     async run(args) {
@@ -134,7 +122,7 @@ class Runner {
         try {
             await command.parseAsync([this.application, this.scriptPath, ...args])
         } catch (e) {
-            throw new RunningError(this.scriptPath, e)
+            throw new RunningError(this.scriptPath, e.message)
         }
     }
 }
