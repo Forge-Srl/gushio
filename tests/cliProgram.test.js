@@ -14,7 +14,7 @@ describe('cliProgram', () => {
         packageInfo = require('../package.json')
 
         Program = require('../cliProgram').Program
-        program = new Program()
+        program = new Program('myLogger')
     })
 
     test('getCommand', () => {
@@ -23,7 +23,7 @@ describe('cliProgram', () => {
         commandObj.name = jest.fn().mockImplementationOnce(() => commandObj)
         commandObj.description = jest.fn().mockImplementationOnce(() => commandObj)
         commandObj.version = jest.fn().mockImplementationOnce(() => commandObj)
-        commandObj.option = jest.fn().mockImplementationOnce(() => commandObj)
+        commandObj.option = jest.fn().mockImplementation(() => commandObj)
         commandObj.action = jest.fn().mockImplementationOnce(() => commandObj)
 
         program.commandAction = workingDir => {
@@ -34,7 +34,8 @@ describe('cliProgram', () => {
         expect(program.getCommand('workingDir')).toBe(commandObj)
         expect(commandObj.name).toHaveBeenCalledWith(packageInfo.name)
         expect(commandObj.description).toHaveBeenCalledWith(packageInfo.description)
-        expect(commandObj.option).toHaveBeenCalledWith('-s, --script <path>', 'path to the script')
+        expect(commandObj.option).toHaveBeenNthCalledWith(1, '-s, --script <path>', 'path to the script')
+        expect(commandObj.option).toHaveBeenNthCalledWith(2, '-v, --verbose', 'enable verbose logging')
         expect(commandObj.action).toHaveBeenCalledWith('action')
     })
 
@@ -45,21 +46,32 @@ describe('cliProgram', () => {
             action = program.commandAction('workingDir')
         })
 
-        test('no script', () => {
-            action({someKey: 'but it is not "script"'}, null)
+        test('no script', async () => {
+            await action({someKey: 'but it is not "script"'}, null)
             expect(Runner.fromPath).not.toHaveBeenCalled()
         })
 
-        test('with script', () => {
+        test('with script', async () => {
             const run = jest.fn()
             path.resolve.mockImplementationOnce(() => 'absolutePath')
 
             Runner.fromPath = (app, script) => {
                 expect(app).toBe('gushioApp')
                 expect(script).toBe('absolutePath')
-                return {run}
+                const runner = {
+                    run,
+                    setLogger: logger => {
+                        expect(logger).toBe('myLogger')
+                        return runner
+                    },
+                    setOptions: options => {
+                        expect(options).toStrictEqual({verboseLogging: 'verbose'})
+                        return runner
+                    }
+                }
+                return runner
             }
-            action({script: 'someScript'}, {
+            await action({script: 'someScript', verbose: 'verbose'}, {
                 rawArgs: ['nodeApp', 'gushioApp', 'otherArgs'],
                 args: 'someArgs'
             })

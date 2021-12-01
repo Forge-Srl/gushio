@@ -20,34 +20,28 @@ const dependencyDescriptor = (name, version = 'latest', alias) => {
     return {name: name, npmInstallVersion: depString}
 }
 
-const ensureNodeModulesExists = async (folder) => {
-    return new Promise((resolve, reject) => {
-        const exec = shell.mkdir('-p', `${folder}/node_modules`)
-        if (exec.code === 0) {
-            return resolve()
-        }
-        return reject()
-    })
-}
+const ensureNodeModulesExists = async (folder) => new Promise((resolve, reject) => {
+    const exec = shell.mkdir('-p', `${folder}/node_modules`)
+    if (exec.code === 0) {
+        return resolve()
+    }
+    return reject(new Error(`Cannot create "${folder}/node_modules", mkdir failed with code ${exec.code}`))
+})
 
-const checkDependencyInstalled = async (folder, npmInstallVersion, silent = true) => {
-    return new Promise((resolve, reject) => {
-        const exec = shell.exec(`npm list --depth=0 --prefix ${folder} ${npmInstallVersion}`, {silent})
-        if (exec.code === 0) {
-            return resolve()
-        }
-        return reject()
-    })
-}
+const checkDependencyInstalled = async (folder, npmInstallVersion, silent = true) => new Promise((resolve, reject) => {
+    const exec = shell.exec(`npm list --depth=0 --prefix ${folder} ${npmInstallVersion}`, {silent})
+    if (exec.code === 0) {
+        return resolve()
+    }
+    return reject(new Error(`Cannot find "${npmInstallVersion}" in "${folder}"`))
+})
 
-const installDependency = async (folder, npmInstallVersion, silent = true) => {
-    return new Promise((resolve, reject) => {
-        const exec = shell.exec(`npm install --prefix ${folder} ${npmInstallVersion}`, {silent})
-        if (exec.code === 0) {
-            return resolve()
-        }
-        return reject(new Error(`Installation of ${npmInstallVersion} failed with exit code ${exec.code}.`))
-    })
-}
+const installDependency = async (folder, npmInstallVersion, silent = true) => new Promise((resolve, reject) => {
+    const exec = shell.exec(`npm install --prefix ${folder} ${npmInstallVersion}`, {silent})
+    if (exec.code === 0) {
+        return resolve()
+    }
+    return reject(new Error(`Installation of ${npmInstallVersion} failed with exit code ${exec.code}`))
+})
 
 module.exports = {requireScriptDependency, dependencyDescriptor, ensureNodeModulesExists, checkDependencyInstalled, installDependency}
