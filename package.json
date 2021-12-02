@@ -1,7 +1,38 @@
 {
   "name": "gushio",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Like bash scripts, but in JavaScript!",
+  "keywords": [
+    "cli",
+    "terminal",
+    "scripting",
+    "script",
+    "shell",
+    "bash",
+    "cmd",
+    "command-line",
+    "command",
+    "commander",
+    "prompt",
+    "argument",
+    "args",
+    "argv",
+    "multiplatform",
+    "automation"
+  ],
+  "homepage": "https://github.com/Forge-Srl/gushio",
+  "author": "Forge S.r.l.",
+  "license": "MIT",
+  "maintainers": [
+    {
+      "name": "Tommaso Bossi",
+      "email": "tommaso.bossi@forge.srl"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Forge-Srl/gushio.git"
+  },
   "main": "cliProgram.js",
   "scripts": {
     "test": "jest",
@@ -10,9 +41,6 @@
   "bin": {
     "gushio": "cli.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "commander": "^8.3.0",
     "enquirer": "^2.3.6",
