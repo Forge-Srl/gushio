@@ -145,8 +145,29 @@ describe('Runner', () => {
         expect(runner.installDependency).toHaveBeenNthCalledWith(2, 'dep2')
     })
 
-    test('getCommandAction', () => {
-        throw 'TODO'
+    test('getCommandAction', async () => {
+        const func = jest.fn()
+        const runner = new Runner('appPath', 'scriptPath', func)
+        runner.options = {verboseLogging: true}
+        runner.logger = {info: jest.fn()}
+        dependenciesUtils.requireScriptDependency.mockImplementation(() => 'resolved')
+
+        const action = runner.getCommandAction(['dep1', 'dep2'])
+        await action('arg1', 'arg2', 'arg3', 'cliOptions', 'command')
+
+        expect(runner.logger.info)
+            .toHaveBeenNthCalledWith(1, 'Running with arguments ["arg1","arg2","arg3"]')
+        expect(runner.logger.info)
+            .toHaveBeenNthCalledWith(2, 'Running with options "cliOptions"')
+        expect(runner.logger.info)
+            .toHaveBeenNthCalledWith(3, 'Running with dependencies ["shelljs","ansi-colors","enquirer","dep1","dep2"]')
+        expect(func).toHaveBeenCalledWith({
+            "shelljs": "resolved",
+            "ansi-colors": "resolved",
+            "enquirer": "resolved",
+            "dep1": "resolved",
+            "dep2": "resolved"
+        }, ['arg1', 'arg2', 'arg3'], 'cliOptions')
     })
 
     test('makeCommand', () => {

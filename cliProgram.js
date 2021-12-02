@@ -33,20 +33,22 @@ class Program {
             .action(this.commandAction(workingDir))
     }
 
-    async start() {
+    async start(cwd, argv) {
         try {
-            await this.getCommand(process.cwd()).parseAsync(process.argv)
-            process.exit(0)
+            await this.getCommand(cwd).parseAsync(argv)
+            return 0
         } catch (error) {
             this.logger.error(error.message)
-            process.exit(error.errorCode || 1)
+            return error.errorCode || 1
         }
     }
 }
 
 const start = () => {
     const {Logger} = require('./Logger')
-    return new Program(new Logger()).start()
+    return new Program(new Logger())
+        .start(process.cwd(), process.argv)
+        .then(exitCode => process.exit(exitCode))
 }
 
 module.exports = {start, Program}

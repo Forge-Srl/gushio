@@ -79,4 +79,39 @@ describe('cliProgram', () => {
             expect(run).toHaveBeenCalledWith('someArgs')
         })
     })
+
+    describe('start', () => {
+        test('success', async () => {
+            program.getCommand = cwd => {
+                expect(cwd).toBe('path')
+                return {
+                    parseAsync: async argv => {
+                        expect(argv).toBe('argv')
+                    }
+                }
+            }
+
+            expect(await program.start('path', 'argv')).toBe(0)
+        })
+
+        test('failure', async () => {
+            program.getCommand = cwd => {
+                expect(cwd).toBe('path')
+                return {
+                    parseAsync: async argv => {
+                        expect(argv).toBe('argv')
+                        const error = new Error('kaboom')
+                        error.errorCode = 42
+                        throw error
+                    }
+                }
+            }
+            program.logger = {
+                error: jest.fn()
+            }
+
+            expect(await program.start('path', 'argv')).toBe(42)
+            expect(program.logger.error).toHaveBeenCalledWith('kaboom')
+        })
+    })
 })
