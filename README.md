@@ -2,9 +2,13 @@
 
 *Like bash scripts, but in JavaScript!*
 
-Gushio is built on top of battle-tested libraries like [commander](https://www.npmjs.com/package/commander) and 
-[shelljs](https://www.npmjs.com/package/shelljs) and allows you to write a shell script in a single JavaScript file 
-without having to worry about `package.json` and dependencies installation. 
+[![Build Gushio](https://github.com/Forge-Srl/gushio/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/Forge-Srl/gushio/actions/workflows/build.yml)
+
+Gushio* is built on top of battle-tested libraries like [commander](https://www.npmjs.com/package/commander) and 
+[shelljs](https://www.npmjs.com/package/shelljs) and allows you to write a multiplatform shell script in a single 
+JavaScript file without having to worry about `package.json` and dependencies installation.
+
+<sub>_* Gushio is pronounced like the italian word "guscio" (IPA: /'guʃʃo/) which means "shell"._</sub>
 
 ## Installation
 
