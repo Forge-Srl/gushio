@@ -1,11 +1,9 @@
 const {Command} = require('commander')
-const {LoadingError, RunningError} = require('./errors')
 const {
     requireScriptDependency, dependencyDescriptor, ensureNodeModulesExists, checkDependencyInstalled, installDependency
 } = require('../utils/dependenciesUtils')
+const {LoadingError, RunningError} = require('./errors')
 const {ScriptChecker} = require('./ScriptChecker')
-
-const gushioFolder = '.gushio'
 
 class Runner {
 
@@ -34,6 +32,7 @@ class Runner {
         this.cli.arguments = this.cli.arguments || []
         this.cli.options = this.cli.options || []
         this.dependencies = dependencies || []
+        this.gushioFolderName = '.gushio'
     }
 
     getDependenciesVersionsAndNames() {
@@ -56,33 +55,38 @@ class Runner {
         return this
     }
 
-    async installDependency(npmInstallVersion) {
+    getGushioFolder(workingDir) {
+        return `${workingDir}/${this.gushioFolderName}`
+    }
+
+    async installDependency(path, npmInstallVersion) {
         this.logger.info(`Installing dependency ${npmInstallVersion}`)
         try {
-            await checkDependencyInstalled(gushioFolder, npmInstallVersion, !this.options.verboseLogging)
+            await checkDependencyInstalled(path, npmInstallVersion, !this.options.verboseLogging)
             this.logger.info(`Dependency ${npmInstallVersion} already installed`)
         } catch (e) {
-            await installDependency(gushioFolder, npmInstallVersion, !this.options.verboseLogging)
+            await installDependency(path, npmInstallVersion, !this.options.verboseLogging)
             this.logger.info(`Dependency ${npmInstallVersion} successfully installed`)
         }
     }
 
-    getCommandPreActionHook(dependenciesVersions) {
+    getCommandPreActionHook(workingDir, dependenciesVersions) {
         return async (_thisCommand, _actionCommand) => {
             if (dependenciesVersions.length === 0) {
                 return
             }
 
             this.logger.info('Checking dependencies')
+            const gushioFolder = this.getGushioFolder(workingDir)
             await ensureNodeModulesExists(gushioFolder)
 
             for (const dependency of dependenciesVersions) {
-                await this.installDependency(dependency)
+                await this.installDependency(gushioFolder, dependency)
             }
         }
     }
 
-    getCommandAction(dependenciesNames) {
+    getCommandAction(workingDir, dependenciesNames) {
         const dependencies = ['shelljs', 'ansi-colors', 'enquirer', ...dependenciesNames]
 
         return async (...args) => {
@@ -95,14 +99,16 @@ class Runner {
                 this.logger.info(`Running with dependencies ${JSON.stringify(dependencies)}`)
             }
 
-            const injectedDependencies = Object.assign({}, ...dependencies
-                .map(dependency => ({[dependency]: requireScriptDependency(dependency, `./${gushioFolder}`)})))
+            const gushioFolder = this.getGushioFolder(workingDir)
+            const injectedDependencies = Object.assign({}, ...dependencies.map(dependency => ({
+                [dependency]: requireScriptDependency(dependency, gushioFolder)
+            })))
 
             await this.func(injectedDependencies, args, cliOptions)
         }
     }
 
-    makeCommand() {
+    makeCommand(workingDir) {
         const command = new Command()
             .name(this.cli.name || this.scriptPath)
             .description(this.cli.description || '')
@@ -125,12 +131,12 @@ class Runner {
 
         const dependencies = this.getDependenciesVersionsAndNames()
         return command
-            .hook('preAction', this.getCommandPreActionHook(dependencies.versions))
-            .action(this.getCommandAction(dependencies.names))
+            .hook('preAction', this.getCommandPreActionHook(workingDir, dependencies.versions))
+            .action(this.getCommandAction(workingDir, dependencies.names))
     }
 
-    async run(args) {
-        const command = this.makeCommand()
+    async run(workingDir, args) {
+        const command = this.makeCommand(workingDir)
         try {
             await command.parseAsync([this.application, this.scriptPath, ...args])
         } catch (e) {

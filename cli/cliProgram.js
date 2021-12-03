@@ -19,7 +19,7 @@ class Program {
             const runner = Runner.fromPath(command.rawArgs[1], path.resolve(workingDir, scriptPath))
                 .setLogger(this.logger)
                 .setOptions({verboseLogging: options.verbose})
-            await runner.run(command.args)
+            await runner.run(workingDir, command.args)
         }
     }
 

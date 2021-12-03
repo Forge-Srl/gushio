@@ -103,6 +103,13 @@ describe('Runner', () => {
         expect(runner.logger).toBe('logger')
     })
 
+    test('getGushioFolder', () => {
+        const runner = new Runner('appPath', 'scriptPath', 'run')
+        expect(runner.getGushioFolder('somePath')).toBe('somePath/.gushio')
+        runner.gushioFolderName = 'different-gushio-path'
+        expect(runner.getGushioFolder('somePath')).toBe('somePath/different-gushio-path')
+    })
+
     describe('installDependency', () => {
         let runner
 
@@ -113,9 +120,9 @@ describe('Runner', () => {
         })
 
         test('already installed', async () => {
-            await runner.installDependency('dep')
+            await runner.installDependency('somePath', 'dep')
             expect(runner.logger.info).toHaveBeenNthCalledWith(1, 'Installing dependency dep')
-            expect(dependenciesUtils.checkDependencyInstalled).toHaveBeenCalledWith('.gushio', 'dep', false)
+            expect(dependenciesUtils.checkDependencyInstalled).toHaveBeenCalledWith('somePath', 'dep', false)
             expect(dependenciesUtils.installDependency).not.toHaveBeenCalled()
             expect(runner.logger.info).toHaveBeenNthCalledWith(2, 'Dependency dep already installed')
         })
@@ -123,10 +130,10 @@ describe('Runner', () => {
         test('missing dependency', async () => {
             dependenciesUtils.checkDependencyInstalled.mockRejectedValueOnce(new Error('kaboom'))
 
-            await runner.installDependency('dep')
+            await runner.installDependency('somePath', 'dep')
             expect(runner.logger.info).toHaveBeenNthCalledWith(1, 'Installing dependency dep')
-            expect(dependenciesUtils.checkDependencyInstalled).toHaveBeenCalledWith('.gushio', 'dep', false)
-            expect(dependenciesUtils.installDependency).toHaveBeenCalledWith('.gushio', 'dep', false)
+            expect(dependenciesUtils.checkDependencyInstalled).toHaveBeenCalledWith('somePath', 'dep', false)
+            expect(dependenciesUtils.installDependency).toHaveBeenCalledWith('somePath', 'dep', false)
             expect(runner.logger.info).toHaveBeenNthCalledWith(2, 'Dependency dep successfully installed')
         })
     })
@@ -140,7 +147,7 @@ describe('Runner', () => {
         })
 
         test('no dependencies', async () => {
-            const hook = runner.getCommandPreActionHook([])
+            const hook = runner.getCommandPreActionHook('somePath', [])
             await hook()
 
             expect(runner.logger.info).not.toHaveBeenCalled()
@@ -148,13 +155,17 @@ describe('Runner', () => {
         })
 
         test('with dependencies', async () => {
-            const hook = runner.getCommandPreActionHook(['dep1', 'dep2'])
+            runner.getGushioFolder = path => {
+                expect(path).toBe('somePath')
+                return 'gushioFolder'
+            }
+            const hook = runner.getCommandPreActionHook('somePath', ['dep1', 'dep2'])
             await hook()
 
             expect(runner.logger.info).toHaveBeenNthCalledWith(1, 'Checking dependencies')
-            expect(dependenciesUtils.ensureNodeModulesExists).toHaveBeenCalledWith('.gushio')
-            expect(runner.installDependency).toHaveBeenNthCalledWith(1, 'dep1')
-            expect(runner.installDependency).toHaveBeenNthCalledWith(2, 'dep2')
+            expect(dependenciesUtils.ensureNodeModulesExists).toHaveBeenCalledWith('gushioFolder')
+            expect(runner.installDependency).toHaveBeenNthCalledWith(1, 'gushioFolder', 'dep1')
+            expect(runner.installDependency).toHaveBeenNthCalledWith(2, 'gushioFolder', 'dep2')
         })
     })
 
@@ -163,9 +174,16 @@ describe('Runner', () => {
         const runner = new Runner('appPath', 'scriptPath', func)
         runner.options = {verboseLogging: true}
         runner.logger = {info: jest.fn()}
-        dependenciesUtils.requireScriptDependency.mockImplementation(() => 'resolved')
+        runner.getGushioFolder = path => {
+            expect(path).toBe('somePath')
+            return 'someFolder'
+        }
+        dependenciesUtils.requireScriptDependency.mockImplementation((dependency, path) => {
+            expect(path).toBe('someFolder')
+            return 'resolved'
+        })
 
-        const action = runner.getCommandAction(['dep1', 'dep2'])
+        const action = runner.getCommandAction('somePath', ['dep1', 'dep2'])
         await action('arg1', 'arg2', 'arg3', 'cliOptions', 'command')
 
         expect(runner.logger.info)
@@ -197,11 +215,13 @@ describe('Runner', () => {
             ]
         })
         runner.getDependenciesVersionsAndNames = () => ({versions: 'versions', names: 'names'})
-        runner.getCommandPreActionHook = (versions) => {
+        runner.getCommandPreActionHook = (path, versions) => {
+            expect(path).toBe('somePath')
             expect(versions).toBe('versions')
             return 'hook'
         }
-        runner.getCommandAction = (names) => {
+        runner.getCommandAction = (path, names) => {
+            expect(path).toBe('somePath')
             expect(names).toBe('names')
             return 'action'
         }
@@ -233,7 +253,7 @@ describe('Runner', () => {
         }
         Command.mockImplementationOnce(() => command)
 
-        expect(runner.makeCommand()).toBe(command)
+        expect(runner.makeCommand('somePath')).toBe(command)
         expect(command.argument).toHaveBeenNthCalledWith(1, 'name1', 'desc1', 'def1')
         expect(command.argument).toHaveBeenNthCalledWith(2, 'name2', 'desc2', 'def2')
         expect(command.option).toHaveBeenNthCalledWith(1, 'flag1', 'desc_flag1', 'def_flag1')
@@ -243,17 +263,24 @@ describe('Runner', () => {
     describe('run', () => {
         test('failure', async () => {
             const runner = new Runner('appPath', 'scriptPath', 'run')
-            runner.makeCommand = () => ({
-                parseAsync: jest.fn().mockRejectedValueOnce(new Error('kaboom!!!'))
-            })
-            await expect(async () => await runner.run(['arg1', 'arg2'])).rejects.toThrow(new RunningError('scriptPath', 'kaboom!!!'))
+            runner.makeCommand = (path) => {
+                expect(path).toBe('somePath')
+                return {
+                    parseAsync: jest.fn().mockRejectedValueOnce(new Error('kaboom!!!'))
+                }
+            }
+            await expect(async () => await runner.run('somePath', ['arg1', 'arg2'])).rejects
+                .toThrow(new RunningError('scriptPath', 'kaboom!!!'))
         })
 
         test('success', async () => {
             const runner = new Runner('appPath', 'scriptPath', 'run')
             const command = {parseAsync: jest.fn().mockResolvedValueOnce(undefined)}
-            runner.makeCommand = () => command
-            await runner.run(['arg1', 'arg2'])
+            runner.makeCommand = (path) => {
+                expect(path).toBe('somePath')
+                return command
+            }
+            await runner.run('somePath', ['arg1', 'arg2'])
             expect(command.parseAsync).toHaveBeenCalledWith(['appPath', 'scriptPath', 'arg1', 'arg2'])
         })
     })

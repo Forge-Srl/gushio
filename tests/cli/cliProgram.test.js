@@ -76,7 +76,7 @@ describe('cliProgram', () => {
                 args: 'someArgs'
             })
             expect(path.resolve).toHaveBeenCalledWith('workingDir', 'someScript')
-            expect(run).toHaveBeenCalledWith('someArgs')
+            expect(run).toHaveBeenCalledWith('workingDir', 'someArgs')
         })
     })
 
