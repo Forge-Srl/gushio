@@ -1,6 +1,6 @@
 {
   "name": "gushio",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "Like bash scripts, but in JavaScript!",
   "keywords": [
     "cli",
@@ -33,14 +33,25 @@
     "type": "git",
     "url": "https://github.com/Forge-Srl/gushio.git"
   },
-  "main": "cliProgram.js",
+  "main": "cli/cliProgram.js",
   "scripts": {
     "test": "jest",
-    "sample": "node ./cli.js -s tests/samples/sample1.js -- someQuix --baz asd"
+    "lint": "eslint .",
+    "prerelease": "npm test && npm run lint",
+    "release": "npm version -m \"build: prepare release %s\"",
+    "postrelease": "git push --follow-tags",
+    "sample": "node cli/cli.js -s tests/samples/sample1.js -- someQuix --baz asd"
   },
   "bin": {
-    "gushio": "cli.js"
+    "gushio": "cli/cli.js"
   },
+  "files": [
+    "/cli",
+    "/runner",
+    "/utils",
+    "/README.md",
+    "/LICENSE.md"
+  ],
   "dependencies": {
     "commander": "^8.3.0",
     "enquirer": "^2.3.6",
@@ -48,6 +59,7 @@
     "ansi-colors": "^4.1.1"
   },
   "devDependencies": {
-    "jest": "^27.3.1"
+    "jest": "^27.3.1",
+    "eslint": "^8.3.0"
   }
 }

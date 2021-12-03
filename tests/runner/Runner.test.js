@@ -4,18 +4,18 @@ describe('Runner', () => {
     beforeEach(() => {
         jest.resetModules()
 
-        jest.mock('../ScriptChecker')
-        ScriptChecker = require('../ScriptChecker').ScriptChecker
+        jest.mock('../../runner/ScriptChecker')
+        ScriptChecker = require('../../runner/ScriptChecker').ScriptChecker
 
-        jest.mock('../dependenciesUtils')
-        dependenciesUtils = require('../dependenciesUtils')
+        jest.mock('../../utils/dependenciesUtils')
+        dependenciesUtils = require('../../utils/dependenciesUtils')
 
         jest.mock('commander')
         Command = require('commander').Command
 
-        Runner = require('../Runner').Runner
-        LoadingError = require('../errors').LoadingError
-        RunningError = require('../errors').RunningError
+        Runner = require('../../runner/Runner').Runner
+        LoadingError = require('../../runner/errors').LoadingError
+        RunningError = require('../../runner/errors').RunningError
     })
 
     describe('fromPath', () => {

@@ -1,7 +1,7 @@
 const {Command} = require('commander')
 const path = require('path')
-const packageInfo = require('./package.json')
-const {Runner} = require('./Runner')
+const packageInfo = require('../package.json')
+const {Runner} = require('../runner/Runner')
 
 class Program {
 
@@ -45,7 +45,7 @@ class Program {
 }
 
 const start = () => {
-    const {Logger} = require('./Logger')
+    const {Logger} = require('../utils/Logger')
     return new Program(new Logger())
         .start(process.cwd(), process.argv)
         .then(exitCode => process.exit(exitCode))

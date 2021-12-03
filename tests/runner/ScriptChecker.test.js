@@ -5,8 +5,8 @@ describe('ScriptChecker', () => {
     beforeEach(() => {
         jest.resetModules()
 
-        ScriptChecker = require('../ScriptChecker').ScriptChecker
-        LoadingError = require('../errors').LoadingError
+        ScriptChecker = require('../../runner/ScriptChecker').ScriptChecker
+        LoadingError = require('../../runner/errors').LoadingError
         checker = new ScriptChecker(scriptPath)
     })
 

@@ -9,11 +9,11 @@ describe('dependenciesUtils', () => {
         jest.mock('shelljs', () => ({dummy: 'dummy'}))
         shelljs = require('shelljs')
 
-        requireScriptDependency = require('../dependenciesUtils').requireScriptDependency
-        dependencyDescriptor = require('../dependenciesUtils').dependencyDescriptor
-        ensureNodeModulesExists = require('../dependenciesUtils').ensureNodeModulesExists
-        checkDependencyInstalled = require('../dependenciesUtils').checkDependencyInstalled
-        installDependency = require('../dependenciesUtils').installDependency
+        requireScriptDependency = require('../../utils/dependenciesUtils').requireScriptDependency
+        dependencyDescriptor = require('../../utils/dependenciesUtils').dependencyDescriptor
+        ensureNodeModulesExists = require('../../utils/dependenciesUtils').ensureNodeModulesExists
+        checkDependencyInstalled = require('../../utils/dependenciesUtils').checkDependencyInstalled
+        installDependency = require('../../utils/dependenciesUtils').installDependency
     })
 
     describe('requireScriptDependency', () => {

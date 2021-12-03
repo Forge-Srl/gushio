@@ -8,12 +8,12 @@ describe('cliProgram', () => {
         path = require('path')
         jest.mock('commander')
         Command = require('commander').Command
-        jest.mock('../Runner')
-        Runner = require('../Runner').Runner
+        jest.mock('../../runner/Runner')
+        Runner = require('../../runner/Runner').Runner
 
-        packageInfo = require('../package.json')
+        packageInfo = require('../../package.json')
 
-        Program = require('../cliProgram').Program
+        Program = require('../../cli/cliProgram').Program
         program = new Program('myLogger')
     })
 

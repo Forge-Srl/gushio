@@ -1,5 +1,8 @@
 class Logger {
-    prefix = 'Gushio'
+
+    constructor() {
+        this.prefix = 'Gushio'
+    }
 
     info(message) {
         console.log(`[${this.prefix}] ${message}`)

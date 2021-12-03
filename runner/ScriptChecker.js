@@ -66,7 +66,9 @@ class ScriptChecker {
             }
         }
 
-        const duplicateCandidates = dependencies.map(d => d.name).filter((item, index) => dependencies.indexOf(item) !== index)
+        const duplicateCandidates = dependencies
+            .map(d => d.name)
+            .filter((item, index) => dependencies.indexOf(item) !== index)
         for (const duplicate of duplicateCandidates) {
             const dependencyDuplicates = dependencies.filter(dep => dep.name === duplicate)
 

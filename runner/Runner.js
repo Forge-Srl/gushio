@@ -1,6 +1,8 @@
 const {Command} = require('commander')
 const {LoadingError, RunningError} = require('./errors')
-const {requireScriptDependency, dependencyDescriptor, ensureNodeModulesExists, checkDependencyInstalled, installDependency} = require('./dependenciesUtils')
+const {
+    requireScriptDependency, dependencyDescriptor, ensureNodeModulesExists, checkDependencyInstalled, installDependency
+} = require('../utils/dependenciesUtils')
 const {ScriptChecker} = require('./ScriptChecker')
 
 const gushioFolder = '.gushio'
@@ -35,7 +37,8 @@ class Runner {
     }
 
     getDependenciesVersionsAndNames() {
-        const dependencies = this.dependencies.map(rawDep => dependencyDescriptor(rawDep.name, rawDep.version, rawDep.alias))
+        const dependencies = this.dependencies
+            .map(rawDep => dependencyDescriptor(rawDep.name, rawDep.version, rawDep.alias))
 
         return {
             versions: dependencies.map(d => d.npmInstallVersion),
@@ -65,7 +68,7 @@ class Runner {
     }
 
     getCommandPreActionHook(dependenciesVersions) {
-        return async (thisCommand, actionCommand) => {
+        return async (_thisCommand, _actionCommand) => {
             if (dependenciesVersions.length === 0) {
                 return
             }
@@ -83,7 +86,7 @@ class Runner {
         const dependencies = ['shelljs', 'ansi-colors', 'enquirer', ...dependenciesNames]
 
         return async (...args) => {
-            const command = args.pop()
+            const _command = args.pop()
             const cliOptions = args.pop()
 
             if (this.options.verboseLogging) {

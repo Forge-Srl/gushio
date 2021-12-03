@@ -2,7 +2,7 @@ describe('Logger', () => {
     let Logger
 
     beforeEach(() => {
-        Logger = require('../Logger').Logger
+        Logger = require('../../utils/Logger').Logger
     })
 
     test('info', () => {
