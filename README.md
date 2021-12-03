@@ -168,8 +168,19 @@ To run a Gushio script pass the script to the `gushio` executable with the `-s` 
 script needs arguments and/or options, you can pass them separated from the gushio options by `--`.
 
 ```shell
-gushio -s path/to/script_file -- arg1 arg2 --option1 foo --option2 bar baz bau
+gushio -s path/to/script_file.js -- arg1 arg2 --option1 foo --option2 bar baz bau
 ```
+
+On Linux and macOS you can also run the script directly:
+1. Add the shabang to the script (`#!/usr/bin/gushio -s` or `#!/usr/bin/env -S gushio -s`)
+2. Make the script executable
+   ```shell
+   chmod +x path/to/script_file.js
+   ```
+3. Run the script
+   ```shell
+   path/to/script_file.js arg1 arg2 --option1 foo --option2 bar baz bau
+   ```
 
 ## License
 
