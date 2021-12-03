@@ -66,6 +66,10 @@ class Runner {
 
     getCommandPreActionHook(dependenciesVersions) {
         return async (thisCommand, actionCommand) => {
+            if (dependenciesVersions.length === 0) {
+                return
+            }
+
             this.logger.info('Checking dependencies')
             await ensureNodeModulesExists(gushioFolder)
 
@@ -102,14 +106,19 @@ class Runner {
             .version(this.cli.version || '')
 
         for (const argument of this.cli.arguments) {
+            // TODO: use Argument constructor for more configurations
+            //       see: https://github.com/tj/commander.js#more-configuration-1
             command.argument(argument.name, argument.description, argument.default)
         }
 
         for (const option of this.cli.options) {
+            // TODO: use Option constructor for more configurations
+            //       see: https://github.com/tj/commander.js#more-configuration
             command.option(option.flags, option.description, option.default)
         }
 
         // TODO: add command.addHelpText support in cli?
+        //       see: https://github.com/tj/commander.js#custom-help
 
         const dependencies = this.getDependenciesVersionsAndNames()
         return command

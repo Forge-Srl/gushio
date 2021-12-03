@@ -131,18 +131,31 @@ describe('Runner', () => {
         })
     })
 
-    test('getCommandPreActionHook', async () => {
-        const runner = new Runner('appPath', 'scriptPath', 'run')
-        runner.logger = {info: jest.fn()}
-        runner.installDependency = jest.fn()
+    describe('getCommandPreActionHook', () => {
+        let runner
+        beforeEach(() => {
+            runner = new Runner('appPath', 'scriptPath', 'run')
+            runner.logger = {info: jest.fn()}
+            runner.installDependency = jest.fn()
+        })
 
-        const hook = runner.getCommandPreActionHook(['dep1', 'dep2'])
-        await hook()
+        test('no dependencies', async () => {
+            const hook = runner.getCommandPreActionHook([])
+            await hook()
 
-        expect(runner.logger.info).toHaveBeenNthCalledWith(1, 'Checking dependencies')
-        expect(dependenciesUtils.ensureNodeModulesExists).toHaveBeenCalledWith('.gushio')
-        expect(runner.installDependency).toHaveBeenNthCalledWith(1, 'dep1')
-        expect(runner.installDependency).toHaveBeenNthCalledWith(2, 'dep2')
+            expect(runner.logger.info).not.toHaveBeenCalled()
+            expect(dependenciesUtils.ensureNodeModulesExists).not.toHaveBeenCalled()
+        })
+
+        test('with dependencies', async () => {
+            const hook = runner.getCommandPreActionHook(['dep1', 'dep2'])
+            await hook()
+
+            expect(runner.logger.info).toHaveBeenNthCalledWith(1, 'Checking dependencies')
+            expect(dependenciesUtils.ensureNodeModulesExists).toHaveBeenCalledWith('.gushio')
+            expect(runner.installDependency).toHaveBeenNthCalledWith(1, 'dep1')
+            expect(runner.installDependency).toHaveBeenNthCalledWith(2, 'dep2')
+        })
     })
 
     test('getCommandAction', async () => {
