@@ -25,7 +25,7 @@ describe('Gushio', () => {
         const result = runScript('acceptance_sample_1')
         expect(result.code).toBe(0)
         expect(result.stdout).toBe('You have a message to read...\n')
-        expect(shelljs.cat('temp_folder/message.txt').stdout).toBe('"this is a message from acceptance_sample_1"' + os.EOL)
+        expect(shelljs.cat('temp_folder/message.txt').stdout).toBe('this is a message from acceptance_sample_1' + os.EOL)
     })
 
     test('acceptance_sample_2.js', () => {
