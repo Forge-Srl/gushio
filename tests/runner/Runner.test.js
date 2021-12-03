@@ -1,5 +1,5 @@
 describe('Runner', () => {
-    let Runner, LoadingError, RunningError, ScriptChecker, dependenciesUtils, Command
+    let Runner, LoadingError, RunningError, ScriptChecker, dependenciesUtils, Command, Argument, Option
 
     beforeEach(() => {
         jest.resetModules()
@@ -12,6 +12,8 @@ describe('Runner', () => {
 
         jest.mock('commander')
         Command = require('commander').Command
+        Argument = require('commander').Argument
+        Option = require('commander').Option
 
         Runner = require('../../runner/Runner').Runner
         LoadingError = require('../../runner/errors').LoadingError
@@ -239,8 +241,8 @@ describe('Runner', () => {
                 expect(version).toBe('version')
                 return command
             },
-            argument: jest.fn(),
-            option: jest.fn(),
+            addArgument: jest.fn(),
+            addOption: jest.fn(),
             hook: (event, hook) => {
                 expect(event).toBe('preAction')
                 expect(hook).toBe('hook')
@@ -251,13 +253,37 @@ describe('Runner', () => {
                 return command
             }
         }
+
+        const argCapture = class {
+            constructor(value = {}) {
+                this.value = value
+            }
+
+            default(def) {
+                this.value.default = def
+                return this
+            }
+        }
+        const optCapture = class {
+            constructor(value = {}) {
+                this.value = value
+            }
+
+            default(def) {
+                this.value.default = def
+                return this
+            }
+        }
+
         Command.mockImplementationOnce(() => command)
+        Argument.mockImplementation((name, description) => new argCapture({name, description}))
+        Option.mockImplementation((flags, description) => new optCapture({flags, description}))
 
         expect(runner.makeCommand('somePath')).toBe(command)
-        expect(command.argument).toHaveBeenNthCalledWith(1, 'name1', 'desc1', 'def1')
-        expect(command.argument).toHaveBeenNthCalledWith(2, 'name2', 'desc2', 'def2')
-        expect(command.option).toHaveBeenNthCalledWith(1, 'flag1', 'desc_flag1', 'def_flag1')
-        expect(command.option).toHaveBeenNthCalledWith(2, 'flag2', 'desc_flag2', 'def_flag2')
+        expect(command.addArgument).toHaveBeenNthCalledWith(1, new argCapture({name: 'name1', description: 'desc1', default: 'def1'}))
+        expect(command.addArgument).toHaveBeenNthCalledWith(2, new argCapture({name: 'name2', description: 'desc2', default: 'def2'}))
+        expect(command.addOption).toHaveBeenNthCalledWith(1, new optCapture({flags: 'flag1', description: 'desc_flag1', default: 'def_flag1'}))
+        expect(command.addOption).toHaveBeenNthCalledWith(2, new optCapture({flags: 'flag2', description: 'desc_flag2', default: 'def_flag2'}))
     })
 
     describe('run', () => {

@@ -1,4 +1,4 @@
-const {Command} = require('commander')
+const {Command, Argument, Option} = require('commander')
 const {
     requireScriptDependency, dependencyDescriptor, ensureNodeModulesExists, checkDependencyInstalled, installDependency
 } = require('../utils/dependenciesUtils')
@@ -115,15 +115,17 @@ class Runner {
             .version(this.cli.version || '')
 
         for (const argument of this.cli.arguments) {
-            // TODO: use Argument constructor for more configurations
-            //       see: https://github.com/tj/commander.js#more-configuration-1
-            command.argument(argument.name, argument.description, argument.default)
+            // TODO: see https://github.com/tj/commander.js#more-configuration-1
+            const argumentObj = new Argument(argument.name, argument.description)
+                .default(argument.default)
+            command.addArgument(argumentObj)
         }
 
         for (const option of this.cli.options) {
-            // TODO: use Option constructor for more configurations
-            //       see: https://github.com/tj/commander.js#more-configuration
-            command.option(option.flags, option.description, option.default)
+            // TODO: see https://github.com/tj/commander.js#more-configuration
+            const optionObj = new Option(option.flags, option.description)
+                .default(option.default)
+            command.addOption(optionObj)
         }
 
         // TODO: add command.addHelpText support in cli?
