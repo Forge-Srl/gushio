@@ -115,16 +115,29 @@ class Runner {
             .version(this.cli.version || '')
 
         for (const argument of this.cli.arguments) {
-            // TODO: see https://github.com/tj/commander.js#more-configuration-1
             const argumentObj = new Argument(argument.name, argument.description)
-                .default(argument.default)
+            if (argument.default) {
+                argumentObj.default(argument.default)
+            }
+            if (argument.choices) {
+                argumentObj.choices(argument.choices)
+            }
+            // TODO: add argumentObj.argParser?
             command.addArgument(argumentObj)
         }
 
         for (const option of this.cli.options) {
-            // TODO: see https://github.com/tj/commander.js#more-configuration
             const optionObj = new Option(option.flags, option.description)
-                .default(option.default)
+            if (option.default) {
+                optionObj.default(option.default)
+            }
+            if (option.env) {
+                optionObj.env(option.env)
+            }
+            if (option.choices) {
+                optionObj.choices(option.choices)
+            }
+            // TODO: add optionObj.argParser?
             command.addOption(optionObj)
         }
 

@@ -35,6 +35,10 @@ class ScriptChecker {
                 if (!argument.name) {
                     throw new LoadingError(this.scriptPath, 'arguments must have a "name" field')
                 }
+
+                if (argument.choices && !Array.isArray(argument.choices)) {
+                    throw new LoadingError(this.scriptPath, 'argument choices must be an Array of strings')
+                }
             }
         }
 
@@ -46,6 +50,10 @@ class ScriptChecker {
             for (const option of cli.options) {
                 if (!option.flags) {
                     throw new LoadingError(this.scriptPath, 'options must have a "flags" field')
+                }
+
+                if (option.choices && !Array.isArray(option.choices)) {
+                    throw new LoadingError(this.scriptPath, 'option choices must be an Array of strings')
                 }
             }
         }

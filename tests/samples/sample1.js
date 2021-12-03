@@ -10,8 +10,8 @@ module.exports = {
         ],
         options: [
             {flags: '-f, --foo', description: 'the foo flag'},
-            {flags: '-b, --bar [broom]', description: 'the bar flag (optional)', default: 'no_broom'},
-            {flags: '-B, --baz <baam>', description: 'the baz flag'},
+            {flags: '-b, --bar [broom]', description: 'the bar flag (optional)', default: 'no_broom', env: 'GUSHIO_BAR'},
+            {flags: '-B, --baz <baam>', description: 'the baz flag', choices: ['boom', 'beam']},
         ],
     },
     deps: [

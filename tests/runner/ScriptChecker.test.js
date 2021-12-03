@@ -65,10 +65,19 @@ describe('ScriptChecker', () => {
                     .toThrow(new LoadingError(scriptPath, 'arguments must have a "name" field'))
             })
 
+            test('choices not an Array', () => {
+                expect(() => checker.checkCliObject({arguments: [
+                        {name: 'foo'},
+                        {name: 'bar', choices: 'other value'},
+                    ]}))
+                    .toThrow(new LoadingError(scriptPath, 'argument choices must be an Array of strings'))
+            })
+
             test('valid', () => {
                 expect(() => checker.checkCliObject({arguments: [
                         {name: 'foo'},
-                        {name: 'bar', otherKey: 'other value'}
+                        {name: 'bar', otherKey: 'other value'},
+                        {name: 'baz', choices: ['asd', 'pbf']}
                     ]}))
                     .not.toThrow()
             })
@@ -89,10 +98,19 @@ describe('ScriptChecker', () => {
                     .toThrow(new LoadingError(scriptPath, 'options must have a "flags" field'))
             })
 
+            test('choices not an Array', () => {
+                expect(() => checker.checkCliObject({options: [
+                        {flags: 'foo'},
+                        {flags: 'bar', choices: 'other value'},
+                    ]}))
+                    .toThrow(new LoadingError(scriptPath, 'option choices must be an Array of strings'))
+            })
+
             test('valid', () => {
                 expect(() => checker.checkCliObject({options: [
                         {flags: 'foo'},
-                        {flags: 'bar', otherKey: 'other value'}
+                        {flags: 'bar', otherKey: 'other value'},
+                        {flags: 'bar', choices: ['asd', 'qwerty']},
                     ]}))
                     .not.toThrow()
             })

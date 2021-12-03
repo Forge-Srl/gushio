@@ -209,11 +209,11 @@ describe('Runner', () => {
             version: 'version',
             arguments: [
                 {name: 'name1', description: 'desc1', default: 'def1'},
-                {name: 'name2', description: 'desc2', default: 'def2'},
+                {name: 'name2', description: 'desc2', choices: ['c1', 'c2']},
             ],
             options: [
-                {flags: 'flag1', description: 'desc_flag1', default: 'def_flag1'},
-                {flags: 'flag2', description: 'desc_flag2', default: 'def_flag2'},
+                {flags: 'flag1', description: 'desc_flag1', default: 'def_flag1', env: 'SOME_ENV_VAR'},
+                {flags: 'flag2', description: 'desc_flag2', choices: ['f1', 'f2', 'f3']},
             ]
         })
         runner.getDependenciesVersionsAndNames = () => ({versions: 'versions', names: 'names'})
@@ -263,6 +263,11 @@ describe('Runner', () => {
                 this.value.default = def
                 return this
             }
+
+            choices(choices) {
+                this.value.choices = choices
+                return this
+            }
         }
         const optCapture = class {
             constructor(value = {}) {
@@ -273,6 +278,16 @@ describe('Runner', () => {
                 this.value.default = def
                 return this
             }
+
+            choices(choices) {
+                this.value.choices = choices
+                return this
+            }
+
+            env(env) {
+                this.value.env = env
+                return this
+            }
         }
 
         Command.mockImplementationOnce(() => command)
@@ -281,9 +296,9 @@ describe('Runner', () => {
 
         expect(runner.makeCommand('somePath')).toBe(command)
         expect(command.addArgument).toHaveBeenNthCalledWith(1, new argCapture({name: 'name1', description: 'desc1', default: 'def1'}))
-        expect(command.addArgument).toHaveBeenNthCalledWith(2, new argCapture({name: 'name2', description: 'desc2', default: 'def2'}))
-        expect(command.addOption).toHaveBeenNthCalledWith(1, new optCapture({flags: 'flag1', description: 'desc_flag1', default: 'def_flag1'}))
-        expect(command.addOption).toHaveBeenNthCalledWith(2, new optCapture({flags: 'flag2', description: 'desc_flag2', default: 'def_flag2'}))
+        expect(command.addArgument).toHaveBeenNthCalledWith(2, new argCapture({name: 'name2', description: 'desc2', choices: ['c1', 'c2']}))
+        expect(command.addOption).toHaveBeenNthCalledWith(1, new optCapture({flags: 'flag1', description: 'desc_flag1', default: 'def_flag1', env: 'SOME_ENV_VAR'}))
+        expect(command.addOption).toHaveBeenNthCalledWith(2, new optCapture({flags: 'flag2', description: 'desc_flag2', choices: ['f1', 'f2', 'f3']}))
     })
 
     describe('run', () => {
