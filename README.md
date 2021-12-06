@@ -170,15 +170,15 @@ module.exports = {
 
 ### Running a Gushio script
 
-To run a Gushio script pass the script to the `gushio` executable with the `-s` (or `--script`) parameter. If your 
-script needs arguments and/or options, you can pass them separated from the gushio options by `--`.
+To run a Gushio script pass the script to the `gushio` executable. If your script needs arguments and/or options, you 
+can pass them after the script path.
 
 ```shell
-gushio -s path/to/script_file.js -- arg1 arg2 --option1 foo --option2 bar baz bau
+gushio path/to/script_file.js arg1 arg2 --option1 foo --option2 bar baz bau
 ```
 
 On Linux and macOS you can also run the script directly:
-1. Add the shabang to the script (`#!/usr/bin/gushio -s` or `#!/usr/bin/env -S gushio -s`)
+1. Add the shabang to the script (`#!/usr/bin/gushio` or `#!/usr/bin/env gushio`)
 2. Make the script executable
    ```shell
    chmod +x path/to/script_file.js
@@ -187,6 +187,11 @@ On Linux and macOS you can also run the script directly:
    ```shell
    path/to/script_file.js arg1 arg2 --option1 foo --option2 bar baz bau
    ```
+
+#### Gushio flags
+
+Gushio can receive options before the script argument. The following options are available:
+- `-v`, `--verbose` enable verbose logging (also available by setting `GUSHIO_VERBOSE` environment variable).
 
 ## License
 

@@ -6,7 +6,7 @@ const shelljs = require('shelljs')
 const executablePath = path.resolve(__dirname, '../cli/cli.js')
 const samplesDir = path.resolve(__dirname, 'samples')
 function runScript(scriptName, argsAndOpts = '') {
-    return shelljs.exec(`node ${executablePath} -s ${samplesDir}/${scriptName}.js -- ${argsAndOpts}`)
+    return shelljs.exec(`node ${executablePath} ${samplesDir}/${scriptName}.js ${argsAndOpts}`)
 }
 
 describe('Gushio', () => {

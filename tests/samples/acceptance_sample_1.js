@@ -1,4 +1,4 @@
-#!/usr/bin/gushio -s
+#!/usr/bin/gushio
 module.exports = {
     run: async ({'shelljs': $, 'ansi-colors': c, 'enquirer': e}, args, options) => {
         $.mkdir('temp_folder')

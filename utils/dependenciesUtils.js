@@ -22,29 +22,30 @@ const dependencyDescriptor = (name, version = 'latest', alias) => {
 
 const ensureNodeModulesExists = async (folder) => new Promise((resolve, reject) => {
     const exec = shell.mkdir('-p', `${folder}/node_modules`)
-    if (exec.code === 0) {
-        resolve()
+    if (exec.code !== 0) {
+        reject(new Error(`Cannot create "${folder}/node_modules", mkdir failed with code ${exec.code}`))
         return
     }
-    reject(new Error(`Cannot create "${folder}/node_modules", mkdir failed with code ${exec.code}`))
+    //TODO: also create a fake package.json for maximum compatibility
+    resolve()
 })
 
 const checkDependencyInstalled = async (folder, npmInstallVersion, silent = true) => new Promise((resolve, reject) => {
     const exec = shell.exec(`npm list --depth=0 --prefix ${folder} ${npmInstallVersion}`, {silent})
-    if (exec.code === 0) {
-        resolve()
+    if (exec.code !== 0) {
+        reject(new Error(`Cannot find "${npmInstallVersion}" in "${folder}"`))
         return
     }
-    reject(new Error(`Cannot find "${npmInstallVersion}" in "${folder}"`))
+    resolve()
 })
 
 const installDependency = async (folder, npmInstallVersion, silent = true) => new Promise((resolve, reject) => {
     const exec = shell.exec(`npm install --prefix ${folder} ${npmInstallVersion}`, {silent})
-    if (exec.code === 0) {
-        resolve()
+    if (exec.code !== 0) {
+        reject(new Error(`Installation of ${npmInstallVersion} failed with exit code ${exec.code}`))
         return
     }
-    reject(new Error(`Installation of ${npmInstallVersion} failed with exit code ${exec.code}`))
+    resolve()
 })
 
 module.exports = {

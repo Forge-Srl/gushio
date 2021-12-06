@@ -1,4 +1,4 @@
-#!/usr/bin/gushio -s
+#!/usr/bin/gushio
 module.exports = {
     cli: {
         arguments: [

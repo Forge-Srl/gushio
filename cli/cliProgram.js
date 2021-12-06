@@ -1,4 +1,4 @@
-const {Command} = require('commander')
+const {Command, Option} = require('commander')
 const path = require('path')
 const packageInfo = require('../package.json')
 const {Runner} = require('../runner/Runner')
@@ -10,15 +10,11 @@ class Program {
     }
 
     commandAction(workingDir) {
-        return async (options, command) => {
-            const scriptPath = options.script
-            if (!scriptPath) {
-                return
-            }
-
+        return async (scriptPath, options, command) => {
             const runner = Runner.fromPath(command.rawArgs[1], path.resolve(workingDir, scriptPath))
                 .setLogger(this.logger)
                 .setOptions({verboseLogging: options.verbose})
+            const _removedScriptPathArg = command.args.shift()
             await runner.run(workingDir, command.args)
         }
     }
@@ -28,8 +24,10 @@ class Program {
             .name(packageInfo.name)
             .description(packageInfo.description)
             .version(packageInfo.version)
-            .option('-s, --script <path>', 'path to the script')
-            .option('-v, --verbose', 'enable verbose logging')
+            .enablePositionalOptions()
+            .passThroughOptions()
+            .argument('<script>', 'path to the script')
+            .addOption(new Option('-v, --verbose', 'enable verbose logging').env('GUSHIO_VERBOSE'))
             .action(this.commandAction(workingDir))
     }
 

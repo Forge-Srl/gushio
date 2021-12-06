@@ -40,7 +40,7 @@
     "prerelease": "npm test && npm run lint",
     "release": "npm version -m \"build: prepare release %s\"",
     "postrelease": "git push --follow-tags",
-    "sample": "node cli/cli.js -s tests/samples/sample1.js -- someQuix --baz boom"
+    "sample": "node cli/cli.js tests/samples/sample1.js someQuix --baz boom"
   },
   "bin": {
     "gushio": "cli/cli.js"
