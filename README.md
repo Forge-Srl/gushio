@@ -82,7 +82,8 @@ module.exports = {
     cli: {
         arguments: [
             {name: '<quix>', description: 'the first argument'},
-            {name: '[quak]', description: 'the second (and optional) argument', default: 69420}
+            {name: '<layout>', choices: ['qwerty', 'dvorak']},
+            {name: '[quak]', description: 'the third (and optional) argument', default: 69420}
         ]
     },
     run: async (deps, args, options) => {
@@ -94,6 +95,7 @@ module.exports = {
 
 Use angular brackets (`<>`) for required arguments and square brackets (`[]`) for optional arguments. For each argument
 you can add a `description` to be shown in the help and a `default` value to be used when the argument is not provided.
+You can also allow a limited set of values by adding a `choices` array of strings.
 
 The last argument (and only the last argument) can also be variadic (can receive multiple values) by appending `...` to
 its name:
@@ -118,8 +120,8 @@ module.exports = {
     cli: {
         options: [
             {flags: '-f, --foo', description: 'the foo flag (boolean)'},
-            {flags: '-b, --bar [broom]', description: 'the bar flag (optional)', default: 'no_broom'},
-            {flags: '-B, --baz <baam>', description: 'the baz flag'},
+            {flags: '-b, --bar [broom]', description: 'the bar flag (optional)', default: 'no_broom', env: 'MY_BAR'},
+            {flags: '-B, --baz <baam>', description: 'the baz flag', choices: ['swish', 'swoosh']},
         ],
     },
     run: async (deps, args, options) => {
@@ -130,8 +132,12 @@ module.exports = {
 ```
 
 Use angular brackets (`<>`) for required flag values and square brackets (`[]`) for optional flag values. If you need a
-boolean flag don't add a flag argument. For each flag you can add a `description` to be shown in the help and a 
-`default` value to be used when the flag is not provided.
+boolean flag don't add a flag argument. For each flag you can add:
+- a `description` to be shown in the help;
+- a `default` value to be used when the flag is not provided;
+- a `choices` array of strings to allow only a limited set of values;
+- a `env` variable name to read the value from (if the flag is not provided, then the environment variable is checked; 
+  if such variable is not set, then the default value is used).
 
 An option can also be variadic (can receive multiple values) by appending `...` to its argument name:
 ```javascript
