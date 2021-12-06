@@ -7,7 +7,7 @@ const requireScriptDependency = (dependency, localFolder) => {
         try {
             return require(`${localFolder}/node_modules/${dependency}`)
         } catch (e) {
-            throw new Error(`Dependency ${dependency} should be installed but was not found`)
+            throw new Error(`Dependency "${dependency}" should be installed but was not found`)
         }
     }
 }
@@ -21,12 +21,12 @@ const dependencyDescriptor = (name, version = 'latest', alias) => {
 }
 
 const ensureNodeModulesExists = async (folder) => new Promise((resolve, reject) => {
-    const exec = shell.mkdir('-p', `${folder}/node_modules`)
+    const nodeModuleFolder = `${folder}/node_modules`
+    const exec = shell.mkdir('-p', nodeModuleFolder)
     if (exec.code !== 0) {
-        reject(new Error(`Cannot create "${folder}/node_modules", mkdir failed with code ${exec.code}`))
+        reject(new Error(`Cannot create "${nodeModuleFolder}", mkdir failed with code ${exec.code}`))
         return
     }
-    //TODO: also create a fake package.json for maximum compatibility
     resolve()
 })
 
@@ -42,7 +42,7 @@ const checkDependencyInstalled = async (folder, npmInstallVersion, silent = true
 const installDependency = async (folder, npmInstallVersion, silent = true) => new Promise((resolve, reject) => {
     const exec = shell.exec(`npm install --prefix ${folder} ${npmInstallVersion}`, {silent})
     if (exec.code !== 0) {
-        reject(new Error(`Installation of ${npmInstallVersion} failed with exit code ${exec.code}`))
+        reject(new Error(`Installation of "${npmInstallVersion}" failed with exit code ${exec.code}`))
         return
     }
     resolve()

@@ -113,6 +113,11 @@ class Runner {
             .name(this.cli.name || this.scriptPath)
             .description(this.cli.description || '')
             .version(this.cli.version || '')
+            .showSuggestionAfterError()
+
+        if (this.cli.afterHelp) {
+            command.addHelpText('after', `\n${this.cli.afterHelp}`)
+        }
 
         for (const argument of this.cli.arguments) {
             const argumentObj = new Argument(argument.name, argument.description)
@@ -140,9 +145,6 @@ class Runner {
             // TODO: add optionObj.argParser?
             command.addOption(optionObj)
         }
-
-        // TODO: add command.addHelpText support in cli?
-        //       see: https://github.com/tj/commander.js#custom-help
 
         const dependencies = this.getDependenciesVersionsAndNames()
         return command

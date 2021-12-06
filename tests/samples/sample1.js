@@ -4,6 +4,7 @@ module.exports = {
         name: 'sample1',
         description: 'A sample script for gushio',
         version: 'NO VERSION',
+        afterHelp: 'Some additional info',
         arguments: [
             {name: '<quix>', description: 'the first argument'},
             {name: '[quak]', description: 'the second (and optional) argument', default: 69420}

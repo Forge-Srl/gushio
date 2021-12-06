@@ -161,6 +161,7 @@ module.exports = {
         name: 'my-awesome-script',
         description: 'An awesome description of what this script does',
         version: '4.2.0',
+        afterHelp: 'This string will be shown after the script help',
     },
     run: async (deps, args, options) => {
         //...

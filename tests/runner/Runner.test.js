@@ -207,6 +207,7 @@ describe('Runner', () => {
         const runner = new Runner('appPath', 'scriptPath', 'run', {
             description: 'appDesc',
             version: 'version',
+            afterHelp: 'Custom after help',
             arguments: [
                 {name: 'name1', description: 'desc1', default: 'def1'},
                 {name: 'name2', description: 'desc2', choices: ['c1', 'c2']},
@@ -241,8 +242,10 @@ describe('Runner', () => {
                 expect(version).toBe('version')
                 return command
             },
+            showSuggestionAfterError: jest.fn().mockImplementationOnce(() => command),
             addArgument: jest.fn(),
             addOption: jest.fn(),
+            addHelpText: jest.fn(),
             hook: (event, hook) => {
                 expect(event).toBe('preAction')
                 expect(hook).toBe('hook')
@@ -295,6 +298,8 @@ describe('Runner', () => {
         Option.mockImplementation((flags, description) => new optCapture({flags, description}))
 
         expect(runner.makeCommand('somePath')).toBe(command)
+        expect(command.showSuggestionAfterError).toHaveBeenCalled()
+        expect(command.addHelpText).toHaveBeenCalledWith('after', '\nCustom after help')
         expect(command.addArgument).toHaveBeenNthCalledWith(1, new argCapture({name: 'name1', description: 'desc1', default: 'def1'}))
         expect(command.addArgument).toHaveBeenNthCalledWith(2, new argCapture({name: 'name2', description: 'desc2', choices: ['c1', 'c2']}))
         expect(command.addOption).toHaveBeenNthCalledWith(1, new optCapture({flags: 'flag1', description: 'desc_flag1', default: 'def_flag1', env: 'SOME_ENV_VAR'}))

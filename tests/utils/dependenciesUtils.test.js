@@ -19,7 +19,7 @@ describe('dependenciesUtils', () => {
     describe('requireScriptDependency', () => {
         test('not found', () => {
             expect(() => requireScriptDependency('a-fake-module', 'localFolder'))
-                .toThrow('Dependency a-fake-module should be installed but was not found')
+                .toThrow('Dependency "a-fake-module" should be installed but was not found')
         })
 
         test('found', () => {
@@ -101,7 +101,7 @@ describe('dependenciesUtils', () => {
                 return {code: 34}
             }
             await expect(installDependency('somePath', 'somePackage', false)).rejects
-                .toThrow('Installation of somePackage failed with exit code 34')
+                .toThrow('Installation of "somePackage" failed with exit code 34')
         })
     })
 })
