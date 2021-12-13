@@ -7,11 +7,31 @@ const {ScriptChecker} = require('./ScriptChecker')
 
 class Runner {
 
+    static parseSyntaxError(error) {
+        const stackLines = error.stack.substring(0, error.stack.indexOf('    at '))
+            .split('\n')
+            .filter(l => l)
+
+        const errorLine = stackLines.shift()
+        const errorMessage = stackLines.pop()
+        const errorDetails = stackLines.join('\n')
+
+        return {
+            line: Number.parseInt(errorLine.match(/^.*:(\d+)$/)[1]),
+            message: errorMessage,
+            details: errorDetails,
+        }
+    }
+
     static fromPath(application, scriptPath) {
         let scriptObject
         try {
             scriptObject = require(scriptPath)
         } catch (e) {
+            if (e instanceof SyntaxError) {
+                const parsed = this.parseSyntaxError(e)
+                throw new LoadingError(scriptPath, `"${parsed.message}" at line ${parsed.line}\n${parsed.details}`)
+            }
             throw new LoadingError(scriptPath, 'file not found')
         }
         return this.fromJsonObject(application, scriptPath, scriptObject)

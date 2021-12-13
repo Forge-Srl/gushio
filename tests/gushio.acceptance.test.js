@@ -21,6 +21,18 @@ describe('Gushio', () => {
         fs.rmdirSync(tmpDir, {recursive: true})
     })
 
+    test('missing_file.js', () => {
+        const result = runScript('missing_file')
+        expect(result.code).toBe(2)
+        expect(result.stderr).toMatch(/^\[Gushio] Error while loading '.*missing_file.js': file not found\n$/)
+    })
+
+    test('acceptance_sample_0.js', () => {
+        const result = runScript('acceptance_sample_0')
+        expect(result.code).toBe(2)
+        expect(result.stderr).toMatch(/^\[Gushio] Error while loading '.*acceptance_sample_0.js': "SyntaxError: Unexpected token 'this'" at line 7\nIn this line there's JavaScript syntax error\n\s{3}\^\^\^\^\n$/)
+    })
+
     test('acceptance_sample_1.js', () => {
         const result = runScript('acceptance_sample_1')
         expect(result.code).toBe(0)

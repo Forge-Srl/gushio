@@ -20,10 +20,37 @@ describe('Runner', () => {
         RunningError = require('../../runner/errors').RunningError
     })
 
+    test('parseSyntaxError', () => {
+        let error
+        try {
+            eval('const asd = +++++;\n console.log(\'asd: \' + asd)')
+        } catch (e) {
+            error = e
+            error.stack = '/somePath/someFile.js:12093\nadditional\n\n\ninfo on multiple\nlines\n' + error.stack
+        }
+        expect(Runner.parseSyntaxError(error)).toStrictEqual({
+            line: 12093,
+            message: 'SyntaxError: Unexpected token \';\'',
+            details: 'additional\ninfo on multiple\nlines'
+        })
+    })
+
     describe('fromPath', () => {
         test('invalid package', () => {
             const scriptPath = './invalid_script_path'
-            expect(() => Runner.fromPath('appPath', scriptPath)).toThrow(new LoadingError(scriptPath, 'file not found'))
+            expect(() => Runner.fromPath('appPath', scriptPath))
+                .toThrow(new LoadingError(scriptPath, 'file not found'))
+        })
+
+        test('syntax error', () => {
+            const mockSyntaxError = new SyntaxError('error')
+            jest.mock('valid_script_path', () => {throw mockSyntaxError}, { virtual: true })
+            Runner.parseSyntaxError = error => {
+                expect(error).toBe(mockSyntaxError)
+                return {line: 125, details: 'someDetails', message: 'someMessage'}
+            }
+            expect(() => Runner.fromPath('appPath', 'valid_script_path'))
+                .toThrow(new LoadingError('valid_script_path', '"someMessage" at line 125\nsomeDetails'))
         })
 
         test('valid package', () => {
