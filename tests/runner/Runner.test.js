@@ -207,9 +207,14 @@ describe('Runner', () => {
             expect(path).toBe('somePath')
             return 'someFolder'
         }
-        dependenciesUtils.requireScriptDependency.mockImplementation((dependency, path) => {
+        dependenciesUtils.buildPatchedRequire.mockImplementationOnce((path, allowedDeps) => {
             expect(path).toBe('someFolder')
-            return 'resolved'
+            expect(allowedDeps).toStrictEqual(['shelljs', 'ansi-colors', 'enquirer', 'dep1', 'dep2'])
+            return 'patched'
+        })
+        dependenciesUtils.runWithPatchedRequire.mockImplementationOnce((patchedRequire, func) => {
+            expect(patchedRequire).toBe('patched')
+            func()
         })
 
         const action = runner.getCommandAction('somePath', ['dep1', 'dep2'])
@@ -220,14 +225,8 @@ describe('Runner', () => {
         expect(runner.logger.info)
             .toHaveBeenNthCalledWith(2, 'Running with options "cliOptions"')
         expect(runner.logger.info)
-            .toHaveBeenNthCalledWith(3, 'Running with dependencies ["shelljs","ansi-colors","enquirer","dep1","dep2"]')
-        expect(func).toHaveBeenCalledWith({
-            "shelljs": "resolved",
-            "ansi-colors": "resolved",
-            "enquirer": "resolved",
-            "dep1": "resolved",
-            "dep2": "resolved"
-        }, ['arg1', 'arg2', 'arg3'], 'cliOptions')
+            .toHaveBeenNthCalledWith(3, 'Running with dependencies ["shelljs","ansi-colors","enquirer","dep1","dep2"] in someFolder')
+        expect(func).toHaveBeenCalledWith(['arg1', 'arg2', 'arg3'], 'cliOptions')
     })
 
     test('makeCommand', () => {

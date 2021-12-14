@@ -1,6 +1,11 @@
 const {Command, Argument, Option} = require('commander')
 const {
-    requireScriptDependency, dependencyDescriptor, ensureNodeModulesExists, checkDependencyInstalled, installDependency
+    buildPatchedRequire,
+    runWithPatchedRequire,
+    dependencyDescriptor,
+    ensureNodeModulesExists,
+    checkDependencyInstalled,
+    installDependency
 } = require('../utils/dependenciesUtils')
 const {LoadingError, RunningError} = require('./errors')
 const {ScriptChecker} = require('./ScriptChecker')
@@ -108,6 +113,8 @@ class Runner {
 
     getCommandAction(workingDir, dependenciesNames) {
         const dependencies = ['shelljs', 'ansi-colors', 'enquirer', ...dependenciesNames]
+        const gushioFolder = this.getGushioFolder(workingDir)
+        const patchedRequire = buildPatchedRequire(gushioFolder, dependencies)
 
         return async (...args) => {
             const _command = args.pop()
@@ -116,15 +123,10 @@ class Runner {
             if (this.options.verboseLogging) {
                 this.logger.info(`Running with arguments ${JSON.stringify(args)}`)
                 this.logger.info(`Running with options ${JSON.stringify(cliOptions)}`)
-                this.logger.info(`Running with dependencies ${JSON.stringify(dependencies)}`)
+                this.logger.info(`Running with dependencies ${JSON.stringify(dependencies)} in ${gushioFolder}`)
             }
 
-            const gushioFolder = this.getGushioFolder(workingDir)
-            const injectedDependencies = Object.assign({}, ...dependencies.map(dependency => ({
-                [dependency]: requireScriptDependency(dependency, gushioFolder)
-            })))
-
-            await this.func(injectedDependencies, args, cliOptions)
+            await runWithPatchedRequire(patchedRequire, async () => await this.func(args, cliOptions))
         }
     }
 

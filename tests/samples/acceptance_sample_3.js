@@ -7,7 +7,7 @@ module.exports = {
             {name: '<third_argument...>'},
         ]
     },
-    run: async ({'shelljs': $, 'ansi-colors': c, 'enquirer': e}, args, options) => {
+    run: async (args, options) => {
         console.log('These are the args: ' + JSON.stringify(args))
     },
 }

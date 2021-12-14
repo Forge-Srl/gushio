@@ -1,15 +1,34 @@
+const Module = require('module')
 const shell = require('shelljs')
 
-const requireScriptDependency = (dependency, localFolder) => {
-    try {
-        return require(dependency)
-    } catch (e) {
+const buildPatchedRequire = (folder, allowedDependencies = []) => {
+    // patchedRequire must be a `function` since will replace `require` which is actually a complex object!
+    const patchedRequire = function (id) {
+        const require = patchedRequire.__originalRequire.bind(this)
+
         try {
-            return require(`${localFolder}/node_modules/${dependency}`)
+            return require(id)
         } catch (e) {
-            throw new Error(`Dependency "${dependency}" should be installed but was not found`)
+            try {
+                return require(`${folder}/node_modules/${id}`)
+            } catch (e) {
+                if (allowedDependencies.includes(id)) {
+                    throw new Error(`Dependency "${id}" should be installed but was not found`)
+                }
+
+                throw new Error(`Dependency "${id}" has been required but is not available`)
+            }
         }
     }
+    patchedRequire.__originalRequire = Module.prototype.require
+    return patchedRequire
+}
+
+const runWithPatchedRequire = async (patchedRequire, fn) => {
+    Module.prototype.require = patchedRequire
+    const result = await fn()
+    Module.prototype.require = patchedRequire.__originalRequire
+    return result
 }
 
 const dependencyDescriptor = (name, version = 'latest', alias) => {
@@ -49,5 +68,10 @@ const installDependency = async (folder, npmInstallVersion, silent = true) => ne
 })
 
 module.exports = {
-    requireScriptDependency, dependencyDescriptor, ensureNodeModulesExists, checkDependencyInstalled, installDependency
+    buildPatchedRequire,
+    runWithPatchedRequire,
+    dependencyDescriptor,
+    ensureNodeModulesExists,
+    checkDependencyInstalled,
+    installDependency
 }

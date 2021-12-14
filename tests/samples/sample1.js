@@ -18,10 +18,13 @@ module.exports = {
     deps: [
         {name: 'is-odd'},
     ],
-    run: async ({'shelljs': $, 'ansi-colors': c, 'enquirer': e, 'is-odd': odd}, args, options) => {
+    run: async (args, options) => {
+        const c = require('ansi-colors')
+        const odd = require('is-odd')
+        const path = require('path')
+
         console.log(c.red('args -->'), args)
         console.log(c.green.bold('options -->'), options)
-        console.log($ === require('shelljs'))
         for (let i = 0; i < 10; i++) {
             console.log(`Test ${i} is odd: ${odd(i)}`)
         }

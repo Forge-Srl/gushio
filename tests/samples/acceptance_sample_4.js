@@ -7,7 +7,7 @@ module.exports = {
             {flags: '-t, --third'},
         ]
     },
-    run: async ({'shelljs': $, 'ansi-colors': c, 'enquirer': e}, args, options) => {
+    run: async (args, options) => {
         console.log('These are the options: ' + JSON.stringify(options))
     },
 }

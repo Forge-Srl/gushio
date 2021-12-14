@@ -1,6 +1,6 @@
 describe('dependenciesUtils', () => {
-    let shelljs, requireScriptDependency, dependencyDescriptor, ensureNodeModulesExists, checkDependencyInstalled,
-        installDependency
+    let shelljs, buildPatchedRequire, runWithPatchedRequire, dependencyDescriptor, ensureNodeModulesExists,
+        checkDependencyInstalled, installDependency, Module
 
     beforeEach(() => {
         jest.resetModules()
@@ -9,28 +9,72 @@ describe('dependenciesUtils', () => {
         jest.mock('shelljs', () => ({dummy: 'dummy'}))
         shelljs = require('shelljs')
 
-        requireScriptDependency = require('../../utils/dependenciesUtils').requireScriptDependency
+        Module = require('module')
+
+        buildPatchedRequire = require('../../utils/dependenciesUtils').buildPatchedRequire
+        runWithPatchedRequire = require('../../utils/dependenciesUtils').runWithPatchedRequire
         dependencyDescriptor = require('../../utils/dependenciesUtils').dependencyDescriptor
         ensureNodeModulesExists = require('../../utils/dependenciesUtils').ensureNodeModulesExists
         checkDependencyInstalled = require('../../utils/dependenciesUtils').checkDependencyInstalled
         installDependency = require('../../utils/dependenciesUtils').installDependency
     })
 
-    describe('requireScriptDependency', () => {
+    describe('buildPatchedRequire', () => {
+        let patchedRequire
+
+        beforeEach(() => {
+            patchedRequire = buildPatchedRequire('localFolder', ['installed-fake-module'])
+            expect(patchedRequire.__originalRequire).toBe(Module.prototype.require)
+        })
+
         test('not found', () => {
-            expect(() => requireScriptDependency('a-fake-module', 'localFolder'))
-                .toThrow('Dependency "a-fake-module" should be installed but was not found')
+            patchedRequire.__originalRequire = function(id) {
+                expect(id).toBe('installed-fake-module')
+                throw new Error()
+            }
+            expect(() => patchedRequire('installed-fake-module'))
+                .toThrow('Dependency "installed-fake-module" should be installed but was not found')
+        })
+
+        test('not available', () => {
+            patchedRequire.__originalRequire = function(id) {
+                expect(id).toBe('other-fake-module')
+                throw new Error()
+            }
+            expect(() => patchedRequire('other-fake-module'))
+                .toThrow('Dependency "other-fake-module" has been required but is not available')
         })
 
         test('found', () => {
-            jest.mock('a-fake-module', () => 'theModule', {virtual: true})
-            expect(requireScriptDependency('a-fake-module', null)).toBe('theModule')
+            patchedRequire.__originalRequire = function(id) {
+                expect(id).toBe('a-fake-module')
+                return 'theModule'
+            }
+            expect(patchedRequire('a-fake-module')).toBe('theModule')
         })
 
         test('found in local folder', () => {
-            jest.mock('localFolder/node_modules/a-fake-module', () => 'theModule', {virtual: true})
-            expect(requireScriptDependency('a-fake-module', 'localFolder')).toBe('theModule')
+            patchedRequire.__originalRequire = function(id) {
+                if (id === 'a-fake-module') {
+                    throw new Error()
+                } else if (id === 'localFolder/node_modules/a-fake-module') {
+                    return 'theModule'
+                }
+                return 'other'
+            }
+            expect(patchedRequire('a-fake-module')).toBe('theModule')
         })
+    })
+
+    test('runWithPatchedRequire', async () => {
+        const patched = {__originalRequire: 'original'}
+        expect(Module.prototype.require).not.toBe(patched)
+        const result = await runWithPatchedRequire(patched, async () => {
+            expect(Module.prototype.require).toBe(patched)
+            return 'someValue'
+        })
+        expect(Module.prototype.require).toBe('original')
+        expect(result).toBe('someValue')
     })
 
     test.each([
