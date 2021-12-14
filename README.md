@@ -41,19 +41,21 @@ By default, Gushio provides 3 useful dependencies:
 - [`ansi-colors`](https://www.npmjs.com/package/ansi-colors), for terminal logs styling;
 - [`enquirer`](https://www.npmjs.com/package/enquirer), for user-friendly cli prompts.
 
-To add a dependency to your script, you need to export a `deps` array
-like this:
+To add a dependency to your script, you need to export a `deps` array like this:
 ```javascript
 module.exports = {
     deps: [
         {name: 'my-dependecy'}
     ],
-    run: async (deps) => {
-        deps['my-dependency'].myfunction()
+    run: async () => {
+        require('my-dependency')
         //...
     }
 }
 ```
+
+**Dependencies are available for `require()` only inside the `run()` function**. Requiring a dependency outside such
+function will probably result in an error to be thrown.
 
 For each dependency you must specify the name (as found on NPM). You can add a `version` field to specify the version of
 the dependency you desire. When it is not specified, the `latest` version of that package is used.
@@ -65,7 +67,9 @@ module.exports = {
         {name: 'is-odd', version: '^3.0.1'},
         {name: 'is-odd', version: '1.0.0', alias: 'old-odd'},
     ],
-    run: async ({'is-odd': isOdd, 'old-odd': old_isOdd}) => {
+    run: async () => {
+        const isOdd = require('is-odd')
+        const old_isOdd = require('old-odd')
         console.log('15 is odd: ' + isOdd(15))
         console.log('15 was odd: ' + old_isOdd(15))
     }
@@ -86,7 +90,7 @@ module.exports = {
             {name: '[quak]', description: 'the third (and optional) argument', default: 69420}
         ]
     },
-    run: async (deps, args, options) => {
+    run: async (args, options) => {
         const [quix, quak] = args
         //...
     }
@@ -124,7 +128,7 @@ module.exports = {
             {flags: '-B, --baz <baam>', description: 'the baz flag', choices: ['swish', 'swoosh']},
         ],
     },
-    run: async (deps, args, options) => {
+    run: async (args, options) => {
         const {foo, bar, baz} = options
         //...
     }
@@ -163,7 +167,7 @@ module.exports = {
         version: '4.2.0',
         afterHelp: 'This string will be shown after the script help',
     },
-    run: async (deps, args, options) => {
+    run: async (args, options) => {
         //...
     }
 }
