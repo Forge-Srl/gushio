@@ -34,7 +34,8 @@ module.exports = {
 #### Dependencies
 
 You can use NPM packages in your Gushio script. All dependencies are automatically downloaded by the Gushio runner and 
-are provided in an object to the `run` function as the first parameter.
+**they are available for `require()` only inside the `run()` function**. Requiring a dependency outside such function 
+will lead to unknown results (probably an error will be thrown).
 
 By default, Gushio provides 3 useful dependencies:
 - [`shelljs`](https://www.npmjs.com/package/shelljs), a portable implementation of unix shell commands;
@@ -53,9 +54,6 @@ module.exports = {
     }
 }
 ```
-
-**Dependencies are available for `require()` only inside the `run()` function**. Requiring a dependency outside such
-function will probably result in an error to be thrown.
 
 For each dependency you must specify the name (as found on NPM). You can add a `version` field to specify the version of
 the dependency you desire. When it is not specified, the `latest` version of that package is used.
