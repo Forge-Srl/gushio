@@ -132,11 +132,18 @@ describe('Runner', () => {
         expect(runner.logger).toBe('logger')
     })
 
-    test('getGushioFolder', () => {
-        const runner = new Runner('appPath', 'scriptPath', 'run')
-        expect(runner.getGushioFolder('somePath')).toBe('somePath/.gushio')
-        runner.gushioFolderName = 'different-gushio-path'
-        expect(runner.getGushioFolder('somePath')).toBe('somePath/different-gushio-path')
+    test.each([
+        [{name: 'script name', version: 'my super   duper\tversion'}, '0d858590-script_name-my_super_duper_version'],
+        [{version: 'my super   duper\tversion'}, '0d858590-my_super_duper_version'],
+        [{name: 'script name'}, '0d858590-script_name'],
+        [{}, '0d858590'],
+    ])('gushioFolder', (cli, expected) => {
+        const path = require('path')
+        const generalPath = path.resolve('fake_folder')
+        const runner = new Runner('appPath', 'scriptPath', 'run', cli, undefined, generalPath)
+
+        expect(runner.gushioFolder)
+            .toBe(path.resolve(generalPath, expected))
     })
 
     describe('installDependency', () => {
@@ -176,7 +183,7 @@ describe('Runner', () => {
         })
 
         test('no dependencies', async () => {
-            const hook = runner.getCommandPreActionHook('somePath', [])
+            const hook = runner.getCommandPreActionHook([])
             await hook()
 
             expect(runner.logger.info).not.toHaveBeenCalled()
@@ -184,11 +191,8 @@ describe('Runner', () => {
         })
 
         test('with dependencies', async () => {
-            runner.getGushioFolder = path => {
-                expect(path).toBe('somePath')
-                return 'gushioFolder'
-            }
-            const hook = runner.getCommandPreActionHook('somePath', ['dep1', 'dep2'])
+            runner._gushioFolder = 'gushioFolder'
+            const hook = runner.getCommandPreActionHook(['dep1', 'dep2'])
             await hook()
 
             expect(runner.logger.info).toHaveBeenNthCalledWith(1, 'Checking dependencies')
@@ -203,10 +207,7 @@ describe('Runner', () => {
         const runner = new Runner('appPath', 'scriptPath', func)
         runner.options = {verboseLogging: true}
         runner.logger = {info: jest.fn()}
-        runner.getGushioFolder = path => {
-            expect(path).toBe('somePath')
-            return 'someFolder'
-        }
+        runner._gushioFolder = 'someFolder'
         dependenciesUtils.buildPatchedRequire.mockImplementationOnce((path, allowedDeps) => {
             expect(path).toBe('someFolder')
             expect(allowedDeps).toStrictEqual(['shelljs', 'ansi-colors', 'enquirer', 'dep1', 'dep2'])
@@ -217,7 +218,7 @@ describe('Runner', () => {
             func()
         })
 
-        const action = runner.getCommandAction('somePath', ['dep1', 'dep2'])
+        const action = runner.getCommandAction( ['dep1', 'dep2'])
         await action('arg1', 'arg2', 'arg3', 'cliOptions', 'command')
 
         expect(runner.logger.info)
@@ -244,13 +245,11 @@ describe('Runner', () => {
             ]
         })
         runner.getDependenciesVersionsAndNames = () => ({versions: 'versions', names: 'names'})
-        runner.getCommandPreActionHook = (path, versions) => {
-            expect(path).toBe('somePath')
+        runner.getCommandPreActionHook = (versions) => {
             expect(versions).toBe('versions')
             return 'hook'
         }
-        runner.getCommandAction = (path, names) => {
-            expect(path).toBe('somePath')
+        runner.getCommandAction = (names) => {
             expect(names).toBe('names')
             return 'action'
         }
@@ -335,24 +334,18 @@ describe('Runner', () => {
     describe('run', () => {
         test('failure', async () => {
             const runner = new Runner('appPath', 'scriptPath', 'run')
-            runner.makeCommand = (path) => {
-                expect(path).toBe('somePath')
-                return {
-                    parseAsync: jest.fn().mockRejectedValueOnce(new Error('kaboom!!!'))
-                }
-            }
-            await expect(async () => await runner.run('somePath', ['arg1', 'arg2'])).rejects
+            runner.makeCommand = () => ({
+                parseAsync: jest.fn().mockRejectedValueOnce(new Error('kaboom!!!'))
+            })
+            await expect(async () => await runner.run(['arg1', 'arg2'])).rejects
                 .toThrow(new RunningError('scriptPath', 'kaboom!!!'))
         })
 
         test('success', async () => {
             const runner = new Runner('appPath', 'scriptPath', 'run')
             const command = {parseAsync: jest.fn().mockResolvedValueOnce(undefined)}
-            runner.makeCommand = (path) => {
-                expect(path).toBe('somePath')
-                return command
-            }
-            await runner.run('somePath', ['arg1', 'arg2'])
+            runner.makeCommand = (path) => command
+            await runner.run(['arg1', 'arg2'])
             expect(command.parseAsync).toHaveBeenCalledWith(['appPath', 'scriptPath', 'arg1', 'arg2'])
         })
     })

@@ -1,4 +1,6 @@
 const {Command, Argument, Option} = require('commander')
+const path = require('path')
+const crypto = require('crypto')
 const {
     buildPatchedRequire,
     runWithPatchedRequire,
@@ -12,6 +14,7 @@ const {ScriptChecker} = require('./ScriptChecker')
 
 class Runner {
 
+    // TODO(refactor): move in helper?
     static parseSyntaxError(error) {
         const stackLines = error.stack.substring(0, error.stack.indexOf('    at '))
             .split('\n')
@@ -28,7 +31,7 @@ class Runner {
         }
     }
 
-    static fromPath(application, scriptPath) {
+    static fromPath(application, scriptPath, gushioGeneralPath) {
         let scriptObject
         try {
             scriptObject = require(scriptPath)
@@ -39,17 +42,18 @@ class Runner {
             }
             throw new LoadingError(scriptPath, 'file not found')
         }
-        return this.fromJsonObject(application, scriptPath, scriptObject)
+        return this.fromJsonObject(application, scriptPath, scriptObject, gushioGeneralPath)
     }
 
-    static fromJsonObject(application, scriptPath, scriptObject) {
+    static fromJsonObject(application, scriptPath, scriptObject, gushioGeneralPath) {
         const checker = new ScriptChecker(scriptPath)
         checker.checkScriptObject(scriptObject)
 
-        return new Runner(application, scriptPath, scriptObject.run, scriptObject.cli, scriptObject.deps)
+        return new Runner(application, scriptPath, scriptObject.run, scriptObject.cli, scriptObject.deps,
+            gushioGeneralPath)
     }
 
-    constructor(application, scriptPath, func, cli, dependencies) {
+    constructor(application, scriptPath, func, cli, dependencies, gushioGeneralPath) {
         this.application = application
         this.scriptPath = scriptPath
         this.func = func
@@ -57,7 +61,23 @@ class Runner {
         this.cli.arguments = this.cli.arguments || []
         this.cli.options = this.cli.options || []
         this.dependencies = dependencies || []
-        this.gushioFolderName = '.gushio'
+        this.gushioGeneralPath = gushioGeneralPath
+    }
+
+    get gushioFolder() {
+        if (!this._gushioFolder) {
+            let folderName = crypto.createHash('md5').update(this.scriptPath).digest('hex').substring(0, 8)
+            if (this.cli.name) {
+                folderName += `-${this.cli.name}`
+            }
+            if (this.cli.version) {
+                folderName += `-${this.cli.version}`
+            }
+
+            this._gushioFolder = path.resolve(this.gushioGeneralPath, folderName.replaceAll(/\s+/g, '_'))
+        }
+
+        return this._gushioFolder
     }
 
     getDependenciesVersionsAndNames() {
@@ -80,10 +100,6 @@ class Runner {
         return this
     }
 
-    getGushioFolder(workingDir) {
-        return `${workingDir}/${this.gushioFolderName}`
-    }
-
     async installDependency(path, npmInstallVersion) {
         this.logger.info(`Installing dependency ${npmInstallVersion}`)
         try {
@@ -95,14 +111,14 @@ class Runner {
         }
     }
 
-    getCommandPreActionHook(workingDir, dependenciesVersions) {
+    getCommandPreActionHook(dependenciesVersions) {
         return async (_thisCommand, _actionCommand) => {
             if (dependenciesVersions.length === 0) {
                 return
             }
 
             this.logger.info('Checking dependencies')
-            const gushioFolder = this.getGushioFolder(workingDir)
+            const gushioFolder = this.gushioFolder
             await ensureNodeModulesExists(gushioFolder)
 
             for (const dependency of dependenciesVersions) {
@@ -111,9 +127,9 @@ class Runner {
         }
     }
 
-    getCommandAction(workingDir, dependenciesNames) {
+    getCommandAction(dependenciesNames) {
         const dependencies = ['shelljs', 'ansi-colors', 'enquirer', ...dependenciesNames]
-        const gushioFolder = this.getGushioFolder(workingDir)
+        const gushioFolder = this.gushioFolder
         const patchedRequire = buildPatchedRequire(gushioFolder, dependencies)
 
         return async (...args) => {
@@ -130,7 +146,7 @@ class Runner {
         }
     }
 
-    makeCommand(workingDir) {
+    makeCommand() {
         const command = new Command()
             .name(this.cli.name || this.scriptPath)
             .description(this.cli.description || '')
@@ -149,7 +165,7 @@ class Runner {
             if (argument.choices) {
                 argumentObj.choices(argument.choices)
             }
-            // TODO: add argumentObj.argParser?
+            // TODO(feature): add argumentObj.argParser?
             command.addArgument(argumentObj)
         }
 
@@ -164,18 +180,18 @@ class Runner {
             if (option.choices) {
                 optionObj.choices(option.choices)
             }
-            // TODO: add optionObj.argParser?
+            // TODO(feature): add optionObj.argParser?
             command.addOption(optionObj)
         }
 
         const dependencies = this.getDependenciesVersionsAndNames()
         return command
-            .hook('preAction', this.getCommandPreActionHook(workingDir, dependencies.versions))
-            .action(this.getCommandAction(workingDir, dependencies.names))
+            .hook('preAction', this.getCommandPreActionHook(dependencies.versions))
+            .action(this.getCommandAction(dependencies.names))
     }
 
-    async run(workingDir, args) {
-        const command = this.makeCommand(workingDir)
+    async run(args) {
+        const command = this.makeCommand()
         try {
             await command.parseAsync([this.application, this.scriptPath, ...args])
         } catch (e) {
