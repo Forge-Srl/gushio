@@ -3,7 +3,7 @@ const path = require('path')
 const os = require('os')
 const packageInfo = require('../package.json')
 const {Runner} = require('../runner/Runner')
-const {RunningError, LoadingError} = require("../runner/errors");
+const {RunningError, LoadingError} = require('../runner/errors')
 const GUSHIO_FOLDER_NAME = '.gushio'
 
 class Program {
