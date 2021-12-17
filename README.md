@@ -197,6 +197,7 @@ Gushio can receive options before the script argument. The following options are
 - `-v`, `--verbose` enable verbose logging (also available by setting `GUSHIO_VERBOSE` environment variable).
 - `-f <folder>`, `--gushio-folder <folder>` change gushio cache folder (also available by setting `GUSHIO_FOLDER` 
   environment variable). The default value is the `.gushio` folder in the user home directory.
+- `-c`, `--clean-run` clear gushio cache folder before running the script (dependencies will be re-downloaded).
 
 ## License
 
