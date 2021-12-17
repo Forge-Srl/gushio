@@ -45,22 +45,17 @@ describe('dependenciesUtils', () => {
                 .toThrow('Dependency "other-fake-module" has been required but is not available')
         })
 
-        test('found', () => {
-            patchedRequire.__originalRequire = function(id) {
-                expect(id).toBe('a-fake-module')
-                return 'theModule'
-            }
-            expect(patchedRequire('a-fake-module')).toBe('theModule')
+        test.each([
+            'shelljs', 'ansi-colors', 'enquirer'
+        ])('found %s', (dep) => {
+            patchedRequire.__originalRequire = undefined
+            expect(patchedRequire(dep)).toBe(require(dep))
         })
 
         test('found in local folder', () => {
             patchedRequire.__originalRequire = function(id) {
-                if (id === 'a-fake-module') {
-                    throw new Error()
-                } else if (id === 'localFolder/node_modules/a-fake-module') {
-                    return 'theModule'
-                }
-                return 'other'
+                expect(id).toBe('localFolder/node_modules/a-fake-module')
+                return 'theModule'
             }
             expect(patchedRequire('a-fake-module')).toBe('theModule')
         })

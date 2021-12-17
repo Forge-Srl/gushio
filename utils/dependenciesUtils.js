@@ -1,23 +1,29 @@
 const Module = require('module')
 const shell = require('shelljs')
+const ansiColors = require('ansi-colors')
+const enquirer = require('enquirer')
 
 const buildPatchedRequire = (folder, allowedDependencies = []) => {
     // patchedRequire must be a `function` since will replace `require` which is actually a complex object!
     const patchedRequire = function (id) {
+        switch (id) {
+            case 'shelljs':
+                return shell
+            case 'ansi-colors':
+                return ansiColors
+            case 'enquirer':
+                return enquirer
+        }
+
         const require = patchedRequire.__originalRequire.bind(this)
-
         try {
-            return require(id)
+            return require(`${folder}/node_modules/${id}`)
         } catch (e) {
-            try {
-                return require(`${folder}/node_modules/${id}`)
-            } catch (e) {
-                if (allowedDependencies.includes(id)) {
-                    throw new Error(`Dependency "${id}" should be installed but was not found`)
-                }
-
-                throw new Error(`Dependency "${id}" has been required but is not available`)
+            if (allowedDependencies.includes(id)) {
+                throw new Error(`Dependency "${id}" should be installed but was not found`)
             }
+
+            throw new Error(`Dependency "${id}" has been required but is not available`)
         }
     }
     patchedRequire.__originalRequire = Module.prototype.require

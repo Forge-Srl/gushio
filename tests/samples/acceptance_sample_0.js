@@ -7,7 +7,7 @@
 In this line there's JavaScript syntax error
 
 module.exports = {
-    run: async ({'shelljs': $, 'ansi-colors': c, 'enquirer': e}, args, options) => {
+    run: async (args, options) => {
         console.log('This line will never be executed')
     },
 }
