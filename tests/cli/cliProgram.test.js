@@ -42,7 +42,7 @@ describe('cliProgram', () => {
                 return {
                     env: env => {
                         expect(env).toBe('GUSHIO_VERBOSE')
-                        return 'verboseOption'
+                        return {opt: 'verboseOption'}
                     }
                 }
             })
@@ -55,11 +55,16 @@ describe('cliProgram', () => {
                         return {
                             default: (value) => {
                                 expect(value).toBe(path.resolve(os.homedir(), '.gushio'))
-                                return 'gushioFolderOption'
+                                return {opt: 'gushioFolderOption'}
                             }
                         }
                     }
                 }
+            })
+            .mockImplementationOnce((flag, description) => {
+                expect(flag).toBe('-c, --clean-run')
+                expect(description).toBe('clear gushio cache folder before run (dependencies will be re-downloaded)')
+                return {opt: 'cleanRunOption'}
             })
 
         program.commandAction = workingDir => {
@@ -73,8 +78,10 @@ describe('cliProgram', () => {
         expect(commandObj.enablePositionalOptions).toHaveBeenCalled()
         expect(commandObj.passThroughOptions).toHaveBeenCalled()
         expect(commandObj.argument).toHaveBeenNthCalledWith(1, '<script>', 'path to the script')
-        expect(commandObj.addOption).toHaveBeenNthCalledWith(1, 'verboseOption')
-        expect(commandObj.addOption).toHaveBeenNthCalledWith(2, 'gushioFolderOption')
+        expect(commandObj.addOption).toHaveBeenCalledTimes(3)
+        expect(commandObj.addOption).toHaveBeenNthCalledWith(1, {opt: 'verboseOption'})
+        expect(commandObj.addOption).toHaveBeenNthCalledWith(2, {opt: 'gushioFolderOption'})
+        expect(commandObj.addOption).toHaveBeenNthCalledWith(3, {opt: 'cleanRunOption'})
         expect(commandObj.action).toHaveBeenCalledWith('action')
     })
 
@@ -93,13 +100,13 @@ describe('cliProgram', () => {
                     return runner
                 },
                 setOptions: options => {
-                    expect(options).toStrictEqual({verboseLogging: 'verbose'})
+                    expect(options).toStrictEqual({verboseLogging: 'verbose', cleanRun: 'cleanRun'})
                     return runner
                 }
             }
             return runner
         }
-        await action('someScript', {verbose: 'verbose'}, {
+        await action('someScript', {verbose: 'verbose', cleanRun: 'cleanRun'}, {
             rawArgs: ['nodeApp', 'gushioApp', 'otherArgs'],
             args: ['someScript', 'someArgs']
         })

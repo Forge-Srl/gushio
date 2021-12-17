@@ -39,7 +39,14 @@ const dependencyDescriptor = (name, version = 'latest', alias) => {
     return {name: name, npmInstallVersion: depString}
 }
 
-const ensureNodeModulesExists = async (folder) => new Promise((resolve, reject) => {
+const ensureNodeModulesExists = async (folder, clear) => new Promise((resolve, reject) => {
+    if (clear) {
+        const exec = shell.rm('-rf', folder)
+        if (exec.code !== 0) {
+            reject(new Error(`Cannot clear "${folder}", rm failed with code ${exec.code}`))
+            return
+        }
+    }
     const nodeModuleFolder = `${folder}/node_modules`
     const exec = shell.mkdir('-p', nodeModuleFolder)
     if (exec.code !== 0) {

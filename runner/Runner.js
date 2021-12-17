@@ -119,7 +119,7 @@ class Runner {
 
             this.logger.info('Checking dependencies')
             const gushioFolder = this.gushioFolder
-            await ensureNodeModulesExists(gushioFolder)
+            await ensureNodeModulesExists(gushioFolder, this.options.cleanRun)
 
             for (const dependency of dependenciesVersions) {
                 await this.installDependency(gushioFolder, dependency)

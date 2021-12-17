@@ -87,22 +87,46 @@ describe('dependenciesUtils', () => {
     })
 
     describe('ensureNodeModulesExists', () => {
-        test('success', async () => {
+        test('clean success', async () => {
+            shelljs.rm = (flag, path) => {
+                expect(flag).toBe('-rf')
+                expect(path).toBe('somePath')
+                return {code: 0}
+            }
             shelljs.mkdir = (flag, path) => {
                 expect(flag).toBe('-p')
                 expect(path).toBe('somePath/node_modules')
                 return {code: 0}
             }
-            await expect(ensureNodeModulesExists('somePath')).resolves.toBeUndefined()
+            await expect(ensureNodeModulesExists('somePath', true)).resolves.toBeUndefined()
         })
 
-        test('failure', async () => {
+        test('no clear success', async () => {
+            shelljs.mkdir = (flag, path) => {
+                expect(flag).toBe('-p')
+                expect(path).toBe('somePath/node_modules')
+                return {code: 0}
+            }
+            await expect(ensureNodeModulesExists('somePath', false)).resolves.toBeUndefined()
+        })
+
+        test('clear failure', async () => {
+            shelljs.rm = (flag, path) => {
+                expect(flag).toBe('-rf')
+                expect(path).toBe('somePath')
+                return {code: 34}
+            }
+            await expect(ensureNodeModulesExists('somePath', true)).rejects
+                .toThrow('Cannot clear "somePath", rm failed with code 34')
+        })
+
+        test('no clear failure', async () => {
             shelljs.mkdir = (flag, path) => {
                 expect(flag).toBe('-p')
                 expect(path).toBe('somePath/node_modules')
                 return {code: 34}
             }
-            await expect(ensureNodeModulesExists('somePath')).rejects
+            await expect(ensureNodeModulesExists('somePath', false)).rejects
                 .toThrow('Cannot create "somePath/node_modules", mkdir failed with code 34')
         })
     })

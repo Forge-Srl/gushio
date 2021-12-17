@@ -179,6 +179,7 @@ describe('Runner', () => {
         beforeEach(() => {
             runner = new Runner('appPath', 'scriptPath', 'run')
             runner.logger = {info: jest.fn()}
+            runner.options = {cleanRun: true}
             runner.installDependency = jest.fn()
         })
 
@@ -196,16 +197,18 @@ describe('Runner', () => {
             await hook()
 
             expect(runner.logger.info).toHaveBeenNthCalledWith(1, 'Checking dependencies')
-            expect(dependenciesUtils.ensureNodeModulesExists).toHaveBeenCalledWith('gushioFolder')
+            expect(dependenciesUtils.ensureNodeModulesExists).toHaveBeenCalledWith('gushioFolder', runner.options.cleanRun)
             expect(runner.installDependency).toHaveBeenNthCalledWith(1, 'gushioFolder', 'dep1')
             expect(runner.installDependency).toHaveBeenNthCalledWith(2, 'gushioFolder', 'dep2')
         })
     })
 
-    test('getCommandAction', async () => {
+    test.each([
+        true, false
+    ])('getCommandAction', async (logging) => {
         const func = jest.fn()
         const runner = new Runner('appPath', 'scriptPath', func)
-        runner.options = {verboseLogging: true}
+        runner.options = {verboseLogging: logging}
         runner.logger = {info: jest.fn()}
         runner._gushioFolder = 'someFolder'
         dependenciesUtils.buildPatchedRequire.mockImplementationOnce((path, allowedDeps) => {
@@ -221,12 +224,17 @@ describe('Runner', () => {
         const action = runner.getCommandAction( ['dep1', 'dep2'])
         await action('arg1', 'arg2', 'arg3', 'cliOptions', 'command')
 
-        expect(runner.logger.info)
-            .toHaveBeenNthCalledWith(1, 'Running with arguments ["arg1","arg2","arg3"]')
-        expect(runner.logger.info)
-            .toHaveBeenNthCalledWith(2, 'Running with options "cliOptions"')
-        expect(runner.logger.info)
-            .toHaveBeenNthCalledWith(3, 'Running with dependencies ["shelljs","ansi-colors","enquirer","dep1","dep2"] in someFolder')
+        if (logging) {
+            expect(runner.logger.info)
+                .toHaveBeenNthCalledWith(1, 'Running with arguments ["arg1","arg2","arg3"]')
+            expect(runner.logger.info)
+                .toHaveBeenNthCalledWith(2, 'Running with options "cliOptions"')
+            expect(runner.logger.info)
+                .toHaveBeenNthCalledWith(3, 'Running with dependencies ["shelljs","ansi-colors","enquirer","dep1","dep2"] in someFolder')
+        } else {
+            expect(runner.logger.info).not.toHaveBeenCalled()
+        }
+
         expect(func).toHaveBeenCalledWith(['arg1', 'arg2', 'arg3'], 'cliOptions')
     })
 

@@ -17,7 +17,10 @@ class Program {
             const absoluteScriptPath = path.resolve(workingDir, scriptPath)
             const runner = Runner.fromPath(command.rawArgs[1], absoluteScriptPath, options.gushioFolder)
                 .setLogger(this.logger)
-                .setOptions({verboseLogging: options.verbose})
+                .setOptions({
+                    verboseLogging: options.verbose,
+                    cleanRun: options.cleanRun
+                })
             const _removedScriptPathArg = command.args.shift()
             await runner.run(command.args)
         }
@@ -29,6 +32,8 @@ class Program {
         const gushioFolderOption = new Option('-f, --gushio-folder <folder>', 'path to the gushio cache folder')
             .env('GUSHIO_FOLDER')
             .default(path.resolve(os.homedir(), GUSHIO_FOLDER_NAME))
+        const cleanRunOption = new Option('-c, --clean-run',
+            'clear gushio cache folder before run (dependencies will be re-downloaded)')
 
         return new Command()
             .name(packageInfo.name)
@@ -39,6 +44,7 @@ class Program {
             .argument('<script>', 'path to the script')
             .addOption(verboseOption)
             .addOption(gushioFolderOption)
+            .addOption(cleanRunOption)
             .action(this.commandAction(workingDir))
     }
 
