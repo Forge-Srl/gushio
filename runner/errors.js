@@ -25,4 +25,20 @@ class RunningError extends ScriptError {
     }
 }
 
-module.exports = {ScriptError, LoadingError, RunningError}
+const parseSyntaxError = (error) => {
+    const stackLines = error.stack.substring(0, error.stack.indexOf('    at '))
+        .split('\n')
+        .filter(l => l)
+
+    const errorLine = stackLines.shift()
+    const errorMessage = stackLines.pop()
+    const errorDetails = stackLines.join('\n')
+
+    return {
+        line: Number.parseInt(errorLine.match(/^.*:(\d+)$/)[1]),
+        message: errorMessage,
+        details: errorDetails,
+    }
+}
+
+module.exports = {ScriptError, LoadingError, RunningError, parseSyntaxError}

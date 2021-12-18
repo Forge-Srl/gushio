@@ -1,5 +1,5 @@
 describe('Runner', () => {
-    let Runner, LoadingError, RunningError, ScriptChecker, dependenciesUtils, Command, Argument, Option
+    let Runner, LoadingError, RunningError, parseSyntaxError, ScriptChecker, dependenciesUtils, Command, Argument, Option
 
     beforeEach(() => {
         jest.resetModules()
@@ -10,47 +10,43 @@ describe('Runner', () => {
         jest.mock('../../utils/dependenciesUtils')
         dependenciesUtils = require('../../utils/dependenciesUtils')
 
+        jest.mock('../../runner/errors')
+        LoadingError = require('../../runner/errors').LoadingError
+        RunningError = require('../../runner/errors').RunningError
+        parseSyntaxError = require('../../runner/errors').parseSyntaxError
+
         jest.mock('commander')
         Command = require('commander').Command
         Argument = require('commander').Argument
         Option = require('commander').Option
 
         Runner = require('../../runner/Runner').Runner
-        LoadingError = require('../../runner/errors').LoadingError
-        RunningError = require('../../runner/errors').RunningError
-    })
-
-    test('parseSyntaxError', () => {
-        let error
-        try {
-            eval('const asd = +++++;\n console.log(\'asd: \' + asd)')
-        } catch (e) {
-            error = e
-            error.stack = '/somePath/someFile.js:12093\nadditional\n\n\ninfo on multiple\nlines\n' + error.stack
-        }
-        expect(Runner.parseSyntaxError(error)).toStrictEqual({
-            line: 12093,
-            message: 'SyntaxError: Unexpected token \';\'',
-            details: 'additional\ninfo on multiple\nlines'
-        })
     })
 
     describe('fromPath', () => {
         test('invalid package', () => {
             const scriptPath = './invalid_script_path'
-            expect(() => Runner.fromPath('appPath', scriptPath))
-                .toThrow(new LoadingError(scriptPath, 'file not found'))
+            LoadingError.mockImplementationOnce((script, message) => {
+                expect(script).toBe(scriptPath)
+                expect(message).toBe('file not found')
+                return new Error('boom')
+            })
+            expect(() => Runner.fromPath('appPath', scriptPath)).toThrow(new Error('boom'))
         })
 
         test('syntax error', () => {
             const mockSyntaxError = new SyntaxError('error')
             jest.mock('valid_script_path', () => {throw mockSyntaxError}, { virtual: true })
-            Runner.parseSyntaxError = error => {
+            parseSyntaxError.mockImplementationOnce(error => {
                 expect(error).toBe(mockSyntaxError)
                 return {line: 125, details: 'someDetails', message: 'someMessage'}
-            }
-            expect(() => Runner.fromPath('appPath', 'valid_script_path'))
-                .toThrow(new LoadingError('valid_script_path', '"someMessage" at line 125\nsomeDetails'))
+            })
+            LoadingError.mockImplementationOnce((script, message) => {
+                expect(script).toBe('valid_script_path')
+                expect(message).toBe('"someMessage" at line 125\nsomeDetails')
+                return new Error('boom')
+            })
+            expect(() => Runner.fromPath('appPath', 'valid_script_path')).toThrow(new Error('boom'))
         })
 
         test('valid package', () => {
@@ -345,8 +341,12 @@ describe('Runner', () => {
             runner.makeCommand = () => ({
                 parseAsync: jest.fn().mockRejectedValueOnce(new Error('kaboom!!!'))
             })
-            await expect(async () => await runner.run(['arg1', 'arg2'])).rejects
-                .toThrow(new RunningError('scriptPath', 'kaboom!!!'))
+            RunningError.mockImplementationOnce((script, message) => {
+                expect(script).toBe('scriptPath')
+                expect(message).toBe('kaboom!!!')
+                return new Error('boom')
+            })
+            await expect(async () => await runner.run(['arg1', 'arg2'])).rejects.toThrow(new Error('boom'))
         })
 
         test('success', async () => {

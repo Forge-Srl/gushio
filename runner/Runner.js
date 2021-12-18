@@ -9,27 +9,10 @@ const {
     checkDependencyInstalled,
     installDependency
 } = require('../utils/dependenciesUtils')
-const {LoadingError, RunningError} = require('./errors')
+const {LoadingError, RunningError, parseSyntaxError} = require('./errors')
 const {ScriptChecker} = require('./ScriptChecker')
 
 class Runner {
-
-    // TODO(refactor): move in helper?
-    static parseSyntaxError(error) {
-        const stackLines = error.stack.substring(0, error.stack.indexOf('    at '))
-            .split('\n')
-            .filter(l => l)
-
-        const errorLine = stackLines.shift()
-        const errorMessage = stackLines.pop()
-        const errorDetails = stackLines.join('\n')
-
-        return {
-            line: Number.parseInt(errorLine.match(/^.*:(\d+)$/)[1]),
-            message: errorMessage,
-            details: errorDetails,
-        }
-    }
 
     static fromPath(application, scriptPath, gushioGeneralPath) {
         let scriptObject
@@ -37,7 +20,7 @@ class Runner {
             scriptObject = require(scriptPath)
         } catch (e) {
             if (e instanceof SyntaxError) {
-                const parsed = this.parseSyntaxError(e)
+                const parsed = parseSyntaxError(e)
                 throw new LoadingError(scriptPath, `"${parsed.message}" at line ${parsed.line}\n${parsed.details}`)
             }
             throw new LoadingError(scriptPath, 'file not found')
