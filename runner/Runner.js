@@ -125,7 +125,13 @@ class Runner {
                 this.logger.info(`Running with dependencies ${JSON.stringify(dependencies)} in ${gushioFolder}`)
             }
 
-            await runWithPatchedRequire(patchedRequire, async () => await this.func(args, cliOptions))
+            await runWithPatchedRequire(patchedRequire, async () => {
+                try {
+                    await this.func(args, cliOptions)
+                } catch (e) {
+                    throw new RunningError(this.scriptPath, e.message)
+                }
+            })
         }
     }
 
@@ -175,11 +181,7 @@ class Runner {
 
     async run(args) {
         const command = this.makeCommand()
-        try {
-            await command.parseAsync([this.application, this.scriptPath, ...args])
-        } catch (e) {
-            throw new RunningError(this.scriptPath, e.message)
-        }
+        await command.parseAsync([this.application, this.scriptPath, ...args])
     }
 }
 

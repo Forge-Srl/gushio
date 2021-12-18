@@ -199,39 +199,74 @@ describe('Runner', () => {
         })
     })
 
-    test.each([
-        true, false
-    ])('getCommandAction', async (logging) => {
-        const func = jest.fn()
-        const runner = new Runner('appPath', 'scriptPath', func)
-        runner.options = {verboseLogging: logging}
-        runner.logger = {info: jest.fn()}
-        runner._gushioFolder = 'someFolder'
-        dependenciesUtils.buildPatchedRequire.mockImplementationOnce((path, allowedDeps) => {
-            expect(path).toBe('someFolder')
-            expect(allowedDeps).toStrictEqual(['shelljs', 'ansi-colors', 'enquirer', 'dep1', 'dep2'])
-            return 'patched'
+    describe('getCommandAction', () => {
+        let func, runner, action
+        beforeEach(() => {
+            func = jest.fn()
+            runner = new Runner('appPath', 'scriptPath', func)
+            runner.logger = {info: jest.fn()}
+            runner._gushioFolder = 'someFolder'
+            dependenciesUtils.buildPatchedRequire.mockImplementationOnce((path, allowedDeps) => {
+                expect(path).toBe('someFolder')
+                expect(allowedDeps).toStrictEqual(['shelljs', 'ansi-colors', 'enquirer', 'dep1', 'dep2'])
+                return 'patched'
+            })
+            dependenciesUtils.runWithPatchedRequire.mockImplementationOnce(async (patchedRequire, func) => {
+                expect(patchedRequire).toBe('patched')
+                await func()
+            })
+
+            action = runner.getCommandAction(['dep1', 'dep2'])
         })
-        dependenciesUtils.runWithPatchedRequire.mockImplementationOnce((patchedRequire, func) => {
-            expect(patchedRequire).toBe('patched')
-            func()
+
+        test.each([
+            true, false
+        ])('function ok', async (logging) => {
+            runner.options = {verboseLogging: logging}
+            await action('arg1', 'arg2', 'arg3', 'cliOptions', 'command')
+
+            if (logging) {
+                expect(runner.logger.info)
+                    .toHaveBeenNthCalledWith(1, 'Running with arguments ["arg1","arg2","arg3"]')
+                expect(runner.logger.info)
+                    .toHaveBeenNthCalledWith(2, 'Running with options "cliOptions"')
+                expect(runner.logger.info)
+                    .toHaveBeenNthCalledWith(3, 'Running with dependencies ["shelljs","ansi-colors","enquirer","dep1","dep2"] in someFolder')
+            } else {
+                expect(runner.logger.info).not.toHaveBeenCalled()
+            }
+
+            expect(func).toHaveBeenCalledWith(['arg1', 'arg2', 'arg3'], 'cliOptions')
         })
 
-        const action = runner.getCommandAction( ['dep1', 'dep2'])
-        await action('arg1', 'arg2', 'arg3', 'cliOptions', 'command')
+        test.each([
+            true, false
+        ])('function error', async (logging) => {
+            runner.options = {verboseLogging: logging}
+            func.mockImplementationOnce(() => {throw new Error('boom boom')})
+            RunningError.mockImplementationOnce((script, message) => {
+                expect(script).toBe('scriptPath')
+                expect(message).toBe('boom boom')
+                return new Error('boom')
+            })
+            await expect(async () => await action('arg1', 'arg2', 'arg3', 'cliOptions', 'command')).rejects
+                .toThrow(new Error('boom'))
 
-        if (logging) {
-            expect(runner.logger.info)
-                .toHaveBeenNthCalledWith(1, 'Running with arguments ["arg1","arg2","arg3"]')
-            expect(runner.logger.info)
-                .toHaveBeenNthCalledWith(2, 'Running with options "cliOptions"')
-            expect(runner.logger.info)
-                .toHaveBeenNthCalledWith(3, 'Running with dependencies ["shelljs","ansi-colors","enquirer","dep1","dep2"] in someFolder')
-        } else {
-            expect(runner.logger.info).not.toHaveBeenCalled()
-        }
+            if (logging) {
+                expect(runner.logger.info)
+                    .toHaveBeenNthCalledWith(1, 'Running with arguments ["arg1","arg2","arg3"]')
+                expect(runner.logger.info)
+                    .toHaveBeenNthCalledWith(2, 'Running with options "cliOptions"')
+                expect(runner.logger.info)
+                    .toHaveBeenNthCalledWith(3, 'Running with dependencies ["shelljs","ansi-colors","enquirer","dep1","dep2"] in someFolder')
+            } else {
+                expect(runner.logger.info).not.toHaveBeenCalled()
+            }
 
-        expect(func).toHaveBeenCalledWith(['arg1', 'arg2', 'arg3'], 'cliOptions')
+            expect(func).toHaveBeenCalledWith(['arg1', 'arg2', 'arg3'], 'cliOptions')
+        })
+
+
     })
 
     test('makeCommand', () => {
@@ -341,12 +376,7 @@ describe('Runner', () => {
             runner.makeCommand = () => ({
                 parseAsync: jest.fn().mockRejectedValueOnce(new Error('kaboom!!!'))
             })
-            RunningError.mockImplementationOnce((script, message) => {
-                expect(script).toBe('scriptPath')
-                expect(message).toBe('kaboom!!!')
-                return new Error('boom')
-            })
-            await expect(async () => await runner.run(['arg1', 'arg2'])).rejects.toThrow(new Error('boom'))
+            await expect(async () => await runner.run(['arg1', 'arg2'])).rejects.toThrow(new Error('kaboom!!!'))
         })
 
         test('success', async () => {
