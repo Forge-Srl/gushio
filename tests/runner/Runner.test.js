@@ -199,12 +199,15 @@ describe('Runner', () => {
         })
     })
 
-    describe('getCommandAction', () => {
+    describe.each([
+        true, false
+    ])('getCommandAction', (logging) => {
         let func, runner, action
         beforeEach(() => {
             func = jest.fn()
             runner = new Runner('appPath', 'scriptPath', func)
             runner.logger = {info: jest.fn()}
+            runner.options = {verboseLogging: logging}
             runner._gushioFolder = 'someFolder'
             dependenciesUtils.buildPatchedRequire.mockImplementationOnce((path, allowedDeps) => {
                 expect(path).toBe('someFolder')
@@ -219,10 +222,7 @@ describe('Runner', () => {
             action = runner.getCommandAction(['dep1', 'dep2'])
         })
 
-        test.each([
-            true, false
-        ])('function ok', async (logging) => {
-            runner.options = {verboseLogging: logging}
+        test('function ok', async () => {
             await action('arg1', 'arg2', 'arg3', 'cliOptions', 'command')
 
             if (logging) {
@@ -239,10 +239,7 @@ describe('Runner', () => {
             expect(func).toHaveBeenCalledWith(['arg1', 'arg2', 'arg3'], 'cliOptions')
         })
 
-        test.each([
-            true, false
-        ])('function error', async (logging) => {
-            runner.options = {verboseLogging: logging}
+        test('function error', async () => {
             func.mockImplementationOnce(() => {throw new Error('boom boom')})
             RunningError.mockImplementationOnce((script, message) => {
                 expect(script).toBe('scriptPath')

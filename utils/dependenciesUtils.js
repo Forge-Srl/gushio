@@ -3,7 +3,7 @@ const shell = require('shelljs')
 const ansiColors = require('ansi-colors')
 const enquirer = require('enquirer')
 
-const buildPatchedRequire = (folder, allowedDependencies = []) => {
+const buildPatchedRequire = (folder, allowedDependencies = [], silent) => {
     // patchedRequire must be a `function` since will replace `require` which is actually a complex object!
     const patchedRequire = function (id) {
         switch (id) {
@@ -16,14 +16,23 @@ const buildPatchedRequire = (folder, allowedDependencies = []) => {
         }
 
         const require = patchedRequire.__originalRequire.bind(this)
-        try {
-            return require(`${folder}/node_modules/${id}`)
-        } catch (e) {
-            if (allowedDependencies.includes(id)) {
-                throw new Error(`Dependency "${id}" should be installed but was not found`)
-            }
 
-            throw new Error(`Dependency "${id}" has been required but is not available`)
+        try {
+            return require(id)
+        } catch (e) {
+            try {
+                return require(`${folder}/node_modules/${id}`)
+            } catch (e) {
+                if (allowedDependencies.includes(id)) {
+                    throw new Error(`Dependency "${id}" should be installed but was not found`)
+                }
+
+                let message = `Dependency "${id}" has been required but is not available`
+                if (!silent) {
+                    message += `\n${e.stack}`
+                }
+                throw new Error(message)
+            }
         }
     }
     patchedRequire.__originalRequire = Module.prototype.require
@@ -31,6 +40,11 @@ const buildPatchedRequire = (folder, allowedDependencies = []) => {
 }
 
 const runWithPatchedRequire = async (patchedRequire, fn) => {
+    // Clear modules cache to ensure patchedRequire is clean
+    for (const cacheKey in require.cache) {
+        delete require.cache[cacheKey]
+    }
+
     Module.prototype.require = patchedRequire
     const result = await fn()
     Module.prototype.require = patchedRequire.__originalRequire

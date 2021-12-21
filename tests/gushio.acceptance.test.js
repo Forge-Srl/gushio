@@ -37,7 +37,7 @@ describe('Gushio', () => {
         const result = runScript(tmpDir, 'acceptance_sample_1')
         expect(result.code).toBe(0)
         expect(result.stdout).toBe('You have a message to read...\n')
-        expect(shelljs.cat('temp_folder/message.txt').stdout).toBe('this is a message from acceptance_sample_1' + os.EOL)
+        expect(shelljs.cat('temp_folder/message.txt').stdout).toBe(`this is a message from acceptance_sample_1${os.EOL}`)
     })
 
     test('acceptance_sample_2.js', () => {
@@ -57,4 +57,18 @@ describe('Gushio', () => {
         expect(result.code).toBe(0)
         expect(result.stdout).toBe('These are the options: {"second":["123","456","789"],"third":true,"first":"foo foo"}\n')
     })
+
+    test('acceptance_sample_5.js', () => {
+        const result = runScript(tmpDir, 'acceptance_sample_5')
+        expect(result.code).toBe(0)
+        expect(result.stdout).toBe('[Gushio] Checking dependencies\n' +
+            '[Gushio] Installing dependency glob@latest\n' +
+            '[Gushio] Dependency glob@latest successfully installed\n' +
+            '[Gushio] Installing dependency check-odd@npm:is-odd@latest\n' +
+            '[Gushio] Dependency check-odd@npm:is-odd@latest successfully installed\n' +
+            'Written on console after requiring deps\n')
+        const installedDeps = shelljs.ls(`${tmpDir}/.gushio/317f0a7c-sample_5/node_modules`)
+        expect(installedDeps).toContain('check-odd')
+        expect(installedDeps).toContain('glob')
+    }, 15000)
 })

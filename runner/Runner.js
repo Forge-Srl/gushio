@@ -113,7 +113,7 @@ class Runner {
     getCommandAction(dependenciesNames) {
         const dependencies = ['shelljs', 'ansi-colors', 'enquirer', ...dependenciesNames]
         const gushioFolder = this.gushioFolder
-        const patchedRequire = buildPatchedRequire(gushioFolder, dependencies)
+        const patchedRequire = buildPatchedRequire(gushioFolder, dependencies, !this.options.verboseLogging)
 
         return async (...args) => {
             const _command = args.pop()
