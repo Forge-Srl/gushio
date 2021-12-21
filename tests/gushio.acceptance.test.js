@@ -2,6 +2,7 @@ const fs = require('fs')
 const os = require('os')
 const path = require('path')
 const shelljs = require('shelljs')
+const crypto = require('crypto')
 
 const executablePath = path.resolve(__dirname, '../cli/cli.js')
 const samplesDir = path.resolve(__dirname, 'samples')
@@ -67,7 +68,9 @@ describe('Gushio', () => {
             '[Gushio] Installing dependency check-odd@npm:is-odd@latest\n' +
             '[Gushio] Dependency check-odd@npm:is-odd@latest successfully installed\n' +
             'Written on console after requiring deps\n')
-        const installedDeps = shelljs.ls(`${tmpDir}/.gushio/317f0a7c-sample_5/node_modules`)
+
+        const hash = crypto.createHash('md5').update(path.resolve(samplesDir, 'acceptance_sample_5.js')).digest('hex').substring(0, 8)
+        const installedDeps = shelljs.ls(`${tmpDir}/.gushio/${hash}-sample_5/node_modules`)
         expect(installedDeps).toContain('check-odd')
         expect(installedDeps).toContain('glob')
     }, 15000)
