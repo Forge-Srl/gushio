@@ -114,6 +114,7 @@ class Runner {
         const dependencies = ['shelljs', 'ansi-colors', 'enquirer', ...dependenciesNames]
         const gushioFolder = this.gushioFolder
         const patchedRequire = buildPatchedRequire(gushioFolder, dependencies, !this.options.verboseLogging)
+        const runPatched = runWithPatchedRequire(patchedRequire)
 
         return async (...args) => {
             const _command = args.pop()
@@ -125,7 +126,7 @@ class Runner {
                 this.logger.info(`Running with dependencies ${JSON.stringify(dependencies)} in ${gushioFolder}`)
             }
 
-            await runWithPatchedRequire(patchedRequire, async () => {
+            await runPatched(async () => {
                 try {
                     await this.func(args, cliOptions)
                 } catch (e) {

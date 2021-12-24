@@ -214,9 +214,9 @@ describe('Runner', () => {
                 expect(allowedDeps).toStrictEqual(['shelljs', 'ansi-colors', 'enquirer', 'dep1', 'dep2'])
                 return 'patched'
             })
-            dependenciesUtils.runWithPatchedRequire.mockImplementationOnce(async (patchedRequire, func) => {
+            dependenciesUtils.runWithPatchedRequire.mockImplementationOnce((patchedRequire) => {
                 expect(patchedRequire).toBe('patched')
-                await func()
+                return async (func) => await func()
             })
 
             action = runner.getCommandAction(['dep1', 'dep2'])

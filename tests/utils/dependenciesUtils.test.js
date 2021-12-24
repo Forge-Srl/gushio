@@ -63,8 +63,9 @@ describe('dependenciesUtils', () => {
 
     test('runWithPatchedRequire', async () => {
         const patched = {__originalRequire: 'original'}
+        const runPatched = runWithPatchedRequire(patched)
         expect(Module.prototype.require).not.toBe(patched)
-        const result = await runWithPatchedRequire(patched, async () => {
+        const result = await runPatched(async () => {
             expect(Module.prototype.require).toBe(patched)
             return 'someValue'
         })

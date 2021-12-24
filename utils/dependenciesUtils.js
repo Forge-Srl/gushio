@@ -39,7 +39,7 @@ const buildPatchedRequire = (folder, allowedDependencies = [], silent) => {
     return patchedRequire
 }
 
-const runWithPatchedRequire = async (patchedRequire, fn) => {
+const runWithPatchedRequire = (patchedRequire) => async (fn) => {
     // Clear modules cache to ensure patchedRequire is clean
     for (const cacheKey in require.cache) {
         delete require.cache[cacheKey]
