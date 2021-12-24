@@ -9,6 +9,7 @@ const {
     checkDependencyInstalled,
     installDependency
 } = require('../utils/dependenciesUtils')
+const {patchedStringRunner} = require('../utils/stringUtils')
 const {FunctionRunner} = require('../utils/FunctionRunner')
 const {LoadingError, RunningError, parseSyntaxError} = require('./errors')
 const {ScriptChecker} = require('./ScriptChecker')
@@ -112,10 +113,10 @@ class Runner {
     }
 
     getCommandAction(dependenciesNames) {
-        const dependencies = ['shelljs', 'ansi-colors', 'enquirer', ...dependenciesNames]
+        const dependencies = ['shelljs', 'enquirer', ...dependenciesNames]
         const gushioFolder = this.gushioFolder
         const patchedRequire = buildPatchedRequire(gushioFolder, dependencies, !this.options.verboseLogging)
-        const runner = FunctionRunner.combine(patchedRequireRunner(patchedRequire))
+        const runner = FunctionRunner.combine(patchedRequireRunner(patchedRequire), patchedStringRunner())
 
         return async (...args) => {
             const _command = args.pop()

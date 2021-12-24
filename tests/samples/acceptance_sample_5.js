@@ -11,6 +11,6 @@ module.exports = {
         const _glob = require('glob')
         const _checkOdd = require('check-odd')
 
-        console.log('Written on console after requiring deps')
+        console.log(`Written on console ${'after'.bold.yellow} requiring deps`)
     },
 }

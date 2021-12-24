@@ -1,6 +1,6 @@
 describe('Runner', () => {
-    let Runner, LoadingError, RunningError, parseSyntaxError, ScriptChecker, dependenciesUtils, FunctionRunner, Command,
-        Argument, Option
+    let Runner, LoadingError, RunningError, parseSyntaxError, ScriptChecker, dependenciesUtils, stringUtils,
+        FunctionRunner, Command, Argument, Option
 
     beforeEach(() => {
         jest.resetModules()
@@ -10,6 +10,8 @@ describe('Runner', () => {
 
         jest.mock('../../utils/dependenciesUtils')
         dependenciesUtils = require('../../utils/dependenciesUtils')
+        jest.mock('../../utils/stringUtils')
+        stringUtils = require('../../utils/stringUtils')
 
         jest.mock('../../utils/FunctionRunner')
         FunctionRunner = require('../../utils/FunctionRunner').FunctionRunner
@@ -216,15 +218,16 @@ describe('Runner', () => {
 
             dependenciesUtils.buildPatchedRequire.mockImplementationOnce((path, allowedDeps) => {
                 expect(path).toBe('someFolder')
-                expect(allowedDeps).toStrictEqual(['shelljs', 'ansi-colors', 'enquirer', 'dep1', 'dep2'])
+                expect(allowedDeps).toStrictEqual(['shelljs', 'enquirer', 'dep1', 'dep2'])
                 return 'patched'
             })
             dependenciesUtils.patchedRequireRunner.mockImplementationOnce((patchedRequire) => {
                 expect(patchedRequire).toBe('patched')
                 return 'patchedRequireRunner'
             })
+            stringUtils.patchedStringRunner.mockImplementationOnce(() => 'patchedStringRunner')
             FunctionRunner.combine = (...runners) => {
-                expect(runners).toStrictEqual(['patchedRequireRunner'])
+                expect(runners).toStrictEqual(['patchedRequireRunner', 'patchedStringRunner'])
                 return {
                     run: async (func) => await func()
                 }
@@ -242,7 +245,7 @@ describe('Runner', () => {
                 expect(runner.logger.info)
                     .toHaveBeenNthCalledWith(2, 'Running with options "cliOptions"')
                 expect(runner.logger.info)
-                    .toHaveBeenNthCalledWith(3, 'Running with dependencies ["shelljs","ansi-colors","enquirer","dep1","dep2"] in someFolder')
+                    .toHaveBeenNthCalledWith(3, 'Running with dependencies ["shelljs","enquirer","dep1","dep2"] in someFolder')
             } else {
                 expect(runner.logger.info).not.toHaveBeenCalled()
             }
@@ -266,7 +269,7 @@ describe('Runner', () => {
                 expect(runner.logger.info)
                     .toHaveBeenNthCalledWith(2, 'Running with options "cliOptions"')
                 expect(runner.logger.info)
-                    .toHaveBeenNthCalledWith(3, 'Running with dependencies ["shelljs","ansi-colors","enquirer","dep1","dep2"] in someFolder')
+                    .toHaveBeenNthCalledWith(3, 'Running with dependencies ["shelljs","enquirer","dep1","dep2"] in someFolder')
             } else {
                 expect(runner.logger.info).not.toHaveBeenCalled()
             }

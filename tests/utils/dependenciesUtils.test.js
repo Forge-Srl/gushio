@@ -46,7 +46,7 @@ describe('dependenciesUtils', () => {
         })
 
         test.each([
-            'shelljs', 'ansi-colors', 'enquirer'
+            'shelljs', 'enquirer'
         ])('found %s', (dep) => {
             patchedRequire.__originalRequire = undefined
             expect(patchedRequire(dep)).toBe(require(dep))

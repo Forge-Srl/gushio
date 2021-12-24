@@ -19,14 +19,13 @@ module.exports = {
         {name: 'is-odd'},
     ],
     run: async (args, options) => {
-        const c = require('ansi-colors')
         const odd = require('is-odd')
         const path = require('path')
 
-        console.log(c.red('args -->'), args)
-        console.log(c.green.bold('options -->'), options)
+        console.log('args -->'.red, args)
+        console.log('options -->'.green.bold, options)
         for (let i = 0; i < 10; i++) {
-            console.log(`Test ${i} is odd: ${odd(i)}`)
+            console.log(`Test ${i.toString().bold} is odd: ${odd(i)}`.bgBlue.whiteBright)
         }
     },
 }

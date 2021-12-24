@@ -1,6 +1,5 @@
 const Module = require('module')
 const shell = require('shelljs')
-const ansiColors = require('ansi-colors')
 const enquirer = require('enquirer')
 const {FunctionRunner} = require('./FunctionRunner')
 
@@ -10,8 +9,6 @@ const buildPatchedRequire = (folder, allowedDependencies = [], silent) => {
         switch (id) {
             case 'shelljs':
                 return shell
-            case 'ansi-colors':
-                return ansiColors
             case 'enquirer':
                 return enquirer
         }

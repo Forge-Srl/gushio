@@ -2,6 +2,7 @@ const fs = require('fs')
 const os = require('os')
 const path = require('path')
 const shelljs = require('shelljs')
+const colors = require('ansi-colors')
 const crypto = require('crypto')
 
 const executablePath = path.resolve(__dirname, '../cli/cli.js')
@@ -67,7 +68,7 @@ describe('Gushio', () => {
             '[Gushio] Dependency glob@latest successfully installed\n' +
             '[Gushio] Installing dependency check-odd@npm:is-odd@latest\n' +
             '[Gushio] Dependency check-odd@npm:is-odd@latest successfully installed\n' +
-            'Written on console after requiring deps\n')
+            'Written on console ' + colors.yellow.bold('after') + ' requiring deps\n')
 
         const hash = crypto.createHash('md5').update(path.resolve(samplesDir, 'acceptance_sample_5.js')).digest('hex').substring(0, 8)
         const installedDeps = shelljs.ls(`${tmpDir}/.gushio/${hash}-sample_5/node_modules`)
