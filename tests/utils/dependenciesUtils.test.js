@@ -1,5 +1,5 @@
 describe('dependenciesUtils', () => {
-    let shelljs, buildPatchedRequire, runWithPatchedRequire, dependencyDescriptor, ensureNodeModulesExists,
+    let shelljs, buildPatchedRequire, patchedRequireRunner, dependencyDescriptor, ensureNodeModulesExists,
         checkDependencyInstalled, installDependency, Module
 
     beforeEach(() => {
@@ -12,7 +12,7 @@ describe('dependenciesUtils', () => {
         Module = require('module')
 
         buildPatchedRequire = require('../../utils/dependenciesUtils').buildPatchedRequire
-        runWithPatchedRequire = require('../../utils/dependenciesUtils').runWithPatchedRequire
+        patchedRequireRunner = require('../../utils/dependenciesUtils').patchedRequireRunner
         dependencyDescriptor = require('../../utils/dependenciesUtils').dependencyDescriptor
         ensureNodeModulesExists = require('../../utils/dependenciesUtils').ensureNodeModulesExists
         checkDependencyInstalled = require('../../utils/dependenciesUtils').checkDependencyInstalled
@@ -61,11 +61,11 @@ describe('dependenciesUtils', () => {
         })
     })
 
-    test('runWithPatchedRequire', async () => {
+    test('patchedRequireRunner', async () => {
         const patched = {__originalRequire: 'original'}
-        const runPatched = runWithPatchedRequire(patched)
+        const runPatched = patchedRequireRunner(patched)
         expect(Module.prototype.require).not.toBe(patched)
-        const result = await runPatched(async () => {
+        const result = await runPatched.run(async () => {
             expect(Module.prototype.require).toBe(patched)
             return 'someValue'
         })

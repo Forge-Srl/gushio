@@ -3,12 +3,13 @@ const path = require('path')
 const crypto = require('crypto')
 const {
     buildPatchedRequire,
-    runWithPatchedRequire,
+    patchedRequireRunner,
     dependencyDescriptor,
     ensureNodeModulesExists,
     checkDependencyInstalled,
     installDependency
 } = require('../utils/dependenciesUtils')
+const {FunctionRunner} = require('../utils/FunctionRunner')
 const {LoadingError, RunningError, parseSyntaxError} = require('./errors')
 const {ScriptChecker} = require('./ScriptChecker')
 
@@ -114,7 +115,7 @@ class Runner {
         const dependencies = ['shelljs', 'ansi-colors', 'enquirer', ...dependenciesNames]
         const gushioFolder = this.gushioFolder
         const patchedRequire = buildPatchedRequire(gushioFolder, dependencies, !this.options.verboseLogging)
-        const runPatched = runWithPatchedRequire(patchedRequire)
+        const runner = FunctionRunner.combine(patchedRequireRunner(patchedRequire))
 
         return async (...args) => {
             const _command = args.pop()
@@ -126,7 +127,7 @@ class Runner {
                 this.logger.info(`Running with dependencies ${JSON.stringify(dependencies)} in ${gushioFolder}`)
             }
 
-            await runPatched(async () => {
+            await runner.run(async () => {
                 try {
                     await this.func(args, cliOptions)
                 } catch (e) {

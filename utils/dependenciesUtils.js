@@ -2,6 +2,7 @@ const Module = require('module')
 const shell = require('shelljs')
 const ansiColors = require('ansi-colors')
 const enquirer = require('enquirer')
+const {FunctionRunner} = require('./FunctionRunner')
 
 const buildPatchedRequire = (folder, allowedDependencies = [], silent) => {
     // patchedRequire must be a `function` since will replace `require` which is actually a complex object!
@@ -39,16 +40,20 @@ const buildPatchedRequire = (folder, allowedDependencies = [], silent) => {
     return patchedRequire
 }
 
-const runWithPatchedRequire = (patchedRequire) => async (fn) => {
-    // Clear modules cache to ensure patchedRequire is clean
-    for (const cacheKey in require.cache) {
-        delete require.cache[cacheKey]
+const patchedRequireRunner = (patchedRequire) => {
+    const before = () => {
+        for (const cacheKey in require.cache) {
+            delete require.cache[cacheKey]
+        }
+
+        Module.prototype.require = patchedRequire
     }
 
-    Module.prototype.require = patchedRequire
-    const result = await fn()
-    Module.prototype.require = patchedRequire.__originalRequire
-    return result
+    const after = () => {
+        Module.prototype.require = patchedRequire.__originalRequire
+    }
+
+    return new FunctionRunner(before, after)
 }
 
 const dependencyDescriptor = (name, version = 'latest', alias) => {
@@ -96,7 +101,7 @@ const installDependency = async (folder, npmInstallVersion, silent = true) => ne
 
 module.exports = {
     buildPatchedRequire,
-    runWithPatchedRequire,
+    patchedRequireRunner,
     dependencyDescriptor,
     ensureNodeModulesExists,
     checkDependencyInstalled,

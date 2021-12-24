@@ -1,5 +1,6 @@
 describe('Runner', () => {
-    let Runner, LoadingError, RunningError, parseSyntaxError, ScriptChecker, dependenciesUtils, Command, Argument, Option
+    let Runner, LoadingError, RunningError, parseSyntaxError, ScriptChecker, dependenciesUtils, FunctionRunner, Command,
+        Argument, Option
 
     beforeEach(() => {
         jest.resetModules()
@@ -9,6 +10,9 @@ describe('Runner', () => {
 
         jest.mock('../../utils/dependenciesUtils')
         dependenciesUtils = require('../../utils/dependenciesUtils')
+
+        jest.mock('../../utils/FunctionRunner')
+        FunctionRunner = require('../../utils/FunctionRunner').FunctionRunner
 
         jest.mock('../../runner/errors')
         LoadingError = require('../../runner/errors').LoadingError
@@ -209,15 +213,22 @@ describe('Runner', () => {
             runner.logger = {info: jest.fn()}
             runner.options = {verboseLogging: logging}
             runner._gushioFolder = 'someFolder'
+
             dependenciesUtils.buildPatchedRequire.mockImplementationOnce((path, allowedDeps) => {
                 expect(path).toBe('someFolder')
                 expect(allowedDeps).toStrictEqual(['shelljs', 'ansi-colors', 'enquirer', 'dep1', 'dep2'])
                 return 'patched'
             })
-            dependenciesUtils.runWithPatchedRequire.mockImplementationOnce((patchedRequire) => {
+            dependenciesUtils.patchedRequireRunner.mockImplementationOnce((patchedRequire) => {
                 expect(patchedRequire).toBe('patched')
-                return async (func) => await func()
+                return 'patchedRequireRunner'
             })
+            FunctionRunner.combine = (...runners) => {
+                expect(runners).toStrictEqual(['patchedRequireRunner'])
+                return {
+                    run: async (func) => await func()
+                }
+            }
 
             action = runner.getCommandAction(['dep1', 'dep2'])
         })
