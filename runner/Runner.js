@@ -115,7 +115,7 @@ class Runner {
     }
 
     getCommandAction(dependenciesNames) {
-        const dependencies = ['shelljs', 'enquirer', ...dependenciesNames]
+        const dependencies = ['shelljs', ...dependenciesNames]
         const gushioFolder = this.gushioFolder
         const patchedRequire = buildPatchedRequire(gushioFolder, dependencies, !this.console.isVerbose)
         const runner = FunctionRunner.combine(

@@ -1,14 +1,25 @@
-const {Writable} = require('stream')
+const {Readable, Writable} = require('stream')
 
-describe('Logger', () => {
-    let superConsole, GushioConsole, GushioLogFormat, outStream, errStream, myConsole
+describe('GushioConsole', () => {
+    let superConsole, GushioConsole, GushioLogFormat, Enquirer, enquirer, inStream, outStream, errStream, myConsole
 
     beforeEach(() => {
         jest.resetModules()
         jest.resetAllMocks()
 
+        inStream = new Readable()
         outStream = new Writable()
         errStream = new Writable()
+
+        enquirer = {}
+        jest.mock('enquirer')
+        Enquirer = require('enquirer')
+        Enquirer.mockImplementationOnce((options) => {
+            //TODO: uncomment together with GushioConsole.js line 21
+            //expect(options).toStrictEqual({stdin: inStream, stdout: outStream})
+            return enquirer
+        })
+
         class MockConsole {
             constructor(...args) {
                 if (!superConsole) {
@@ -24,12 +35,11 @@ describe('Logger', () => {
             log(...args) { this.logMock(...args) }
             error(...args) { this.errorMock(...args) }
         }
-
         jest.mock('console', () => ({Console: MockConsole}))
 
         GushioConsole = require('../../utils/GushioConsole').GushioConsole
         GushioLogFormat = require('../../utils/GushioConsole').GushioLogFormat
-        myConsole = new GushioConsole(outStream, errStream)
+        myConsole = new GushioConsole(inStream, outStream, errStream)
         expect(myConsole.logLevel).toBe('info')
     })
 
@@ -116,5 +126,13 @@ describe('Logger', () => {
         myConsole.error = jest.fn()
         myConsole.warn('some', 'thing')
         expect(myConsole.error).toHaveBeenLastCalledWith('some', 'thing')
+    })
+
+    test('input', async () => {
+        enquirer.prompt = async (questions) => {
+            expect(questions).toStrictEqual(['question1', 'question2'])
+            return 'answers'
+        }
+        expect(await myConsole.input('question1', 'question2')).toBe('answers')
     })
 })

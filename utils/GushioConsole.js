@@ -1,4 +1,5 @@
 const {Console} = require('console')
+const Enquirer = require('enquirer')
 
 const LOG_LEVELS = {
     verbose: 10,
@@ -11,9 +12,14 @@ const GushioLogFormat = '[Gushio] %s'
 
 class GushioConsole extends Console {
 
-    constructor(stdout, stderr, logLevel = 'info') {
+    constructor(stdin, stdout, stderr, logLevel = 'info') {
         super({stdout, stderr, groupIndentation: 4})
         this.logLevel = logLevel
+        /* TODO: uncomment following line when next enquirer version is released solving a bug in custom IO streams
+         *       see: https://github.com/enquirer/enquirer/issues/308, https://github.com/enquirer/enquirer/issues/338
+         */
+        // this.enquirer = new Enquirer({stdout, stdin})
+        this.enquirer = new Enquirer({})
     }
 
     get isVerbose() {
@@ -60,11 +66,9 @@ class GushioConsole extends Console {
     }
     */
 
-    // TODO: implement
-    /*
-    async input() {
+    async input(...questions) {
+        return await this.enquirer.prompt(questions)
     }
-    */
 }
 
 module.exports = {GushioConsole, GushioLogFormat}

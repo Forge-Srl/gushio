@@ -216,7 +216,7 @@ describe('Runner', () => {
 
             dependenciesUtils.buildPatchedRequire.mockImplementationOnce((path, allowedDeps) => {
                 expect(path).toBe('someFolder')
-                expect(allowedDeps).toStrictEqual(['shelljs', 'enquirer', 'dep1', 'dep2'])
+                expect(allowedDeps).toStrictEqual(['shelljs', 'dep1', 'dep2'])
                 return 'patched'
             })
             dependenciesUtils.patchedRequireRunner.mockImplementationOnce((patchedRequire) => {
@@ -246,7 +246,7 @@ describe('Runner', () => {
             expect(runner.console.verbose)
                 .toHaveBeenNthCalledWith(2, '[Gushio] %s', 'Running with options "cliOptions"')
             expect(runner.console.verbose)
-                .toHaveBeenNthCalledWith(3, '[Gushio] %s', 'Running with dependencies ["shelljs","enquirer","dep1","dep2"] in someFolder')
+                .toHaveBeenNthCalledWith(3, '[Gushio] %s', 'Running with dependencies ["shelljs","dep1","dep2"] in someFolder')
 
             expect(func).toHaveBeenCalledWith(['arg1', 'arg2', 'arg3'], 'cliOptions')
         })
@@ -266,7 +266,7 @@ describe('Runner', () => {
             expect(runner.console.verbose)
                 .toHaveBeenNthCalledWith(2, '[Gushio] %s', 'Running with options "cliOptions"')
             expect(runner.console.verbose)
-                .toHaveBeenNthCalledWith(3, '[Gushio] %s', 'Running with dependencies ["shelljs","enquirer","dep1","dep2"] in someFolder')
+                .toHaveBeenNthCalledWith(3, '[Gushio] %s', 'Running with dependencies ["shelljs","dep1","dep2"] in someFolder')
 
             expect(func).toHaveBeenCalledWith(['arg1', 'arg2', 'arg3'], 'cliOptions')
         })

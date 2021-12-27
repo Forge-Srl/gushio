@@ -17,7 +17,7 @@ describe('cliProgram', () => {
         LoadingError = require('../../runner/errors').LoadingError
 
         Program = require('../../cli/cliProgram').Program
-        program = new Program(process.stdout, process.stderr)
+        program = new Program(process.stdin, process.stdout, process.stderr)
     })
 
     test('getCommand', () => {

@@ -9,13 +9,14 @@ const GUSHIO_FOLDER_NAME = '.gushio'
 
 class Program {
 
-    constructor(stdout, stderr) {
+    constructor(stdin, stdout, stderr) {
+        this.stdin = stdin
         this.stdout = stdout
         this.stderr = stderr
     }
 
     initConsole(logLevel) {
-        this.console = new GushioConsole(this.stdout, this.stderr, logLevel)
+        this.console = new GushioConsole(this.stdin, this.stdout, this.stderr, logLevel)
     }
 
     commandAction(workingDir) {
@@ -71,7 +72,7 @@ class Program {
 }
 
 const start = () => {
-    return new Program(process.stdout, process.stderr)
+    return new Program(process.stdin, process.stdout, process.stderr)
         .start(process.cwd(), process.argv)
         .then(exitCode => process.exit(exitCode))
 }
