@@ -11,8 +11,10 @@ const {
 } = require('../utils/dependenciesUtils')
 const {patchedStringRunner} = require('../utils/stringUtils')
 const {FunctionRunner} = require('../utils/FunctionRunner')
+const {GushioLogFormat} = require('../utils/GushioConsole')
 const {LoadingError, RunningError, parseSyntaxError} = require('./errors')
 const {ScriptChecker} = require('./ScriptChecker')
+const {patchedConsoleRunner} = require('../utils/consoleUtils')
 
 class Runner {
 
@@ -80,19 +82,19 @@ class Runner {
         return this
     }
 
-    setLogger(logger) {
-        this.logger = logger
+    setConsole(console) {
+        this.console = console
         return this
     }
 
     async installDependency(path, npmInstallVersion) {
-        this.logger.info(`Installing dependency ${npmInstallVersion}`)
+        this.console.info(GushioLogFormat, `Installing dependency ${npmInstallVersion}`)
         try {
-            await checkDependencyInstalled(path, npmInstallVersion, !this.options.verboseLogging)
-            this.logger.info(`Dependency ${npmInstallVersion} already installed`)
+            await checkDependencyInstalled(path, npmInstallVersion, !this.console.isVerbose)
+            this.console.info(GushioLogFormat, `Dependency ${npmInstallVersion} already installed`)
         } catch (e) {
-            await installDependency(path, npmInstallVersion, !this.options.verboseLogging)
-            this.logger.info(`Dependency ${npmInstallVersion} successfully installed`)
+            await installDependency(path, npmInstallVersion, !this.console.isVerbose)
+            this.console.info(GushioLogFormat, `Dependency ${npmInstallVersion} successfully installed`)
         }
     }
 
@@ -102,7 +104,7 @@ class Runner {
                 return
             }
 
-            this.logger.info('Checking dependencies')
+            this.console.info(GushioLogFormat, 'Checking dependencies')
             const gushioFolder = this.gushioFolder
             await ensureNodeModulesExists(gushioFolder, this.options.cleanRun)
 
@@ -115,18 +117,20 @@ class Runner {
     getCommandAction(dependenciesNames) {
         const dependencies = ['shelljs', 'enquirer', ...dependenciesNames]
         const gushioFolder = this.gushioFolder
-        const patchedRequire = buildPatchedRequire(gushioFolder, dependencies, !this.options.verboseLogging)
-        const runner = FunctionRunner.combine(patchedRequireRunner(patchedRequire), patchedStringRunner())
+        const patchedRequire = buildPatchedRequire(gushioFolder, dependencies, !this.console.isVerbose)
+        const runner = FunctionRunner.combine(
+            patchedRequireRunner(patchedRequire),
+            patchedStringRunner(),
+            patchedConsoleRunner(this.console)
+        )
 
         return async (...args) => {
             const _command = args.pop()
             const cliOptions = args.pop()
 
-            if (this.options.verboseLogging) {
-                this.logger.info(`Running with arguments ${JSON.stringify(args)}`)
-                this.logger.info(`Running with options ${JSON.stringify(cliOptions)}`)
-                this.logger.info(`Running with dependencies ${JSON.stringify(dependencies)} in ${gushioFolder}`)
-            }
+            this.console.verbose(GushioLogFormat, `Running with arguments ${JSON.stringify(args)}`)
+            this.console.verbose(GushioLogFormat, `Running with options ${JSON.stringify(cliOptions)}`)
+            this.console.verbose(GushioLogFormat, `Running with dependencies ${JSON.stringify(dependencies)} in ${gushioFolder}`)
 
             await runner.run(async () => {
                 try {

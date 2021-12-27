@@ -1,6 +1,6 @@
 describe('Runner', () => {
     let Runner, LoadingError, RunningError, parseSyntaxError, ScriptChecker, dependenciesUtils, stringUtils,
-        FunctionRunner, Command, Argument, Option
+        consoleUtils, FunctionRunner, Command, Argument, Option
 
     beforeEach(() => {
         jest.resetModules()
@@ -12,6 +12,8 @@ describe('Runner', () => {
         dependenciesUtils = require('../../utils/dependenciesUtils')
         jest.mock('../../utils/stringUtils')
         stringUtils = require('../../utils/stringUtils')
+        jest.mock('../../utils/consoleUtils')
+        consoleUtils = require('../../utils/consoleUtils')
 
         jest.mock('../../utils/FunctionRunner')
         FunctionRunner = require('../../utils/FunctionRunner').FunctionRunner
@@ -127,11 +129,11 @@ describe('Runner', () => {
         expect(runner.options).toBe('options')
     })
 
-    test('setLogger', () => {
+    test('setConsole', () => {
         const runner = new Runner('appPath', 'scriptPath', 'run')
-        expect(runner.logger).toBeUndefined()
-        expect(runner.setLogger('logger')).toBe(runner)
-        expect(runner.logger).toBe('logger')
+        expect(runner.console).toBeUndefined()
+        expect(runner.setConsole('console')).toBe(runner)
+        expect(runner.console).toBe('console')
     })
 
     test.each([
@@ -153,26 +155,25 @@ describe('Runner', () => {
 
         beforeEach(() => {
             runner = new Runner('appPath', 'scriptPath', 'run')
-            runner.logger = {info: jest.fn()}
-            runner.options = {verboseLogging: true}
+            runner.console = {info: jest.fn(), isVerbose: true}
         })
 
         test('already installed', async () => {
             await runner.installDependency('somePath', 'dep')
-            expect(runner.logger.info).toHaveBeenNthCalledWith(1, 'Installing dependency dep')
+            expect(runner.console.info).toHaveBeenNthCalledWith(1, '[Gushio] %s', 'Installing dependency dep')
             expect(dependenciesUtils.checkDependencyInstalled).toHaveBeenCalledWith('somePath', 'dep', false)
             expect(dependenciesUtils.installDependency).not.toHaveBeenCalled()
-            expect(runner.logger.info).toHaveBeenNthCalledWith(2, 'Dependency dep already installed')
+            expect(runner.console.info).toHaveBeenNthCalledWith(2, '[Gushio] %s', 'Dependency dep already installed')
         })
 
         test('missing dependency', async () => {
             dependenciesUtils.checkDependencyInstalled.mockRejectedValueOnce(new Error('kaboom'))
 
             await runner.installDependency('somePath', 'dep')
-            expect(runner.logger.info).toHaveBeenNthCalledWith(1, 'Installing dependency dep')
+            expect(runner.console.info).toHaveBeenNthCalledWith(1, '[Gushio] %s', 'Installing dependency dep')
             expect(dependenciesUtils.checkDependencyInstalled).toHaveBeenCalledWith('somePath', 'dep', false)
             expect(dependenciesUtils.installDependency).toHaveBeenCalledWith('somePath', 'dep', false)
-            expect(runner.logger.info).toHaveBeenNthCalledWith(2, 'Dependency dep successfully installed')
+            expect(runner.console.info).toHaveBeenNthCalledWith(2, '[Gushio] %s', 'Dependency dep successfully installed')
         })
     })
 
@@ -180,7 +181,7 @@ describe('Runner', () => {
         let runner
         beforeEach(() => {
             runner = new Runner('appPath', 'scriptPath', 'run')
-            runner.logger = {info: jest.fn()}
+            runner.console = {info: jest.fn()}
             runner.options = {cleanRun: true}
             runner.installDependency = jest.fn()
         })
@@ -189,7 +190,7 @@ describe('Runner', () => {
             const hook = runner.getCommandPreActionHook([])
             await hook()
 
-            expect(runner.logger.info).not.toHaveBeenCalled()
+            expect(runner.console.info).not.toHaveBeenCalled()
             expect(dependenciesUtils.ensureNodeModulesExists).not.toHaveBeenCalled()
         })
 
@@ -198,22 +199,19 @@ describe('Runner', () => {
             const hook = runner.getCommandPreActionHook(['dep1', 'dep2'])
             await hook()
 
-            expect(runner.logger.info).toHaveBeenNthCalledWith(1, 'Checking dependencies')
+            expect(runner.console.info).toHaveBeenNthCalledWith(1, '[Gushio] %s', 'Checking dependencies')
             expect(dependenciesUtils.ensureNodeModulesExists).toHaveBeenCalledWith('gushioFolder', runner.options.cleanRun)
             expect(runner.installDependency).toHaveBeenNthCalledWith(1, 'gushioFolder', 'dep1')
             expect(runner.installDependency).toHaveBeenNthCalledWith(2, 'gushioFolder', 'dep2')
         })
     })
 
-    describe.each([
-        true, false
-    ])('getCommandAction', (logging) => {
+    describe('getCommandAction', () => {
         let func, runner, action
         beforeEach(() => {
             func = jest.fn()
             runner = new Runner('appPath', 'scriptPath', func)
-            runner.logger = {info: jest.fn()}
-            runner.options = {verboseLogging: logging}
+            runner.console = {verbose: jest.fn()}
             runner._gushioFolder = 'someFolder'
 
             dependenciesUtils.buildPatchedRequire.mockImplementationOnce((path, allowedDeps) => {
@@ -226,8 +224,12 @@ describe('Runner', () => {
                 return 'patchedRequireRunner'
             })
             stringUtils.patchedStringRunner.mockImplementationOnce(() => 'patchedStringRunner')
+            consoleUtils.patchedConsoleRunner.mockImplementationOnce((console) => {
+                expect(console).toBe(runner.console)
+                return 'patchedConsoleRunner'
+            })
             FunctionRunner.combine = (...runners) => {
-                expect(runners).toStrictEqual(['patchedRequireRunner', 'patchedStringRunner'])
+                expect(runners).toStrictEqual(['patchedRequireRunner', 'patchedStringRunner', 'patchedConsoleRunner'])
                 return {
                     run: async (func) => await func()
                 }
@@ -239,16 +241,12 @@ describe('Runner', () => {
         test('function ok', async () => {
             await action('arg1', 'arg2', 'arg3', 'cliOptions', 'command')
 
-            if (logging) {
-                expect(runner.logger.info)
-                    .toHaveBeenNthCalledWith(1, 'Running with arguments ["arg1","arg2","arg3"]')
-                expect(runner.logger.info)
-                    .toHaveBeenNthCalledWith(2, 'Running with options "cliOptions"')
-                expect(runner.logger.info)
-                    .toHaveBeenNthCalledWith(3, 'Running with dependencies ["shelljs","enquirer","dep1","dep2"] in someFolder')
-            } else {
-                expect(runner.logger.info).not.toHaveBeenCalled()
-            }
+            expect(runner.console.verbose)
+                .toHaveBeenNthCalledWith(1, '[Gushio] %s', 'Running with arguments ["arg1","arg2","arg3"]')
+            expect(runner.console.verbose)
+                .toHaveBeenNthCalledWith(2, '[Gushio] %s', 'Running with options "cliOptions"')
+            expect(runner.console.verbose)
+                .toHaveBeenNthCalledWith(3, '[Gushio] %s', 'Running with dependencies ["shelljs","enquirer","dep1","dep2"] in someFolder')
 
             expect(func).toHaveBeenCalledWith(['arg1', 'arg2', 'arg3'], 'cliOptions')
         })
@@ -263,21 +261,15 @@ describe('Runner', () => {
             await expect(async () => await action('arg1', 'arg2', 'arg3', 'cliOptions', 'command')).rejects
                 .toThrow(new Error('boom'))
 
-            if (logging) {
-                expect(runner.logger.info)
-                    .toHaveBeenNthCalledWith(1, 'Running with arguments ["arg1","arg2","arg3"]')
-                expect(runner.logger.info)
-                    .toHaveBeenNthCalledWith(2, 'Running with options "cliOptions"')
-                expect(runner.logger.info)
-                    .toHaveBeenNthCalledWith(3, 'Running with dependencies ["shelljs","enquirer","dep1","dep2"] in someFolder')
-            } else {
-                expect(runner.logger.info).not.toHaveBeenCalled()
-            }
+            expect(runner.console.verbose)
+                .toHaveBeenNthCalledWith(1, '[Gushio] %s', 'Running with arguments ["arg1","arg2","arg3"]')
+            expect(runner.console.verbose)
+                .toHaveBeenNthCalledWith(2, '[Gushio] %s', 'Running with options "cliOptions"')
+            expect(runner.console.verbose)
+                .toHaveBeenNthCalledWith(3, '[Gushio] %s', 'Running with dependencies ["shelljs","enquirer","dep1","dep2"] in someFolder')
 
             expect(func).toHaveBeenCalledWith(['arg1', 'arg2', 'arg3'], 'cliOptions')
         })
-
-
     })
 
     test('makeCommand', () => {
@@ -393,7 +385,7 @@ describe('Runner', () => {
         test('success', async () => {
             const runner = new Runner('appPath', 'scriptPath', 'run')
             const command = {parseAsync: jest.fn().mockResolvedValueOnce(undefined)}
-            runner.makeCommand = (path) => command
+            runner.makeCommand = () => command
             await runner.run(['arg1', 'arg2'])
             expect(command.parseAsync).toHaveBeenCalledWith(['appPath', 'scriptPath', 'arg1', 'arg2'])
         })

@@ -17,7 +17,7 @@ describe('cliProgram', () => {
         LoadingError = require('../../runner/errors').LoadingError
 
         Program = require('../../cli/cliProgram').Program
-        program = new Program('myLogger')
+        program = new Program(process.stdout, process.stderr)
     })
 
     test('getCommand', () => {
@@ -89,18 +89,22 @@ describe('cliProgram', () => {
         const action = program.commandAction('workingDir')
         const run = jest.fn()
         path.resolve.mockImplementationOnce(() => 'absolutePath')
+        program.initConsole = (logLevel) => {
+            expect(logLevel).toBe('verbose')
+            program.console = 'console'
+        }
 
         Runner.fromPath = (app, script) => {
             expect(app).toBe('gushioApp')
             expect(script).toBe('absolutePath')
             const runner = {
                 run,
-                setLogger: logger => {
-                    expect(logger).toBe('myLogger')
+                setConsole: console => {
+                    expect(console).toBe('console')
                     return runner
                 },
                 setOptions: options => {
-                    expect(options).toStrictEqual({verboseLogging: 'verbose', cleanRun: 'cleanRun'})
+                    expect(options).toStrictEqual({cleanRun: 'cleanRun'})
                     return runner
                 }
             }
@@ -141,12 +145,12 @@ describe('cliProgram', () => {
                     }
                 }
             }
-            program.logger = {
+            program.console = {
                 error: jest.fn()
             }
 
             expect(await program.start('path', 'argv')).toBe(error.errorCode)
-            expect(program.logger.error).toHaveBeenCalledWith(error.stack)
+            expect(program.console.error).toHaveBeenCalledWith('[Gushio] %s', error.stack)
         })
 
         test('failure RunningError', async () => {
@@ -161,12 +165,12 @@ describe('cliProgram', () => {
                     }
                 }
             }
-            program.logger = {
+            program.console = {
                 error: jest.fn()
             }
 
             expect(await program.start('path', 'argv')).toBe(error.errorCode)
-            expect(program.logger.error).toHaveBeenCalledWith(error.message)
+            expect(program.console.error).toHaveBeenCalledWith('[Gushio] %s', error.message)
         })
 
         test('failure LoadingError', async () => {
@@ -181,12 +185,12 @@ describe('cliProgram', () => {
                     }
                 }
             }
-            program.logger = {
+            program.console = {
                 error: jest.fn()
             }
 
             expect(await program.start('path', 'argv')).toBe(error.errorCode)
-            expect(program.logger.error).toHaveBeenCalledWith(error.message)
+            expect(program.console.error).toHaveBeenCalledWith('[Gushio] %s', error.message)
         })
     })
 })

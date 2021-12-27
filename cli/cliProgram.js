@@ -4,21 +4,27 @@ const os = require('os')
 const packageInfo = require('../package.json')
 const {Runner} = require('../runner/Runner')
 const {RunningError, LoadingError} = require('../runner/errors')
+const {GushioConsole, GushioLogFormat} = require('../utils/GushioConsole')
 const GUSHIO_FOLDER_NAME = '.gushio'
 
 class Program {
 
-    constructor(logger) {
-        this.logger = logger
+    constructor(stdout, stderr) {
+        this.stdout = stdout
+        this.stderr = stderr
+    }
+
+    initConsole(logLevel) {
+        this.console = new GushioConsole(this.stdout, this.stderr, logLevel)
     }
 
     commandAction(workingDir) {
         return async (scriptPath, options, command) => {
+            this.initConsole(options.verbose ? 'verbose' : 'info')
             const absoluteScriptPath = path.resolve(workingDir, scriptPath)
             const runner = Runner.fromPath(command.rawArgs[1], absoluteScriptPath, options.gushioFolder)
-                .setLogger(this.logger)
+                .setConsole(this.console)
                 .setOptions({
-                    verboseLogging: options.verbose,
                     cleanRun: options.cleanRun
                 })
             const _removedScriptPathArg = command.args.shift()
@@ -53,10 +59,11 @@ class Program {
             await this.getCommand(cwd).parseAsync(argv)
             return 0
         } catch (error) {
+            // TODO: move error logging in commandAction?
             if (error instanceof RunningError || error instanceof LoadingError) {
-                this.logger.error(error.message)
+                this.console.error(GushioLogFormat, error.message)
             } else {
-                this.logger.error(error.stack)
+                this.console.error(GushioLogFormat, error.stack)
             }
             return error.errorCode || 1
         }
@@ -64,8 +71,7 @@ class Program {
 }
 
 const start = () => {
-    const {Logger} = require('../utils/Logger')
-    return new Program(new Logger())
+    return new Program(process.stdout, process.stderr)
         .start(process.cwd(), process.argv)
         .then(exitCode => process.exit(exitCode))
 }
