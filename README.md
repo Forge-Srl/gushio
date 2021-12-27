@@ -31,16 +31,45 @@ module.exports = {
 }
 ```
 
+#### Scripting utilities
+
+The code executed inside the `run` function has access to some special utilities which are not available in a standard
+Node.js context.
+
+##### Write styled text
+
+You can change output text color directly from the string itself. For example:
+```javascript
+module.exports = {
+    run: async () => {
+        console.log('Hello stylish world!'.blue.bold.italic)
+    }
+}
+```
+For a complete reference of the available styles see [`ansi-colors`](https://www.npmjs.com/package/ansi-colors).
+
+##### Read user input
+
+You can read user input with `console.input()`. For example:
+```javascript
+module.exports = {
+    run: async () => {
+        const userInput = await console.input(
+            {type: 'input', name: 'username', message: 'Tell me your username'},
+            {type: 'input', name: 'email', message: 'And your email address'}
+        )
+        console.log(`Your name is "${userInput.name}" and your email address is <${userInput.email}>`)
+    }
+}
+```
+For a complete reference of the available input types and configurations see 
+[`enquirer`](https://www.npmjs.com/package/enquirer).
+
 #### Dependencies
 
 You can use NPM packages in your Gushio script. All dependencies are automatically downloaded by the Gushio runner and 
 **they are available for `require()` only inside the `run()` function**. Requiring a dependency outside such function 
 will lead to unknown results (probably an error will be thrown).
-
-By default, Gushio provides 3 useful dependencies:
-- [`shelljs`](https://www.npmjs.com/package/shelljs), a portable implementation of unix shell commands;
-- [`ansi-colors`](https://www.npmjs.com/package/ansi-colors), for terminal logs styling;
-- [`enquirer`](https://www.npmjs.com/package/enquirer), for user-friendly cli prompts.
 
 To add a dependency to your script, you need to export a `deps` array like this:
 ```javascript
@@ -75,6 +104,11 @@ module.exports = {
 ```
 
 When you provide an `alias`, the dependency is accessible via such string, otherwise the dependency `name` is used.
+
+##### Default dependencies
+
+By default, Gushio provides [`shelljs`](https://www.npmjs.com/package/shelljs), a portable implementation of unix shell 
+commands (it is available via `require('shelljs')`).
 
 #### Arguments
 
