@@ -2,7 +2,7 @@ describe('FunctionRunner', () => {
     let FunctionRunner
 
     beforeEach(() => {
-        FunctionRunner = require('../../utils/FunctionRunner').FunctionRunner
+        FunctionRunner = require('../../../runner/patches/FunctionRunner').FunctionRunner
     })
 
     test('run', async () => {

@@ -1,6 +1,6 @@
 describe('Runner', () => {
-    let Runner, LoadingError, RunningError, parseSyntaxError, ScriptChecker, dependenciesUtils, stringUtils,
-        consoleUtils, FunctionRunner, Command, Argument, Option
+    let Runner, LoadingError, RunningError, parseSyntaxError, ScriptChecker, dependenciesUtils, patchedRequireRunner,
+        patchedStringRunner, patchedConsoleRunner, FunctionRunner, Command, Argument, Option
 
     beforeEach(() => {
         jest.resetModules()
@@ -10,13 +10,15 @@ describe('Runner', () => {
 
         jest.mock('../../utils/dependenciesUtils')
         dependenciesUtils = require('../../utils/dependenciesUtils')
-        jest.mock('../../utils/stringUtils')
-        stringUtils = require('../../utils/stringUtils')
-        jest.mock('../../utils/consoleUtils')
-        consoleUtils = require('../../utils/consoleUtils')
+        jest.mock('../../runner/patches/patchedRequireRunner')
+        patchedRequireRunner = require('../../runner/patches/patchedRequireRunner').patchedRequireRunner
+        jest.mock('../../runner/patches/patchedStringRunner')
+        patchedStringRunner = require('../../runner/patches/patchedStringRunner').patchedStringRunner
+        jest.mock('../../runner/patches/patchedConsoleRunner')
+        patchedConsoleRunner = require('../../runner/patches/patchedConsoleRunner').patchedConsoleRunner
 
-        jest.mock('../../utils/FunctionRunner')
-        FunctionRunner = require('../../utils/FunctionRunner').FunctionRunner
+        jest.mock('../../runner/patches/FunctionRunner')
+        FunctionRunner = require('../../runner/patches/FunctionRunner').FunctionRunner
 
         jest.mock('../../runner/errors')
         LoadingError = require('../../runner/errors').LoadingError
@@ -219,12 +221,12 @@ describe('Runner', () => {
                 expect(allowedDeps).toStrictEqual(['shelljs', 'dep1', 'dep2'])
                 return 'patched'
             })
-            dependenciesUtils.patchedRequireRunner.mockImplementationOnce((patchedRequire) => {
+            patchedRequireRunner.mockImplementationOnce((patchedRequire) => {
                 expect(patchedRequire).toBe('patched')
                 return 'patchedRequireRunner'
             })
-            stringUtils.patchedStringRunner.mockImplementationOnce(() => 'patchedStringRunner')
-            consoleUtils.patchedConsoleRunner.mockImplementationOnce((console) => {
+            patchedStringRunner.mockImplementationOnce(() => 'patchedStringRunner')
+            patchedConsoleRunner.mockImplementationOnce((console) => {
                 expect(console).toBe(runner.console)
                 return 'patchedConsoleRunner'
             })

@@ -1,7 +1,6 @@
 const Module = require('module')
 const shell = require('shelljs')
 const enquirer = require('enquirer')
-const {FunctionRunner} = require('./FunctionRunner')
 
 const buildPatchedRequire = (folder, allowedDependencies = [], silent) => {
     // patchedRequire must be a `function` since will replace `require` which is actually a complex object!
@@ -35,22 +34,6 @@ const buildPatchedRequire = (folder, allowedDependencies = [], silent) => {
     }
     patchedRequire.__originalRequire = Module.prototype.require
     return patchedRequire
-}
-
-const patchedRequireRunner = (patchedRequire) => {
-    const before = () => {
-        for (const cacheKey in require.cache) {
-            delete require.cache[cacheKey]
-        }
-
-        Module.prototype.require = patchedRequire
-    }
-
-    const after = () => {
-        Module.prototype.require = patchedRequire.__originalRequire
-    }
-
-    return new FunctionRunner(before, after)
 }
 
 const dependencyDescriptor = (name, version = 'latest', alias) => {
@@ -98,7 +81,6 @@ const installDependency = async (folder, npmInstallVersion, silent = true) => ne
 
 module.exports = {
     buildPatchedRequire,
-    patchedRequireRunner,
     dependencyDescriptor,
     ensureNodeModulesExists,
     checkDependencyInstalled,

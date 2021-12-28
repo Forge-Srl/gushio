@@ -37,8 +37,8 @@ describe('GushioConsole', () => {
         }
         jest.mock('console', () => ({Console: MockConsole}))
 
-        GushioConsole = require('../../utils/GushioConsole').GushioConsole
-        GushioLogFormat = require('../../utils/GushioConsole').GushioLogFormat
+        GushioConsole = require('../../runner/GushioConsole').GushioConsole
+        GushioLogFormat = require('../../runner/GushioConsole').GushioLogFormat
         myConsole = new GushioConsole(inStream, outStream, errStream)
         expect(myConsole.logLevel).toBe('info')
     })

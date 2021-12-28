@@ -1,11 +1,11 @@
-describe('stringUtils', () => {
+describe('patchedConsoleRunner', () => {
     let patchedConsoleRunner
 
     beforeEach(() => {
         jest.resetModules()
         jest.resetAllMocks()
 
-        patchedConsoleRunner = require('../../utils/consoleUtils').patchedConsoleRunner
+        patchedConsoleRunner = require('../../../runner/patches/patchedConsoleRunner').patchedConsoleRunner
     })
 
     test('patchedConsoleRunner', async () => {

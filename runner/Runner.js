@@ -3,18 +3,18 @@ const path = require('path')
 const crypto = require('crypto')
 const {
     buildPatchedRequire,
-    patchedRequireRunner,
     dependencyDescriptor,
     ensureNodeModulesExists,
     checkDependencyInstalled,
     installDependency
 } = require('../utils/dependenciesUtils')
-const {patchedStringRunner} = require('../utils/stringUtils')
-const {FunctionRunner} = require('../utils/FunctionRunner')
-const {GushioLogFormat} = require('../utils/GushioConsole')
-const {LoadingError, RunningError, parseSyntaxError} = require('./errors')
+const {GushioLogFormat} = require('./GushioConsole')
 const {ScriptChecker} = require('./ScriptChecker')
-const {patchedConsoleRunner} = require('../utils/consoleUtils')
+const {LoadingError, RunningError, parseSyntaxError} = require('./errors')
+const {FunctionRunner} = require('./patches/FunctionRunner')
+const {patchedRequireRunner} = require('./patches/patchedRequireRunner')
+const {patchedConsoleRunner} = require('./patches/patchedConsoleRunner')
+const {patchedStringRunner} = require('./patches/patchedStringRunner')
 
 class Runner {
 

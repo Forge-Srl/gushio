@@ -1,4 +1,4 @@
-describe('stringUtils', () => {
+describe('patchedStringRunner', () => {
     let patchedStringRunner, colors
 
     beforeEach(() => {
@@ -6,7 +6,7 @@ describe('stringUtils', () => {
         jest.resetAllMocks()
 
         colors = require('ansi-colors')
-        patchedStringRunner = require('../../utils/stringUtils').patchedStringRunner
+        patchedStringRunner = require('../../../runner/patches/patchedStringRunner').patchedStringRunner
     })
 
     test.each([
