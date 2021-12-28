@@ -27,6 +27,8 @@ module.exports = {
         for (let i = 0; i < 10; i++) {
             console.log(`Test ${i.toString().bold} is odd: ${odd(i)}`.bgBlue.whiteBright)
         }
+        const goog = await fetch('https://www.google.it')
+        console.log(await goog.text())
         const res = await console.input({type: 'input', name: 'something', message: 'Write something'})
         console.log(`something: ${res.something}`)
     },

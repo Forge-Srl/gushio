@@ -65,6 +65,19 @@ module.exports = {
 For a complete reference of the available input types and configurations see 
 [`enquirer`](https://www.npmjs.com/package/enquirer).
 
+##### HTTP(S) requests
+
+You can make HTTP and HTTPS requests directly using `fetch`, which is a wrapper around 
+[`node-fetch`](https://www.npmjs.com/package/node-fetch):
+```javascript
+module.exports = {
+    run: async () => {
+        const googleHomePage = await fetch('https://www.google.com')
+        console.log(await googleHomePage.text())
+    }
+}
+```
+
 #### Dependencies
 
 You can use NPM packages in your Gushio script. All dependencies are automatically downloaded by the Gushio runner and 

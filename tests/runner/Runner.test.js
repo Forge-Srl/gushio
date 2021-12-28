@@ -1,6 +1,6 @@
 describe('Runner', () => {
     let Runner, LoadingError, RunningError, parseSyntaxError, ScriptChecker, dependenciesUtils, patchedRequireRunner,
-        patchedStringRunner, patchedConsoleRunner, FunctionRunner, Command, Argument, Option
+        patchedStringRunner, patchedConsoleRunner, fetchRunner, FunctionRunner, Command, Argument, Option
 
     beforeEach(() => {
         jest.resetModules()
@@ -16,6 +16,8 @@ describe('Runner', () => {
         patchedStringRunner = require('../../runner/patches/patchedStringRunner').patchedStringRunner
         jest.mock('../../runner/patches/patchedConsoleRunner')
         patchedConsoleRunner = require('../../runner/patches/patchedConsoleRunner').patchedConsoleRunner
+        jest.mock('../../runner/patches/fetchRunner')
+        fetchRunner = require('../../runner/patches/fetchRunner').fetchRunner
 
         jest.mock('../../runner/patches/FunctionRunner')
         FunctionRunner = require('../../runner/patches/FunctionRunner').FunctionRunner
@@ -230,8 +232,11 @@ describe('Runner', () => {
                 expect(console).toBe(runner.console)
                 return 'patchedConsoleRunner'
             })
+            fetchRunner.mockImplementationOnce(() => 'fetchRunner')
             FunctionRunner.combine = (...runners) => {
-                expect(runners).toStrictEqual(['patchedRequireRunner', 'patchedStringRunner', 'patchedConsoleRunner'])
+                expect(runners).toStrictEqual([
+                    'patchedRequireRunner', 'patchedStringRunner', 'patchedConsoleRunner', 'fetchRunner'
+                ])
                 return {
                     run: async (func) => await func()
                 }
