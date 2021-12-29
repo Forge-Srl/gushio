@@ -22,8 +22,7 @@ class Program {
     commandAction(workingDir) {
         return async (scriptPath, options, command) => {
             this.initConsole(options.verbose ? 'verbose' : 'info')
-            const absoluteScriptPath = path.resolve(workingDir, scriptPath)
-            const runner = Runner.fromPath(command.rawArgs[1], absoluteScriptPath, options.gushioFolder)
+            const runner = (await Runner.fromPath(command.rawArgs[1], scriptPath, workingDir, options.gushioFolder))
                 .setConsole(this.console)
                 .setOptions({
                     cleanRun: options.cleanRun

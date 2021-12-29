@@ -1,17 +1,10 @@
 const {FunctionRunner} = require('./FunctionRunner')
-const {dynamicLoad} = require('../../utils/dynamicLoad')
-const importFetch = dynamicLoad('node-fetch')
+const {fetch: nodeFetch} = require('../../utils/fetch')
 
 const fetchRunner = () => {
     const originalFetch = global.fetch
     const before = () => {
-        let _fetch
-        global.fetch = async (...args) => {
-            if (!_fetch) {
-                _fetch = (await importFetch).default
-            }
-            return await _fetch(...args)
-        }
+        global.fetch = nodeFetch
     }
     const after = () => {
         global.fetch = originalFetch

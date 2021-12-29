@@ -227,6 +227,9 @@ can pass them after the script path.
 gushio path/to/script_file.js arg1 arg2 --option1 foo --option2 bar baz bau
 ```
 
+You can also run remote scripts directly: if the script path is a URL, the `gushio` executable automatically retrieves
+the remote code before running it.
+
 On Linux and macOS you can also run the script directly:
 1. Add the shabang to the script (`#!/usr/bin/gushio` or `#!/usr/bin/env gushio`)
 2. Make the script executable

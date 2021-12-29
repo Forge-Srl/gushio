@@ -1,6 +1,17 @@
 const Module = require('module')
 const shell = require('shelljs')
-const enquirer = require('enquirer')
+const {fetch} = require('./fetch')
+const requireFromString = require('require-from-string')
+
+const requireStrategy = {
+    localPath: async (path) => require(path),
+    inMemoryString: async (code) => requireFromString(code),
+    remotePath: async (path) => {
+        // TODO: handle status codes
+        const response = await fetch(path)
+        return requireStrategy.inMemoryString(await response.text())
+    }
+}
 
 const buildPatchedRequire = (folder, allowedDependencies = [], silent) => {
     // patchedRequire must be a `function` since will replace `require` which is actually a complex object!
@@ -8,8 +19,6 @@ const buildPatchedRequire = (folder, allowedDependencies = [], silent) => {
         switch (id) {
             case 'shelljs':
                 return shell
-            case 'enquirer':
-                return enquirer
         }
 
         const require = patchedRequire.__originalRequire.bind(this)
@@ -80,6 +89,7 @@ const installDependency = async (folder, npmInstallVersion, silent = true) => ne
 })
 
 module.exports = {
+    requireStrategy,
     buildPatchedRequire,
     dependencyDescriptor,
     ensureNodeModulesExists,

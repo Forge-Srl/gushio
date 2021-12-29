@@ -1,9 +1,13 @@
 describe('Runner', () => {
     let Runner, LoadingError, RunningError, parseSyntaxError, ScriptChecker, dependenciesUtils, patchedRequireRunner,
-        patchedStringRunner, patchedConsoleRunner, fetchRunner, FunctionRunner, Command, Argument, Option
+        patchedStringRunner, patchedConsoleRunner, fetchRunner, FunctionRunner, Command, Argument, Option, path
 
     beforeEach(() => {
         jest.resetModules()
+        jest.clearAllMocks()
+
+        jest.mock('path')
+        path = require('path')
 
         jest.mock('../../runner/ScriptChecker')
         ScriptChecker = require('../../runner/ScriptChecker').ScriptChecker
@@ -36,41 +40,88 @@ describe('Runner', () => {
     })
 
     describe('fromPath', () => {
-        test('invalid package', () => {
+        const app = 'appPath'
+        const gushioPath = 'gushio'
+        const workingDir = 'workingDir'
+
+        test('Remote url', async () => {
+            const scriptPath = 'http://someUrl'
+            dependenciesUtils.requireStrategy.remotePath = 'remote strategy'
+            Runner.fromRequire = (application, scriptPath1, requireStrategy, gushioGeneralPath) => {
+                expect(application).toBe(app)
+                expect(scriptPath1).toBe(scriptPath)
+                expect(requireStrategy).toBe('remote strategy')
+                expect(gushioGeneralPath).toBe(gushioPath)
+                return 'runnerObj'
+            }
+
+            expect(await Runner.fromPath(app, scriptPath, workingDir, gushioPath)).toBe('runnerObj')
+        })
+        test('Local path', async () => {
+            const scriptPath = 'some/local/path'
+            dependenciesUtils.requireStrategy.localPath = 'local strategy'
+            path.resolve.mockImplementationOnce(() => 'local/dir')
+            Runner.fromRequire = (application, scriptPath, requireStrategy, gushioGeneralPath) => {
+                expect(application).toBe(app)
+                expect(scriptPath).toBe('local/dir')
+                expect(requireStrategy).toBe('local strategy')
+                expect(gushioGeneralPath).toBe(gushioPath)
+                return 'runnerObj'
+            }
+
+            expect(await Runner.fromPath(app, scriptPath, workingDir, gushioPath)).toBe('runnerObj')
+            expect(path.resolve).toHaveBeenCalledWith(workingDir, scriptPath)
+        })
+    })
+
+    describe('fromRequire', () => {
+        test('invalid package', async () => {
             const scriptPath = './invalid_script_path'
+            const strategy = async (path) => {
+                expect(path).toBe(scriptPath)
+                throw new Error()
+            }
             LoadingError.mockImplementationOnce((script, message) => {
                 expect(script).toBe(scriptPath)
                 expect(message).toBe('file not found')
                 return new Error('boom')
             })
-            expect(() => Runner.fromPath('appPath', scriptPath)).toThrow(new Error('boom'))
+            await expect(() => Runner.fromRequire('appPath', scriptPath, strategy)).rejects.toThrow(new Error('boom'))
         })
 
-        test('syntax error', () => {
+        test('syntax error', async () => {
             const mockSyntaxError = new SyntaxError('error')
-            jest.mock('valid_script_path', () => {throw mockSyntaxError}, { virtual: true })
+            const scriptPath = './invalid_script_path'
+            const strategy = async (path) => {
+                expect(path).toBe(scriptPath)
+                throw mockSyntaxError
+            }
             parseSyntaxError.mockImplementationOnce(error => {
                 expect(error).toBe(mockSyntaxError)
                 return {line: 125, details: 'someDetails', message: 'someMessage'}
             })
             LoadingError.mockImplementationOnce((script, message) => {
-                expect(script).toBe('valid_script_path')
+                expect(script).toBe(scriptPath)
                 expect(message).toBe('"someMessage" at line 125\nsomeDetails')
                 return new Error('boom')
             })
-            expect(() => Runner.fromPath('appPath', 'valid_script_path')).toThrow(new Error('boom'))
+            await expect(() => Runner.fromRequire('appPath', scriptPath, strategy)).rejects.toThrow(new Error('boom'))
         })
 
-        test('valid package', () => {
-            jest.mock('valid_script_path', () => ({someKey: 'someValue'}), { virtual: true })
-            const dummy = require('valid_script_path')
+        test('valid package', async () => {
+            const scriptPath = 'valid_script_path'
+            const dummy = {someKey: 'someValue'}
+            const strategy = async (path) => {
+                expect(path).toBe(scriptPath)
+                return dummy
+            }
             Runner.fromJsonObject = (application, scriptPath, scriptObject) => {
                 expect(application).toBe('appPath')
-                expect(scriptPath).toBe('valid_script_path')
+                expect(scriptPath).toBe(scriptPath)
                 expect(scriptObject).toBe(dummy)
                 return 'runnerObj'
             }
-            expect(Runner.fromPath('appPath', 'valid_script_path')).toBe('runnerObj')
+            expect(await Runner.fromRequire('appPath', scriptPath, strategy)).toBe('runnerObj')
         })
     })
 

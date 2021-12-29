@@ -88,15 +88,16 @@ describe('cliProgram', () => {
     test('commandAction', async () => {
         const action = program.commandAction('workingDir')
         const run = jest.fn()
-        path.resolve.mockImplementationOnce(() => 'absolutePath')
         program.initConsole = (logLevel) => {
             expect(logLevel).toBe('verbose')
             program.console = 'console'
         }
 
-        Runner.fromPath = (app, script) => {
+        Runner.fromPath = (app, script, workingDir, gushioFolder) => {
             expect(app).toBe('gushioApp')
-            expect(script).toBe('absolutePath')
+            expect(script).toBe('someScript')
+            expect(workingDir).toBe('workingDir')
+            expect(gushioFolder).toBe('gushio')
             const runner = {
                 run,
                 setConsole: console => {
@@ -110,11 +111,10 @@ describe('cliProgram', () => {
             }
             return runner
         }
-        await action('someScript', {verbose: 'verbose', cleanRun: 'cleanRun'}, {
+        await action('someScript', {verbose: 'verbose', cleanRun: 'cleanRun', gushioFolder: 'gushio'}, {
             rawArgs: ['nodeApp', 'gushioApp', 'otherArgs'],
             args: ['someScript', 'someArgs']
         })
-        expect(path.resolve).toHaveBeenCalledWith('workingDir', 'someScript')
         expect(run).toHaveBeenCalledWith(['someArgs'])
     })
 

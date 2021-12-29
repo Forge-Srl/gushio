@@ -1,6 +1,6 @@
 describe('dependenciesUtils', () => {
-    let shelljs, buildPatchedRequire, dependencyDescriptor, ensureNodeModulesExists,
-        checkDependencyInstalled, installDependency, Module
+    let shelljs, mockRequireFromString, fetch, requireStrategy, buildPatchedRequire, dependencyDescriptor,
+        ensureNodeModulesExists, checkDependencyInstalled, installDependency, Module
 
     beforeEach(() => {
         jest.resetModules()
@@ -9,13 +9,43 @@ describe('dependenciesUtils', () => {
         jest.mock('shelljs', () => ({dummy: 'dummy'}))
         shelljs = require('shelljs')
 
+        mockRequireFromString = jest.fn()
+        jest.mock('require-from-string', () => mockRequireFromString)
+
+        jest.mock('../../utils/fetch')
+        fetch = require('../../utils/fetch').fetch
+
         Module = require('module')
 
+        requireStrategy = require('../../utils/dependenciesUtils').requireStrategy
         buildPatchedRequire = require('../../utils/dependenciesUtils').buildPatchedRequire
         dependencyDescriptor = require('../../utils/dependenciesUtils').dependencyDescriptor
         ensureNodeModulesExists = require('../../utils/dependenciesUtils').ensureNodeModulesExists
         checkDependencyInstalled = require('../../utils/dependenciesUtils').checkDependencyInstalled
         installDependency = require('../../utils/dependenciesUtils').installDependency
+    })
+
+    describe('requireStrategy', () => {
+        test('localPath', async () => {
+            jest.mock('a-fake-module', () => 'FAKE', {virtual: true})
+            expect(await requireStrategy.localPath('a-fake-module')).toBe('FAKE')
+        })
+
+        test('inMemoryString', async () => {
+            mockRequireFromString.mockImplementationOnce(code => 'required')
+            expect(await requireStrategy.inMemoryString('someCode')).toBe('required')
+            expect(mockRequireFromString).toHaveBeenCalledWith('someCode')
+        })
+
+        test('remotePath', async () => {
+            fetch.mockImplementationOnce(() => ({text: () => 'someCode'}))
+            requireStrategy.inMemoryString = (code) => {
+                expect(code).toBe('someCode')
+                return 'required'
+            }
+            expect(await requireStrategy.remotePath('remotePath')).toBe('required')
+            expect(fetch).toHaveBeenCalledWith('remotePath')
+        })
     })
 
     describe('buildPatchedRequire', () => {
@@ -45,7 +75,7 @@ describe('dependenciesUtils', () => {
         })
 
         test.each([
-            'shelljs', 'enquirer'
+            'shelljs'
         ])('found %s', (dep) => {
             patchedRequire.__originalRequire = undefined
             expect(patchedRequire(dep)).toBe(require(dep))

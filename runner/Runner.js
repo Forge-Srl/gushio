@@ -2,6 +2,7 @@ const {Command, Argument, Option} = require('commander')
 const path = require('path')
 const crypto = require('crypto')
 const {
+    requireStrategy,
     buildPatchedRequire,
     dependencyDescriptor,
     ensureNodeModulesExists,
@@ -19,10 +20,18 @@ const {fetchRunner} = require('./patches/fetchRunner')
 
 class Runner {
 
-    static fromPath(application, scriptPath, gushioGeneralPath) {
+    static async fromPath(application, scriptPath, workingDir, gushioGeneralPath) {
+        if (scriptPath.startsWith('http')) {
+            return await this.fromRequire(application, scriptPath, requireStrategy.remotePath, gushioGeneralPath)
+        }
+        return await this.fromRequire(application, path.resolve(workingDir, scriptPath), requireStrategy.localPath,
+            gushioGeneralPath)
+    }
+
+    static async fromRequire(application, scriptPath, requireStrategy, gushioGeneralPath) {
         let scriptObject
         try {
-            scriptObject = require(scriptPath)
+            scriptObject = await requireStrategy(scriptPath)
         } catch (e) {
             if (e instanceof SyntaxError) {
                 const parsed = parseSyntaxError(e)
