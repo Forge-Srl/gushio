@@ -7,8 +7,10 @@ const requireStrategy = {
     localPath: async (path) => require(path),
     inMemoryString: async (code) => requireFromString(code),
     remotePath: async (path) => {
-        // TODO: handle status codes
         const response = await fetch(path)
+        if (!response.ok) {
+            throw new Error(`Request of "${path}" failed with status code ${response.status}`)
+        }
         return requireStrategy.inMemoryString(await response.text())
     }
 }

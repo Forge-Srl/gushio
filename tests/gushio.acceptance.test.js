@@ -10,6 +10,9 @@ const samplesDir = path.resolve(__dirname, 'samples')
 function runScript(tmpDir, scriptName, argsAndOpts = '') {
     return shelljs.exec(`node ${executablePath} -f ${tmpDir}/.gushio ${samplesDir}/${scriptName}.js ${argsAndOpts}`)
 }
+function runRemoteScript(tmpDir, remoteScript, argsAndOpts = '') {
+    return shelljs.exec(`node ${executablePath} -f ${tmpDir}/.gushio ${remoteScript} ${argsAndOpts}`)
+}
 
 describe('Gushio', () => {
     let tmpDir
@@ -23,10 +26,16 @@ describe('Gushio', () => {
         fs.rmdirSync(tmpDir, {recursive: true})
     })
 
-    test('missing_file.js', () => {
+    test('missing_local_file.js', () => {
         const result = runScript(tmpDir, 'missing_file')
         expect(result.code).toBe(2)
-        expect(result.stderr).toMatch(/^\[Gushio] Error while loading '.*missing_file.js': file not found\n$/)
+        expect(result.stderr).toMatch(/^\[Gushio] Error while loading '.*missing_file.js': Cannot find module '.*missing_file.js'.*/)
+    })
+
+    test('missing_remote_file.js', () => {
+        const result = runRemoteScript(tmpDir, 'http://invalid.example.com/fake/path/missing_remote_file.js')
+        expect(result.code).toBe(2)
+        expect(result.stderr).toMatch(/^\[Gushio] Error while loading 'http:\/\/invalid.example.com\/fake\/path\/missing_remote_file.js': request to http:\/\/invalid.example.com\/fake\/path\/missing_remote_file.js failed, reason: getaddrinfo ENOTFOUND invalid.example.com\n$/)
     })
 
     test('acceptance_sample_0.js', () => {

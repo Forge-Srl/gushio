@@ -79,11 +79,11 @@ describe('Runner', () => {
             const scriptPath = './invalid_script_path'
             const strategy = async (path) => {
                 expect(path).toBe(scriptPath)
-                throw new Error()
+                throw new Error('someMessage')
             }
             LoadingError.mockImplementationOnce((script, message) => {
                 expect(script).toBe(scriptPath)
-                expect(message).toBe('file not found')
+                expect(message).toBe('someMessage')
                 return new Error('boom')
             })
             await expect(() => Runner.fromRequire('appPath', scriptPath, strategy)).rejects.toThrow(new Error('boom'))

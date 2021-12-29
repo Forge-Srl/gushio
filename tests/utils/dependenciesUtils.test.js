@@ -37,14 +37,21 @@ describe('dependenciesUtils', () => {
             expect(mockRequireFromString).toHaveBeenCalledWith('someCode')
         })
 
-        test('remotePath', async () => {
-            fetch.mockImplementationOnce(() => ({text: () => 'someCode'}))
-            requireStrategy.inMemoryString = (code) => {
-                expect(code).toBe('someCode')
-                return 'required'
-            }
-            expect(await requireStrategy.remotePath('remotePath')).toBe('required')
-            expect(fetch).toHaveBeenCalledWith('remotePath')
+        describe('remotePath', () => {
+            test('OK', async () => {
+                fetch.mockImplementationOnce(() => ({text: () => 'someCode', ok: true}))
+                requireStrategy.inMemoryString = (code) => {
+                    expect(code).toBe('someCode')
+                    return 'required'
+                }
+                expect(await requireStrategy.remotePath('remotePath')).toBe('required')
+                expect(fetch).toHaveBeenCalledWith('remotePath')
+            })
+            test('NOT FOUND', async () => {
+                fetch.mockImplementationOnce(() => ({text: () => 'someCode', ok: false, status: 404}))
+                await expect(() => requireStrategy.remotePath('remotePath')).rejects.toThrow('Request of "remotePath" failed with status code 404')
+                expect(fetch).toHaveBeenCalledWith('remotePath')
+            })
         })
     })
 

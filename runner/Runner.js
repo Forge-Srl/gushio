@@ -37,7 +37,7 @@ class Runner {
                 const parsed = parseSyntaxError(e)
                 throw new LoadingError(scriptPath, `"${parsed.message}" at line ${parsed.line}\n${parsed.details}`)
             }
-            throw new LoadingError(scriptPath, 'file not found')
+            throw new LoadingError(scriptPath, e.message)
         }
         return this.fromJsonObject(application, scriptPath, scriptObject, gushioGeneralPath)
     }
