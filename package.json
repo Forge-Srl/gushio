@@ -64,6 +64,9 @@
     "jest": "^27.4.5",
     "eslint": "^8.5.0"
   },
+  "engines": {
+    "node": ">=14"
+  },
   "jest": {
     "moduleNameMapper": {
       "^.*/dynamicLoad$": "<rootDir>/tests/mocks/dynamicLoadMock.js"

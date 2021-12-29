@@ -13,16 +13,19 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        node_version: [14, 15, 16, 17]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node_version }}
       - name: Cache NPM packages
         uses: actions/cache@v2
         with:
           path: node_modules
-          key: ${{ runner.os }}-npm-${{ hashFiles('package.json') }}
-          restore-keys: ${{ runner.os }}-npm
+          key: ${{ runner.os }}-${{ matrix.node_version }}-npm-${{ hashFiles('package.json') }}
+          restore-keys: ${{ runner.os }}-${{ matrix.node_version }}-npm
       - name: Build and test
         run: |
           npm install
