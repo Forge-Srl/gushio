@@ -71,7 +71,7 @@ class Runner {
                 folderName += `-${this.cli.version}`
             }
 
-            this._gushioFolder = path.resolve(this.gushioGeneralPath, folderName.replaceAll(/\s+/g, '_'))
+            this._gushioFolder = path.resolve(this.gushioGeneralPath, folderName.replace(/\s+/g, '_'))
         }
 
         return this._gushioFolder
