@@ -1,16 +1,16 @@
-class FunctionRunner {
-    static combine(...patches) {
+class FunctionWrapper {
+    static combine(...wrappers) {
         const before = async () => {
-            for (let i = 0; i < patches.length; i++) {
-                await patches[i].before()
+            for (let i = 0; i < wrappers.length; i++) {
+                await wrappers[i].before()
             }
         }
         const after = async () => {
-            for (let i = patches.length - 1; i >= 0; i--) {
-                await patches[i].after()
+            for (let i = wrappers.length - 1; i >= 0; i--) {
+                await wrappers[i].after()
             }
         }
-        return new FunctionRunner(before, after)
+        return new FunctionWrapper(before, after)
     }
 
     constructor(before, after) {
@@ -26,4 +26,4 @@ class FunctionRunner {
     }
 }
 
-module.exports = {FunctionRunner}
+module.exports = {FunctionWrapper}

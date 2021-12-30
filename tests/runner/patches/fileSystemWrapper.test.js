@@ -1,20 +1,20 @@
-describe('fetchRunner', () => {
-    let fileSystemRunner, fsExtra
+describe('fetchWrapper', () => {
+    let fileSystemWrapper, fsExtra
 
     beforeEach(() => {
         jest.mock('fs-extra')
         fsExtra = require('fs-extra')
-        fileSystemRunner = require('../../../runner/patches/fileSystemRunner').fileSystemRunner
+        fileSystemWrapper = require('../../../runner/patches/fileSystemWrapper').fileSystemWrapper
     })
 
-    test('fetchRunner', async () => {
+    test('fetchWrapper', async () => {
         fsExtra.readFile.mockImplementationOnce(() => 'fileContent')
         const fn = async () => {
             expect(await global.fs.readFile('filePath')).toBe('fileContent')
             return 'something'
         }
         expect(global.fs).toBeUndefined()
-        expect(await fileSystemRunner().run(fn)).toBe('something')
+        expect(await fileSystemWrapper().run(fn)).toBe('something')
         expect(fsExtra.readFile).toHaveBeenCalledTimes(1)
         expect(fsExtra.readFile).toHaveBeenCalledWith('filePath')
         expect(global.fs).toBeUndefined()

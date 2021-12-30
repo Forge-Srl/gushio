@@ -1,6 +1,6 @@
-const {FunctionRunner} = require('./FunctionRunner')
+const {FunctionWrapper} = require('./FunctionWrapper')
 
-const patchedConsoleRunner = (patchedConsole) => {
+const patchedConsoleWrapper = (patchedConsole) => {
     const originalConsole = global.console
     const before = () => {
         global.console = patchedConsole
@@ -9,7 +9,7 @@ const patchedConsoleRunner = (patchedConsole) => {
         global.console = originalConsole
     }
 
-    return new FunctionRunner(before, after)
+    return new FunctionWrapper(before, after)
 }
 
-module.exports = {patchedConsoleRunner}
+module.exports = {patchedConsoleWrapper}

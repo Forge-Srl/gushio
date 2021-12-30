@@ -1,7 +1,7 @@
 const Module = require('module')
-const {FunctionRunner} = require('./FunctionRunner')
+const {FunctionWrapper} = require('./FunctionWrapper')
 
-const patchedRequireRunner = (patchedRequire) => {
+const patchedRequireWrapper = (patchedRequire) => {
     const before = () => {
         for (const cacheKey in require.cache) {
             delete require.cache[cacheKey]
@@ -14,7 +14,7 @@ const patchedRequireRunner = (patchedRequire) => {
         Module.prototype.require = patchedRequire.__originalRequire
     }
 
-    return new FunctionRunner(before, after)
+    return new FunctionWrapper(before, after)
 }
 
-module.exports = {patchedRequireRunner}
+module.exports = {patchedRequireWrapper}

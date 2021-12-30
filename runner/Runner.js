@@ -12,12 +12,12 @@ const {
 const {GushioLogFormat} = require('./GushioConsole')
 const {ScriptChecker} = require('./ScriptChecker')
 const {LoadingError, RunningError, parseSyntaxError} = require('./errors')
-const {FunctionRunner} = require('./patches/FunctionRunner')
-const {patchedRequireRunner} = require('./patches/patchedRequireRunner')
-const {patchedConsoleRunner} = require('./patches/patchedConsoleRunner')
-const {patchedStringRunner} = require('./patches/patchedStringRunner')
-const {fetchRunner} = require('./patches/fetchRunner')
-const {fileSystemRunner} = require('./patches/fileSystemRunner')
+const {FunctionWrapper} = require('./patches/FunctionWrapper')
+const {patchedRequireWrapper} = require('./patches/patchedRequireWrapper')
+const {patchedConsoleWrapper} = require('./patches/patchedConsoleWrapper')
+const {patchedStringWrapper} = require('./patches/patchedStringWrapper')
+const {fetchWrapper} = require('./patches/fetchWrapper')
+const {fileSystemWrapper} = require('./patches/fileSystemWrapper')
 
 class Runner {
 
@@ -129,12 +129,12 @@ class Runner {
         const dependencies = ['shelljs', ...dependenciesNames]
         const gushioFolder = this.gushioFolder
         const patchedRequire = buildPatchedRequire(gushioFolder, dependencies, !this.console.isVerbose)
-        const runner = FunctionRunner.combine(
-            patchedRequireRunner(patchedRequire),
-            patchedStringRunner(),
-            patchedConsoleRunner(this.console),
-            fetchRunner(),
-            fileSystemRunner()
+        const runner = FunctionWrapper.combine(
+            patchedRequireWrapper(patchedRequire),
+            patchedStringWrapper(),
+            patchedConsoleWrapper(this.console),
+            fetchWrapper(),
+            fileSystemWrapper()
         )
 
         return async (...args) => {

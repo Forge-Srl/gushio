@@ -1,7 +1,7 @@
-const {FunctionRunner} = require('./FunctionRunner')
+const {FunctionWrapper} = require('./FunctionWrapper')
 const fsExtra = require('fs-extra')
 
-const fileSystemRunner = () => {
+const fileSystemWrapper = () => {
     const originalFs = global.fs
     const before = () => {
         global.fs = fsExtra
@@ -10,7 +10,7 @@ const fileSystemRunner = () => {
         global.fs = originalFs
     }
 
-    return new FunctionRunner(before, after)
+    return new FunctionWrapper(before, after)
 }
 
-module.exports = {fileSystemRunner}
+module.exports = {fileSystemWrapper}

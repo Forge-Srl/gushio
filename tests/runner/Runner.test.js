@@ -1,7 +1,7 @@
 describe('Runner', () => {
-    let Runner, LoadingError, RunningError, parseSyntaxError, ScriptChecker, dependenciesUtils, patchedRequireRunner,
-        patchedStringRunner, patchedConsoleRunner, fetchRunner, fileSystemRunner, FunctionRunner, Command, Argument,
-        Option, path
+    let Runner, LoadingError, RunningError, parseSyntaxError, ScriptChecker, dependenciesUtils, patchedRequireWrapper,
+        patchedStringWrapper, patchedConsoleWrapper, fetchWrapper, fileSystemWrapper, FunctionWrapper, Command,
+        Argument, Option, path
 
     beforeEach(() => {
         jest.mock('path')
@@ -12,19 +12,19 @@ describe('Runner', () => {
 
         jest.mock('../../utils/dependenciesUtils')
         dependenciesUtils = require('../../utils/dependenciesUtils')
-        jest.mock('../../runner/patches/patchedRequireRunner')
-        patchedRequireRunner = require('../../runner/patches/patchedRequireRunner').patchedRequireRunner
-        jest.mock('../../runner/patches/patchedStringRunner')
-        patchedStringRunner = require('../../runner/patches/patchedStringRunner').patchedStringRunner
-        jest.mock('../../runner/patches/patchedConsoleRunner')
-        patchedConsoleRunner = require('../../runner/patches/patchedConsoleRunner').patchedConsoleRunner
-        jest.mock('../../runner/patches/fetchRunner')
-        fetchRunner = require('../../runner/patches/fetchRunner').fetchRunner
-        jest.mock('../../runner/patches/fileSystemRunner')
-        fileSystemRunner = require('../../runner/patches/fileSystemRunner').fileSystemRunner
+        jest.mock('../../runner/patches/patchedRequireWrapper')
+        patchedRequireWrapper = require('../../runner/patches/patchedRequireWrapper').patchedRequireWrapper
+        jest.mock('../../runner/patches/patchedStringWrapper')
+        patchedStringWrapper = require('../../runner/patches/patchedStringWrapper').patchedStringWrapper
+        jest.mock('../../runner/patches/patchedConsoleWrapper')
+        patchedConsoleWrapper = require('../../runner/patches/patchedConsoleWrapper').patchedConsoleWrapper
+        jest.mock('../../runner/patches/fetchWrapper')
+        fetchWrapper = require('../../runner/patches/fetchWrapper').fetchWrapper
+        jest.mock('../../runner/patches/fileSystemWrapper')
+        fileSystemWrapper = require('../../runner/patches/fileSystemWrapper').fileSystemWrapper
 
-        jest.mock('../../runner/patches/FunctionRunner')
-        FunctionRunner = require('../../runner/patches/FunctionRunner').FunctionRunner
+        jest.mock('../../runner/patches/FunctionWrapper')
+        FunctionWrapper = require('../../runner/patches/FunctionWrapper').FunctionWrapper
 
         jest.mock('../../runner/errors')
         LoadingError = require('../../runner/errors').LoadingError
@@ -274,21 +274,21 @@ describe('Runner', () => {
                 expect(allowedDeps).toStrictEqual(['shelljs', 'dep1', 'dep2'])
                 return 'patched'
             })
-            patchedRequireRunner.mockImplementationOnce((patchedRequire) => {
+            patchedRequireWrapper.mockImplementationOnce((patchedRequire) => {
                 expect(patchedRequire).toBe('patched')
-                return 'patchedRequireRunner'
+                return 'patchedRequireWrapper'
             })
-            patchedStringRunner.mockImplementationOnce(() => 'patchedStringRunner')
-            patchedConsoleRunner.mockImplementationOnce((console) => {
+            patchedStringWrapper.mockImplementationOnce(() => 'patchedStringWrapper')
+            patchedConsoleWrapper.mockImplementationOnce((console) => {
                 expect(console).toBe(runner.console)
-                return 'patchedConsoleRunner'
+                return 'patchedConsoleWrapper'
             })
-            fetchRunner.mockImplementationOnce(() => 'fetchRunner')
-            fileSystemRunner.mockImplementationOnce(() => 'fileSystemRunner')
-            FunctionRunner.combine = (...runners) => {
+            fetchWrapper.mockImplementationOnce(() => 'fetchWrapper')
+            fileSystemWrapper.mockImplementationOnce(() => 'fileSystemWrapper')
+            FunctionWrapper.combine = (...runners) => {
                 expect(runners).toStrictEqual([
-                    'patchedRequireRunner', 'patchedStringRunner', 'patchedConsoleRunner', 'fetchRunner',
-                    'fileSystemRunner'
+                    'patchedRequireWrapper', 'patchedStringWrapper', 'patchedConsoleWrapper', 'fetchWrapper',
+                    'fileSystemWrapper'
                 ])
                 return {
                     run: async (func) => await func()

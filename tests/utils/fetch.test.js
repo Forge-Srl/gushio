@@ -14,7 +14,7 @@ describe('fetch', () => {
         fetch = require('../../utils/fetch').fetch
     })
 
-    test('fetchRunner', async () => {
+    test('fetchWrapper', async () => {
         mockFetch.mockImplementationOnce(() => 'httpResult')
         expect(await fetch('url', 'settings')).toBe('httpResult')
         expect(mockFetch).toHaveBeenCalledTimes(1)

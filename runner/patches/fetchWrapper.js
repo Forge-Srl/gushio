@@ -1,7 +1,7 @@
-const {FunctionRunner} = require('./FunctionRunner')
+const {FunctionWrapper} = require('./FunctionWrapper')
 const {fetch: nodeFetch} = require('../../utils/fetch')
 
-const fetchRunner = () => {
+const fetchWrapper = () => {
     const originalFetch = global.fetch
     const before = () => {
         global.fetch = nodeFetch
@@ -10,7 +10,7 @@ const fetchRunner = () => {
         global.fetch = originalFetch
     }
 
-    return new FunctionRunner(before, after)
+    return new FunctionWrapper(before, after)
 }
 
-module.exports = {fetchRunner}
+module.exports = {fetchWrapper}

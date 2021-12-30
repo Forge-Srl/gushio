@@ -14,7 +14,7 @@ describe('ora', () => {
         ora = require('../../utils/ora').ora
     })
 
-    test('fetchRunner', async () => {
+    test('fetchWrapper', async () => {
         mockOra.mockImplementationOnce(() => 'spinner')
         expect(await ora('promise', 'textOrSettings')).toBe('spinner')
         expect(mockOra).toHaveBeenCalledTimes(1)

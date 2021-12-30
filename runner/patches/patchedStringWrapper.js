@@ -1,7 +1,7 @@
 const c = require('ansi-colors')
-const {FunctionRunner} = require('./FunctionRunner')
+const {FunctionWrapper} = require('./FunctionWrapper')
 
-const patchedStringRunner = () => {
+const patchedStringWrapper = () => {
     const excluded = ['theme', 'alias']
     const properties = Object.getOwnPropertyNames(c).filter(n => !excluded.includes(n))
 
@@ -21,7 +21,7 @@ const patchedStringRunner = () => {
         })
     }
 
-    return new FunctionRunner(before, after)
+    return new FunctionWrapper(before, after)
 }
 
-module.exports = {patchedStringRunner}
+module.exports = {patchedStringWrapper}
