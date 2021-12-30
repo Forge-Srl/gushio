@@ -1,5 +1,5 @@
 describe('cliProgram', () => {
-    let program, Program, path, Command, Option, Runner, packageInfo, RunningError, LoadingError
+    let program, Program, path, Command, Option, Runner, GushioConsole, packageInfo, RunningError, LoadingError
 
     beforeEach(() => {
         jest.mock('path')
@@ -9,6 +9,8 @@ describe('cliProgram', () => {
         Option = require('commander').Option
         jest.mock('../../runner/Runner')
         Runner = require('../../runner/Runner').Runner
+        jest.mock('../../runner/GushioConsole')
+        GushioConsole = require('../../runner/GushioConsole').GushioConsole
 
         packageInfo = require('../../package.json')
         RunningError = require('../../runner/errors').RunningError
@@ -16,6 +18,13 @@ describe('cliProgram', () => {
 
         Program = require('../../cli/cliProgram').Program
         program = new Program(process.stdin, process.stdout, process.stderr)
+    })
+
+    test('buildConsole', () => {
+        const console = {my: 'console'}
+        GushioConsole.mockImplementationOnce(() => console)
+        expect(program.buildConsole('logLevel')).toBe(console)
+        expect(GushioConsole).toHaveBeenCalledWith(program.stdin, program.stdout, program.stderr, 'logLevel')
     })
 
     test('getCommand', () => {
@@ -83,37 +92,97 @@ describe('cliProgram', () => {
         expect(commandObj.action).toHaveBeenCalledWith('action')
     })
 
-    test('commandAction', async () => {
-        const action = program.commandAction('workingDir')
-        const run = jest.fn()
-        program.initConsole = (logLevel) => {
-            expect(logLevel).toBe('verbose')
-            program.console = 'console'
-        }
 
-        Runner.fromPath = (app, script, workingDir, gushioFolder) => {
-            expect(app).toBe('gushioApp')
-            expect(script).toBe('someScript')
-            expect(workingDir).toBe('workingDir')
-            expect(gushioFolder).toBe('gushio')
-            const runner = {
-                run,
-                setConsole: console => {
-                    expect(console).toBe('console')
-                    return runner
-                },
-                setOptions: options => {
-                    expect(options).toStrictEqual({cleanRun: 'cleanRun'})
-                    return runner
-                }
+    describe('commandAction', () => {
+        let action, run, console
+
+        beforeEach(() => {
+            action = program.commandAction('workingDir')
+            run = jest.fn()
+            console = {}
+            program.buildConsole = (logLevel) => {
+                expect(logLevel).toBe('verbose')
+                return console
             }
-            return runner
-        }
-        await action('someScript', {verbose: 'verbose', cleanRun: 'cleanRun', gushioFolder: 'gushio'}, {
-            rawArgs: ['nodeApp', 'gushioApp', 'otherArgs'],
-            args: ['someScript', 'someArgs']
+
+            Runner.fromPath = (app, script, workingDir, gushioFolder) => {
+                expect(app).toBe('gushioApp')
+                expect(script).toBe('someScript')
+                expect(workingDir).toBe('workingDir')
+                expect(gushioFolder).toBe('gushio')
+                const runner = {
+                    run,
+                    setConsole: console1 => {
+                        expect(console1).toBe(console)
+                        return runner
+                    },
+                    setOptions: options => {
+                        expect(options).toStrictEqual({cleanRun: 'cleanRun'})
+                        return runner
+                    }
+                }
+                return runner
+            }
         })
-        expect(run).toHaveBeenCalledWith(['someArgs'])
+
+        test('success', async () => {
+            await action('someScript', {verbose: 'verbose', cleanRun: 'cleanRun', gushioFolder: 'gushio'}, {
+                rawArgs: ['nodeApp', 'gushioApp', 'otherArgs'],
+                args: ['someScript', 'someArgs']
+            })
+            expect(run).toHaveBeenCalledWith(['someArgs'])
+        })
+
+        test('failure RunningError', async () => {
+            const error = new RunningError('file', 'boom')
+            run.mockImplementationOnce(() => {throw error})
+            console.error = jest.fn()
+            try {
+                await action('someScript', {verbose: 'verbose', cleanRun: 'cleanRun', gushioFolder: 'gushio'}, {
+                    rawArgs: ['nodeApp', 'gushioApp', 'otherArgs'],
+                    args: ['someScript', 'someArgs']
+                })
+            } catch (e) {
+                expect(e).toBe(error)
+            }
+
+            expect(run).toHaveBeenCalledWith(['someArgs'])
+            expect(console.error).toHaveBeenCalledWith('[Gushio] %s', error.message)
+        })
+
+        test('failure LoadingError', async () => {
+            const error = new LoadingError('file', 'boom')
+            run.mockImplementationOnce(() => {throw error})
+            console.error = jest.fn()
+            try {
+                await action('someScript', {verbose: 'verbose', cleanRun: 'cleanRun', gushioFolder: 'gushio'}, {
+                    rawArgs: ['nodeApp', 'gushioApp', 'otherArgs'],
+                    args: ['someScript', 'someArgs']
+                })
+            } catch (e) {
+                expect(e).toBe(error)
+            }
+
+            expect(run).toHaveBeenCalledWith(['someArgs'])
+            expect(console.error).toHaveBeenCalledWith('[Gushio] %s', error.message)
+        })
+
+        test('failure generic Error', async () => {
+            const error = new Error('boom')
+            run.mockImplementationOnce(() => {throw error})
+            console.error = jest.fn()
+            try {
+                await action('someScript', {verbose: 'verbose', cleanRun: 'cleanRun', gushioFolder: 'gushio'}, {
+                    rawArgs: ['nodeApp', 'gushioApp', 'otherArgs'],
+                    args: ['someScript', 'someArgs']
+                })
+            } catch (e) {
+                expect(e).toBe(error)
+            }
+
+            expect(run).toHaveBeenCalledWith(['someArgs'])
+            expect(console.error).toHaveBeenCalledWith('[Gushio] %s', error.stack)
+        })
     })
 
     describe('start', () => {
@@ -143,52 +212,8 @@ describe('cliProgram', () => {
                     }
                 }
             }
-            program.console = {
-                error: jest.fn()
-            }
 
             expect(await program.start('path', 'argv')).toBe(error.errorCode)
-            expect(program.console.error).toHaveBeenCalledWith('[Gushio] %s', error.stack)
-        })
-
-        test('failure RunningError', async () => {
-            const error = new RunningError('kaboom', 'boomka')
-
-            program.getCommand = cwd => {
-                expect(cwd).toBe('path')
-                return {
-                    parseAsync: async argv => {
-                        expect(argv).toBe('argv')
-                        throw error
-                    }
-                }
-            }
-            program.console = {
-                error: jest.fn()
-            }
-
-            expect(await program.start('path', 'argv')).toBe(error.errorCode)
-            expect(program.console.error).toHaveBeenCalledWith('[Gushio] %s', error.message)
-        })
-
-        test('failure LoadingError', async () => {
-            const error = new LoadingError('kaboom', 'boomka')
-
-            program.getCommand = cwd => {
-                expect(cwd).toBe('path')
-                return {
-                    parseAsync: async argv => {
-                        expect(argv).toBe('argv')
-                        throw error
-                    }
-                }
-            }
-            program.console = {
-                error: jest.fn()
-            }
-
-            expect(await program.start('path', 'argv')).toBe(error.errorCode)
-            expect(program.console.error).toHaveBeenCalledWith('[Gushio] %s', error.message)
         })
     })
 })

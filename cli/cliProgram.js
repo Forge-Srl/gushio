@@ -15,20 +15,31 @@ class Program {
         this.stderr = stderr
     }
 
-    initConsole(logLevel) {
-        this.console = new GushioConsole(this.stdin, this.stdout, this.stderr, logLevel)
+    buildConsole(logLevel) {
+        return new GushioConsole(this.stdin, this.stdout, this.stderr, logLevel)
     }
 
     commandAction(workingDir) {
         return async (scriptPath, options, command) => {
-            this.initConsole(options.verbose ? 'verbose' : 'info')
-            const runner = (await Runner.fromPath(command.rawArgs[1], scriptPath, workingDir, options.gushioFolder))
-                .setConsole(this.console)
-                .setOptions({
-                    cleanRun: options.cleanRun
-                })
-            const _removedScriptPathArg = command.args.shift()
-            await runner.run(command.args)
+            const console = this.buildConsole(options.verbose ? 'verbose' : 'info')
+
+            try {
+                const runner = (await Runner.fromPath(command.rawArgs[1], scriptPath, workingDir, options.gushioFolder))
+                    .setConsole(console)
+                    .setOptions({
+                        cleanRun: options.cleanRun
+                    })
+                const _removedScriptPathArg = command.args.shift()
+
+                await runner.run(command.args)
+            } catch (error) {
+                if (error instanceof LoadingError || error instanceof RunningError) {
+                    console.error(GushioLogFormat, error.message)
+                } else {
+                    console.error(GushioLogFormat, error.stack)
+                }
+                throw error
+            }
         }
     }
 
@@ -59,12 +70,7 @@ class Program {
             await this.getCommand(cwd).parseAsync(argv)
             return 0
         } catch (error) {
-            // TODO: move error logging in commandAction?
-            if (error instanceof RunningError || error instanceof LoadingError) {
-                this.console.error(GushioLogFormat, error.message)
-            } else {
-                this.console.error(GushioLogFormat, error.stack)
-            }
+            // Error already logged inside `commandAction`. Now we just take the errorCode.
             return error.errorCode || 1
         }
     }
