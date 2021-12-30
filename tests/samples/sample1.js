@@ -28,6 +28,7 @@ module.exports = {
             console.log(`Test ${i.toString().bold} is odd: ${odd(i)}`.bgBlue.whiteBright)
         }
         const goog = await console.spinner(fetch('https://www.google.it'), 'Fetching google')
+        await fs.writeFile()
         console.log(await goog.text())
         const res = await console.input({type: 'input', name: 'something', message: 'Write something'})
         console.log(`something: ${res.something}`)

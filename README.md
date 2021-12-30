@@ -91,6 +91,19 @@ module.exports = {
 }
 ```
 
+##### File System
+
+You can access the file system directly using the `fs` object, which is a wrapper around
+[`fs-extra`](https://www.npmjs.com/package/fs-extra):
+```javascript
+module.exports = {
+    run: async () => {
+        const myFile = await fs.readFile('./somefile.txt')
+        console.log(myFile.toString())
+    }
+}
+```
+
 #### Dependencies
 
 You can use NPM packages in your Gushio script. All dependencies are automatically downloaded by the Gushio runner and 

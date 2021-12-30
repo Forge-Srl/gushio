@@ -17,6 +17,7 @@ const {patchedRequireRunner} = require('./patches/patchedRequireRunner')
 const {patchedConsoleRunner} = require('./patches/patchedConsoleRunner')
 const {patchedStringRunner} = require('./patches/patchedStringRunner')
 const {fetchRunner} = require('./patches/fetchRunner')
+const {fileSystemRunner} = require('./patches/fileSystemRunner')
 
 class Runner {
 
@@ -132,7 +133,8 @@ class Runner {
             patchedRequireRunner(patchedRequire),
             patchedStringRunner(),
             patchedConsoleRunner(this.console),
-            fetchRunner()
+            fetchRunner(),
+            fileSystemRunner()
         )
 
         return async (...args) => {
