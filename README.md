@@ -48,6 +48,19 @@ module.exports = {
 ```
 For a complete reference of the available styles see [`ansi-colors`](https://www.npmjs.com/package/ansi-colors).
 
+##### Await with spinners
+
+You can await a long promise to resolve while showing a spinner with `console.spinner()`. For example:
+```javascript
+module.exports = {
+    run: async () => {
+        const myPromise = someLongOperation()
+        const promiseResult = await console.spinner(myPromise, 'Performing a long task') // Await the spinner, not the promise!
+    }
+}
+```
+`console.spinner()` is a wrapper around [`ora`](https://www.npmjs.com/package/ora); check that for a complete reference.
+
 ##### Read user input
 
 You can read user input with `console.input()`. For example:
