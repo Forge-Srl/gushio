@@ -3,9 +3,6 @@ describe('dependenciesUtils', () => {
         ensureNodeModulesExists, checkDependencyInstalled, installDependency, Module
 
     beforeEach(() => {
-        jest.resetModules()
-        jest.resetAllMocks()
-
         jest.mock('shelljs', () => ({dummy: 'dummy'}))
         shelljs = require('shelljs')
 

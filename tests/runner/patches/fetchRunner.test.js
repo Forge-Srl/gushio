@@ -2,9 +2,6 @@ describe('fetchRunner', () => {
     let fetchRunner, fetch
 
     beforeEach(() => {
-        jest.resetModules()
-        jest.resetAllMocks()
-
         jest.mock('../../../utils/fetch')
         fetch = require('../../../utils/fetch').fetch
         fetchRunner = require('../../../runner/patches/fetchRunner').fetchRunner

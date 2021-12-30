@@ -1,5 +1,6 @@
 const {Console} = require('console')
 const Enquirer = require('enquirer')
+const {ora} = require('../utils/ora')
 
 const LOG_LEVELS = {
     verbose: 10,
@@ -60,11 +61,16 @@ class GushioConsole extends Console {
         }
     }
 
-    // TODO: implement
-    /*
-    async spinner() {
+    async spinner(promise, textOrSettings) {
+        let settings
+        if (typeof textOrSettings === 'string' || textOrSettings instanceof String) {
+            settings = {stream: this._stdout, text: textOrSettings}
+        } else {
+            settings = Object.assign({stream: this._stdout}, textOrSettings)
+        }
+        settings.isSilent = !this.isInfo
+        return await ora(promise, settings)
     }
-    */
 
     async input(...questions) {
         return await this.enquirer.prompt(questions)

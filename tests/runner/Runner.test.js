@@ -3,9 +3,6 @@ describe('Runner', () => {
         patchedStringRunner, patchedConsoleRunner, fetchRunner, FunctionRunner, Command, Argument, Option, path
 
     beforeEach(() => {
-        jest.resetModules()
-        jest.clearAllMocks()
-
         jest.mock('path')
         path = require('path')
 

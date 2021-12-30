@@ -2,9 +2,6 @@ describe('fetch', () => {
     let fetch, mockFetch
 
     beforeEach(() => {
-        jest.resetModules()
-        jest.resetAllMocks()
-
         mockFetch = jest.fn()
         jest.mock('../../utils/dynamicLoad', () => ({
             dynamicLoad: (dep) => {

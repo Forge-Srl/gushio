@@ -2,9 +2,6 @@ describe('patchedRequireRunner', () => {
     let patchedRequireRunner, Module
 
     beforeEach(() => {
-        jest.resetModules()
-        jest.resetAllMocks()
-
         Module = require('module')
         patchedRequireRunner = require('../../../runner/patches/patchedRequireRunner').patchedRequireRunner
     })

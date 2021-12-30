@@ -57,6 +57,7 @@
     "enquirer": "^2.3.6",
     "shelljs": "^0.8.4",
     "ansi-colors": "^4.1.1",
+    "ora": "^6.0.1",
     "node-fetch": "^3.1.0",
     "require-from-string": "^2.0.2"
   },
@@ -68,6 +69,9 @@
     "node": "^14 || >=16"
   },
   "jest": {
+    "transform": {},
+    "resetMocks": true,
+    "resetModules": true,
     "moduleNameMapper": {
       "^.*/dynamicLoad$": "<rootDir>/tests/mocks/dynamicLoadMock.js"
     }

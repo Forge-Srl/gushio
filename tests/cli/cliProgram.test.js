@@ -2,8 +2,6 @@ describe('cliProgram', () => {
     let program, Program, path, Command, Option, Runner, packageInfo, RunningError, LoadingError
 
     beforeEach(() => {
-        jest.resetModules()
-
         jest.mock('path')
         path = require('path')
         jest.mock('commander')

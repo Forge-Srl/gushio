@@ -2,9 +2,6 @@ describe('patchedStringRunner', () => {
     let patchedStringRunner, colors
 
     beforeEach(() => {
-        jest.resetModules()
-        jest.resetAllMocks()
-
         colors = require('ansi-colors')
         patchedStringRunner = require('../../../runner/patches/patchedStringRunner').patchedStringRunner
     })

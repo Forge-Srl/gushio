@@ -1,15 +1,20 @@
 const {Readable, Writable} = require('stream')
 
 describe('GushioConsole', () => {
-    let superConsole, GushioConsole, GushioLogFormat, Enquirer, enquirer, inStream, outStream, errStream, myConsole
+    let superConsole, GushioConsole, GushioLogFormat, Enquirer, enquirer, ora, inStream, outStream, errStream, myConsole
+
+    // Keep this function global here!
+    // If you inline it (where mocking `utils/ora`) tests will fail when run all together!
+    // This is probably a Jest bug, but I have no time to investigate further...
+    const dio = jest.fn()
 
     beforeEach(() => {
-        jest.resetModules()
-        jest.resetAllMocks()
-
         inStream = new Readable()
         outStream = new Writable()
         errStream = new Writable()
+
+        jest.mock('../../utils/ora', () => ({ora: dio}))
+        ora = require('../../utils/ora').ora
 
         enquirer = {}
         jest.mock('enquirer')
@@ -28,6 +33,8 @@ describe('GushioConsole', () => {
                     expect(args[0].groupIndentation).toBe(4)
                     this.logMock = jest.fn()
                     this.errorMock = jest.fn()
+                    this._stdout = outStream
+                    this._stderr = errStream
                     superConsole = this
                 }
                 return superConsole
@@ -126,6 +133,16 @@ describe('GushioConsole', () => {
         myConsole.error = jest.fn()
         myConsole.warn('some', 'thing')
         expect(myConsole.error).toHaveBeenLastCalledWith('some', 'thing')
+    })
+
+    test('spinner', async () => {
+        ora.mockResolvedValue('result')
+        Object.defineProperty(myConsole, 'isInfo', {value: true, configurable: true})
+        expect(await myConsole.spinner('promise', 'textOrSettings')).toBe('result')
+        expect(ora).toHaveBeenLastCalledWith('promise', {text: 'textOrSettings', stream: myConsole._stdout, isSilent: false})
+
+        expect(await myConsole.spinner('promise', {some: 'settings'})).toBe('result')
+        expect(ora).toHaveBeenLastCalledWith('promise', {some: 'settings', stream: myConsole._stdout, isSilent: false})
     })
 
     test('input', async () => {

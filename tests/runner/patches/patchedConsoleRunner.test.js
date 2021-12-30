@@ -2,9 +2,6 @@ describe('patchedConsoleRunner', () => {
     let patchedConsoleRunner
 
     beforeEach(() => {
-        jest.resetModules()
-        jest.resetAllMocks()
-
         patchedConsoleRunner = require('../../../runner/patches/patchedConsoleRunner').patchedConsoleRunner
     })
 
