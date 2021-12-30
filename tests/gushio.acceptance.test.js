@@ -29,7 +29,7 @@ describe('Gushio', () => {
     test('missing_local_file.js', () => {
         const result = runScript(tmpDir, 'missing_file')
         expect(result.code).toBe(2)
-        expect(result.stderr).toMatch(/^\[Gushio] Error while loading '.*missing_file.js': Cannot find module '.*missing_file.js'.*/)
+        expect(result.stderr).toMatch(/^\[Gushio] Error while loading '.*missing_file.js': ENOENT: no such file or directory, open '.*missing_file.js'*/)
     })
 
     test('missing_remote_file.js', () => {

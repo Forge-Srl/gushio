@@ -1,11 +1,15 @@
 const Module = require('module')
 const shell = require('shelljs')
 const {fetch} = require('./fetch')
+const fsExtra = require('fs-extra')
 const requireFromString = require('require-from-string')
 
 const requireStrategy = {
-    localPath: async (path) => require(path),
     inMemoryString: async (code) => requireFromString(code),
+    localPath: async (path) => {
+        const file = await fsExtra.readFile(path)
+        return requireStrategy.inMemoryString(file.toString())
+    },
     remotePath: async (path) => {
         const response = await fetch(path)
         if (!response.ok) {

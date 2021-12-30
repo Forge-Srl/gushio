@@ -1,5 +1,5 @@
 describe('dependenciesUtils', () => {
-    let shelljs, mockRequireFromString, fetch, requireStrategy, buildPatchedRequire, dependencyDescriptor,
+    let shelljs, mockRequireFromString, fsExtra, fetch, requireStrategy, buildPatchedRequire, dependencyDescriptor,
         ensureNodeModulesExists, checkDependencyInstalled, installDependency, Module
 
     beforeEach(() => {
@@ -9,6 +9,8 @@ describe('dependenciesUtils', () => {
         mockRequireFromString = jest.fn()
         jest.mock('require-from-string', () => mockRequireFromString)
 
+        jest.mock('fs-extra')
+        fsExtra = require('fs-extra')
         jest.mock('../../utils/fetch')
         fetch = require('../../utils/fetch').fetch
 
@@ -23,15 +25,20 @@ describe('dependenciesUtils', () => {
     })
 
     describe('requireStrategy', () => {
-        test('localPath', async () => {
-            jest.mock('a-fake-module', () => 'FAKE', {virtual: true})
-            expect(await requireStrategy.localPath('a-fake-module')).toBe('FAKE')
-        })
-
         test('inMemoryString', async () => {
             mockRequireFromString.mockImplementationOnce(code => 'required')
             expect(await requireStrategy.inMemoryString('someCode')).toBe('required')
             expect(mockRequireFromString).toHaveBeenCalledWith('someCode')
+        })
+
+        test('localPath', async () => {
+            fsExtra.readFile.mockImplementationOnce(file => ({toString: () => 'someCode'}))
+            requireStrategy.inMemoryString = (code) => {
+                expect(code).toBe('someCode')
+                return 'required'
+            }
+            expect(await requireStrategy.localPath('someFile')).toBe('required')
+            expect(fsExtra.readFile).toHaveBeenCalledWith('someFile')
         })
 
         describe('remotePath', () => {
