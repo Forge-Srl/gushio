@@ -1,4 +1,4 @@
-#!/usr/bin/gushio
+#!/usr/bin/env gushio
 module.exports = {
     cli: {
         name: 'sample_5'

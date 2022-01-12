@@ -1,4 +1,4 @@
-#!/usr/bin/gushio
+#!/usr/bin/env gushio
 /*
 * WARNING:
 * This sample specifically contains errors in order to test how Gushio behaves in such situation

@@ -1,4 +1,4 @@
-#!/usr/bin/gushio
+#!/usr/bin/env gushio
 module.exports = {
     run: async (args, options) => {
         const $ = require('shelljs')
