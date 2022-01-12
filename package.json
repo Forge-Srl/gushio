@@ -63,8 +63,10 @@
     "fs-extra": "^10.0.0"
   },
   "devDependencies": {
-    "jest": "^27.4.5",
-    "eslint": "^8.5.0"
+    "eslint": "^8.5.0",
+    "jest": "^27.4.7",
+    "jest-worker": "^27.4.6",
+    "mock-http-server": "^1.4.5"
   },
   "engines": {
     "node": "^14 || >=16"

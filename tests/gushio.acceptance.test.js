@@ -4,6 +4,7 @@ const path = require('path')
 const shelljs = require('shelljs')
 const colors = require('ansi-colors')
 const crypto = require('crypto')
+const {Worker} = require('jest-worker')
 
 const executablePath = path.resolve(__dirname, '../cli/cli.js')
 const samplesDir = path.resolve(__dirname, 'samples')
@@ -36,6 +37,24 @@ describe('Gushio', () => {
         const result = runRemoteScript(tmpDir, 'http://invalid.example.com/fake/path/missing_remote_file.js')
         expect(result.code).toBe(2)
         expect(result.stderr).toMatch(/^\[Gushio] Error while loading 'http:\/\/invalid.example.com\/fake\/path\/missing_remote_file.js': request to http:\/\/invalid.example.com\/fake\/path\/missing_remote_file.js failed, reason: getaddrinfo ENOTFOUND invalid.example.com\n$/)
+    })
+
+    test('get remote script', async () => {
+        const host = 'localhost'
+        const port = 9000
+        const serverWorker = new Worker(require.resolve('./ServerMockWorker'), {numWorkers: 1})
+        await serverWorker.createServer(host, port)
+        await serverWorker.start()
+        await serverWorker.on('GET', '/remote_file.js', 200, `module.exports = {run: async () => {console.log('Requested file')}}`)
+
+        try {
+            const result = runRemoteScript(tmpDir, `http://${host}:${port}/remote_file.js`)
+            expect(result.code).toBe(0)
+            expect(result.stdout).toBe(`Requested file\n`)
+        } finally {
+            await serverWorker.stop()
+            await serverWorker.end()
+        }
     })
 
     test('syntax error', () => {
