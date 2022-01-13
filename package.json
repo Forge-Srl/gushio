@@ -35,7 +35,7 @@
   },
   "main": "cli/cliProgram.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --coverage",
     "lint": "eslint .",
     "prerelease": "npm test && npm run lint",
     "release": "npm version -m \"build: prepare release %s\"",
@@ -77,6 +77,21 @@
     "resetModules": true,
     "moduleNameMapper": {
       "^.*/dynamicLoad$": "<rootDir>/tests/mocks/dynamicLoadMock.js"
+    },
+    "collectCoverageFrom": [
+      "**/*.{js,cjs,mjs}",
+      "!**/node_modules/**",
+      "!**/tests/**",
+      "!**/coverage/**",
+      "!**/.eslintrc.js"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 85,
+        "functions": 90,
+        "lines": 90,
+        "statements": 90
+      }
     }
   }
 }
