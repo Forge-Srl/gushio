@@ -4,7 +4,7 @@ const path = require('path')
 const shelljs = require('shelljs')
 const colors = require('ansi-colors')
 const crypto = require('crypto')
-const {Worker} = require('jest-worker')
+const {withServer} = require('./withServer')
 
 const executablePath = path.resolve(__dirname, '../cli/cli.js')
 const samplesDir = path.resolve(__dirname, 'samples')
@@ -40,35 +40,19 @@ describe('Gushio', () => {
     })
 
     test('get remote script', async () => {
-        const host = 'localhost'
-        const port = 9000
-        const serverWorker = new Worker(require.resolve('./ServerMockWorker'), {numWorkers: 1})
-        await serverWorker.createServer(host, port)
-        await serverWorker.start()
-        await serverWorker.on('GET', '/remote_file.js', 200, `module.exports = {run: async () => {console.log('Requested file')}}`)
+        await withServer(async server => {
+            await server.on('GET', '/remote_file.js', 200, `module.exports = {run: async () => {console.log('Requested file')}}`)
 
-        try {
-            const result = runRemoteScript(tmpDir, `http://${host}:${port}/remote_file.js`)
+            const result = runRemoteScript(tmpDir, `${await server.getBaseURL()}/remote_file.js`)
             expect(result.code).toBe(0)
             expect(result.stdout).toBe(`Requested file\n`)
-        } finally {
-            await serverWorker.stop()
-            await serverWorker.end()
-        }
+        })
     })
 
     test('syntax error', () => {
         const result = runLocalScript(tmpDir, 'acceptance_sample_syntax_error.js')
         expect(result.code).toBe(2)
         expect(result.stderr).toMatch(/^\[Gushio] Error while loading '.*acceptance_sample_syntax_error.js': "SyntaxError: Unexpected token 'this'" at line 7\nIn this line there's JavaScript syntax error\n\s{3}\^\^\^\^\n$/)
-    })
-
-    test('shelljs', () => {
-        const result = runLocalScript(tmpDir, 'acceptance_sample_shelljs.js')
-        const expectedMessageTxt = `this is a message from acceptance_sample_1${os.EOL}`
-        expect(result.code).toBe(0)
-        expect(result.stdout).toBe(`You have a message to read...\nInside message.txt: "${expectedMessageTxt}"\n`)
-        expect(shelljs.cat('temp_folder/message.txt').stdout).toBe(expectedMessageTxt)
     })
 
     test('throw error', () => {
@@ -116,4 +100,23 @@ describe('Gushio', () => {
             'Written on console ' + colors.yellow.bold('after') + ' requiring deps\n')
          */
     }, 15000)
+
+    test('shelljs', () => {
+        const result = runLocalScript(tmpDir, 'acceptance_sample_shelljs.js')
+        const expectedMessageTxt = `this is a message from acceptance_sample_1${os.EOL}`
+        expect(result.code).toBe(0)
+        expect(result.stdout).toBe(`You have a message to read...\nInside message.txt: "${expectedMessageTxt}"\n`)
+        expect(shelljs.cat('temp_folder/message.txt').stdout).toBe(expectedMessageTxt)
+    })
+
+    test('global fetch', async () => {
+        const fromTheServer = 'this text comes from the server'
+        await withServer(async server => {
+            await server.on('GET', '/remote_resource', 200, fromTheServer)
+
+            const result = runLocalScript(tmpDir, 'acceptance_sample_global_fetch.js', `${await server.getBaseURL()}/remote_resource`)
+            expect(result.code).toBe(0)
+            expect(result.stdout).toBe(`These is the remote resource: "${fromTheServer}"\n`)
+        })
+    })
 })
