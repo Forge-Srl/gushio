@@ -127,7 +127,7 @@ describe('Gushio', () => {
         const scriptPath = absoluteScript('acceptance_sample_directories.js')
 
         beforeEach(() => {
-            expectedTmpDir = process.platform === 'darwin' ? path.resolve('/private', tmpDir) : tmpDir
+            expectedTmpDir = process.platform === 'darwin' ? `/private${tmpDir}` : tmpDir
         })
 
         test('local', () => {
