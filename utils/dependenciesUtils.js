@@ -5,17 +5,17 @@ const fsExtra = require('fs-extra')
 const requireFromString = require('require-from-string')
 
 const requireStrategy = {
-    inMemoryString: async (code) => requireFromString(code),
+    inMemoryString: async (code, filename) => requireFromString(code, filename),
     localPath: async (path) => {
         const file = await fsExtra.readFile(path)
-        return requireStrategy.inMemoryString(file.toString())
+        return requireStrategy.inMemoryString(file.toString(), path)
     },
     remotePath: async (path) => {
         const response = await fetch(path)
         if (!response.ok) {
             throw new Error(`Request of "${path}" failed with status code ${response.status}`)
         }
-        return requireStrategy.inMemoryString(await response.text())
+        return requireStrategy.inMemoryString(await response.text(), null)
     }
 }
 

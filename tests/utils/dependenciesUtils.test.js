@@ -27,14 +27,15 @@ describe('dependenciesUtils', () => {
     describe('requireStrategy', () => {
         test('inMemoryString', async () => {
             mockRequireFromString.mockImplementationOnce(code => 'required')
-            expect(await requireStrategy.inMemoryString('someCode')).toBe('required')
-            expect(mockRequireFromString).toHaveBeenCalledWith('someCode')
+            expect(await requireStrategy.inMemoryString('someCode', 'filename')).toBe('required')
+            expect(mockRequireFromString).toHaveBeenCalledWith('someCode', 'filename')
         })
 
         test('localPath', async () => {
             fsExtra.readFile.mockImplementationOnce(file => ({toString: () => 'someCode'}))
-            requireStrategy.inMemoryString = (code) => {
+            requireStrategy.inMemoryString = (code, filename) => {
                 expect(code).toBe('someCode')
+                expect(filename).toBe('someFile')
                 return 'required'
             }
             expect(await requireStrategy.localPath('someFile')).toBe('required')
@@ -44,8 +45,9 @@ describe('dependenciesUtils', () => {
         describe('remotePath', () => {
             test('OK', async () => {
                 fetch.mockImplementationOnce(() => ({text: () => 'someCode', ok: true}))
-                requireStrategy.inMemoryString = (code) => {
+                requireStrategy.inMemoryString = (code, filename) => {
                     expect(code).toBe('someCode')
+                    expect(filename).toBeNull()
                     return 'required'
                 }
                 expect(await requireStrategy.remotePath('remotePath')).toBe('required')

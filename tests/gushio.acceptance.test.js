@@ -8,11 +8,11 @@ const {withServer} = require('./withServer')
 
 const executablePath = path.resolve(__dirname, '../cli/cli.js')
 const samplesDir = path.resolve(__dirname, 'samples')
-function runLocalScript(tmpDir, scriptName, argsAndOpts = '') {
-    return shelljs.exec(`node ${executablePath} -f ${tmpDir}/.gushio ${samplesDir}/${scriptName} ${argsAndOpts}`)
+function absoluteScript(scriptName) {
+    return path.resolve(samplesDir, scriptName)
 }
-function runRemoteScript(tmpDir, remoteScript, argsAndOpts = '') {
-    return shelljs.exec(`node ${executablePath} -f ${tmpDir}/.gushio ${remoteScript} ${argsAndOpts}`)
+function runScript(tmpDir, scriptPathOrUrl, argsAndOpts = '') {
+    return shelljs.exec(`node ${executablePath} -f ${tmpDir}/.gushio ${scriptPathOrUrl} ${argsAndOpts}`)
 }
 
 describe('Gushio', () => {
@@ -27,54 +27,56 @@ describe('Gushio', () => {
         fs.rmdirSync(tmpDir, {recursive: true})
     })
 
-    test('missing local file', () => {
-        const result = runLocalScript(tmpDir, 'missing_file.js')
-        expect(result.code).toBe(2)
-        expect(result.stderr).toMatch(/^\[Gushio] Error while loading '.*missing_file.js': ENOENT: no such file or directory, open '.*missing_file.js'*/)
-    })
+    describe('missing file', () => {
+        test('local', () => {
+            const result = runScript(tmpDir, absoluteScript('missing_file.js'))
+            expect(result.code).toBe(2)
+            expect(result.stderr).toMatch(/^\[Gushio] Error while loading '.*missing_file.js': ENOENT: no such file or directory, open '.*missing_file.js'*/)
+        })
 
-    test('missing remote file', () => {
-        const result = runRemoteScript(tmpDir, 'http://invalid.example.com/fake/path/missing_remote_file.js')
-        expect(result.code).toBe(2)
-        expect(result.stderr).toMatch(/^\[Gushio] Error while loading 'http:\/\/invalid.example.com\/fake\/path\/missing_remote_file.js': request to http:\/\/invalid.example.com\/fake\/path\/missing_remote_file.js failed, reason: getaddrinfo ENOTFOUND invalid.example.com\n$/)
+        test('remote', () => {
+            const result = runScript(tmpDir, 'http://invalid.example.com/fake/path/missing_remote_file.js')
+            expect(result.code).toBe(2)
+            expect(result.stderr).toMatch(/^\[Gushio] Error while loading 'http:\/\/invalid.example.com\/fake\/path\/missing_remote_file.js': request to http:\/\/invalid.example.com\/fake\/path\/missing_remote_file.js failed, reason: getaddrinfo ENOTFOUND invalid.example.com\n$/)
+        })
     })
 
     test('get remote script', async () => {
         await withServer(async server => {
             await server.on('GET', '/remote_file.js', 200, `module.exports = {run: async () => {console.log('Requested file')}}`)
 
-            const result = runRemoteScript(tmpDir, `${await server.getBaseURL()}/remote_file.js`)
+            const result = runScript(tmpDir, `${await server.getBaseURL()}/remote_file.js`)
             expect(result.code).toBe(0)
             expect(result.stdout).toBe(`Requested file\n`)
         })
     })
 
     test('syntax error', () => {
-        const result = runLocalScript(tmpDir, 'acceptance_sample_syntax_error.js')
+        const result = runScript(tmpDir, absoluteScript('acceptance_sample_syntax_error.js'))
         expect(result.code).toBe(2)
         expect(result.stderr).toMatch(/^\[Gushio] Error while loading '.*acceptance_sample_syntax_error.js': "SyntaxError: Unexpected token 'this'" at line 7\nIn this line there's JavaScript syntax error\n\s{3}\^\^\^\^\n$/)
     })
 
     test('throw error', () => {
-        const result = runLocalScript(tmpDir, 'acceptance_sample_throw_error.js')
+        const result = runScript(tmpDir, absoluteScript('acceptance_sample_throw_error.js'))
         expect(result.code).toBe(1)
         expect(result.stderr).toMatch(/^\[Gushio] Error while running '.*acceptance_sample_throw_error.js': This script can fail badly\n$/)
     })
 
     test('arguments check', () => {
-        const result = runLocalScript(tmpDir, 'acceptance_sample_arguments_check.js', 'foo "bar a bar" quis quix quiz')
+        const result = runScript(tmpDir, absoluteScript('acceptance_sample_arguments_check.js'), 'foo "bar a bar" quis quix quiz')
         expect(result.code).toBe(0)
         expect(result.stdout).toBe('These are the args: ["foo","bar a bar",["quis","quix","quiz"]]\n')
     })
 
     test('flags check', () => {
-        const result = runLocalScript(tmpDir, 'acceptance_sample_flags_check.js', '-s 123 -s 456 789 -t --first "foo foo"')
+        const result = runScript(tmpDir, absoluteScript('acceptance_sample_flags_check.js'), '-s 123 -s 456 789 -t --first "foo foo"')
         expect(result.code).toBe(0)
         expect(result.stdout).toBe('These are the options: {"second":["123","456","789"],"third":true,"first":"foo foo"}\n')
     })
 
     test('dependency installation', () => {
-        const result = runLocalScript(tmpDir, 'acceptance_sample_dependency_installation.js')
+        const result = runScript(tmpDir, absoluteScript('acceptance_sample_dependency_installation.js'))
         expect(result.code).toBe(0)
         expect(result.stdout).toBe('[Gushio] Checking dependencies\n' +
             '[Gushio] Installing dependency glob@latest\n' +
@@ -90,7 +92,7 @@ describe('Gushio', () => {
 
         /* TODO: the second check fails on macOS with node >= 16
         // Now run again to check dependencies are already installed
-        const result2 = runLocalScript(tmpDir, 'acceptance_sample_dependency_installation.js')
+        const result2 = runScript(tmpDir, 'acceptance_sample_dependency_installation.js')
         expect(result2.code).toBe(0)
         expect(result2.stdout).toBe('[Gushio] Checking dependencies\n' +
             '[Gushio] Installing dependency glob@latest\n' +
@@ -102,7 +104,7 @@ describe('Gushio', () => {
     }, 15000)
 
     test('shelljs', () => {
-        const result = runLocalScript(tmpDir, 'acceptance_sample_shelljs.js')
+        const result = runScript(tmpDir, absoluteScript('acceptance_sample_shelljs.js'))
         const expectedMessageTxt = `this is a message from acceptance_sample_1${os.EOL}`
         expect(result.code).toBe(0)
         expect(result.stdout).toBe(`You have a message to read...\nInside message.txt: "${expectedMessageTxt}"\n`)
@@ -114,9 +116,29 @@ describe('Gushio', () => {
         await withServer(async server => {
             await server.on('GET', '/remote_resource', 200, fromTheServer)
 
-            const result = runLocalScript(tmpDir, 'acceptance_sample_global_fetch.js', `${await server.getBaseURL()}/remote_resource`)
+            const result = runScript(tmpDir, absoluteScript('acceptance_sample_global_fetch.js'), `${await server.getBaseURL()}/remote_resource`)
             expect(result.code).toBe(0)
             expect(result.stdout).toBe(`These is the remote resource: "${fromTheServer}"\n`)
+        })
+    })
+
+    describe('directories', () => {
+        const scriptPath = absoluteScript('acceptance_sample_directories.js')
+
+        test('local', () => {
+            const result = runScript(tmpDir, scriptPath)
+            expect(result.code).toBe(0)
+            expect(result.stdout).toBe(`__filename=${scriptPath}\n__dirname=${samplesDir}\nresolved=${scriptPath}\n$.pwd()=${tmpDir}\n`)
+        })
+
+        test('remote', async () => {
+            await withServer(async server => {
+                await server.on('GET', '/remote_file.js', 200, fs.readFileSync(scriptPath).toString())
+
+                const result = runScript(tmpDir, `${await server.getBaseURL()}/remote_file.js`)
+                expect(result.code).toBe(0)
+                expect(result.stdout).toBe(`__filename=\n__dirname=.\nresolved=${tmpDir}\n$.pwd()=${tmpDir}\n`)
+            })
         })
     })
 })
