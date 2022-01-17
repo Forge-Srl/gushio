@@ -18,12 +18,12 @@ function runScript(tmpDir, scriptPathOrUrl, argsAndOpts = '') {
 describe('Gushio', () => {
     let tmpDir
 
-    beforeEach(() => {
+    beforeAll(() => {
         tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gushio-acceptance"))
         shelljs.cd(tmpDir)
     })
 
-    afterEach(() => {
+    afterAll(() => {
         fs.rmdirSync(tmpDir, {recursive: true})
     })
 
@@ -123,12 +123,17 @@ describe('Gushio', () => {
     })
 
     describe('directories', () => {
+        let expectedTmpDir
         const scriptPath = absoluteScript('acceptance_sample_directories.js')
+
+        beforeEach(() => {
+            expectedTmpDir = process.platform === 'darwin' ? path.resolve('/private', tmpDir) : tmpDir
+        })
 
         test('local', () => {
             const result = runScript(tmpDir, scriptPath)
             expect(result.code).toBe(0)
-            expect(result.stdout).toBe(`__filename=${scriptPath}\n__dirname=${samplesDir}\nresolved=${scriptPath}\n$.pwd()=${tmpDir}\n`)
+            expect(result.stdout).toBe(`__filename=${scriptPath}\n__dirname=${samplesDir}\nresolved=${scriptPath}\n$.pwd()=${expectedTmpDir}\n`)
         })
 
         test('remote', async () => {
@@ -137,7 +142,7 @@ describe('Gushio', () => {
 
                 const result = runScript(tmpDir, `${await server.getBaseURL()}/remote_file.js`)
                 expect(result.code).toBe(0)
-                expect(result.stdout).toBe(`__filename=\n__dirname=.\nresolved=${tmpDir}\n$.pwd()=${tmpDir}\n`)
+                expect(result.stdout).toBe(`__filename=\n__dirname=.\nresolved=${expectedTmpDir}\n$.pwd()=${expectedTmpDir}\n`)
             })
         })
     })
