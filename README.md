@@ -106,6 +106,13 @@ module.exports = {
 }
 ```
 
+##### Exit with error
+
+If you need to notify to the user the failure of your script you can simply throw an `Error` (possibly with an 
+informative message). Gushio will automatically print your message with `console.error()` and exit with code 1.
+
+*Do not use `process.exit()` to make your script fail!*
+
 #### Dependencies
 
 You can use NPM packages in your Gushio script. All dependencies are automatically downloaded by the Gushio runner and 
