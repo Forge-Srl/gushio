@@ -153,6 +153,12 @@ module.exports = {
 
 When you provide an `alias`, the dependency is accessible via such string, otherwise the dependency `name` is used.
 
+> Here are some examples of libraries you can add to superpower your scripts:
+> - [simple-git](https://www.npmjs.com/package/simple-git) for Git;
+> - [jimp](https://www.npmjs.com/package/jimp) for image processing;
+> - [dockerode](https://www.npmjs.com/package/dockerode) for Docker;
+> - [aws-sdk](https://www.npmjs.com/package/aws-sdk) for AWS.
+
 ##### Default dependencies
 
 By default, Gushio provides [`shelljs`](https://www.npmjs.com/package/shelljs), a portable implementation of unix shell 
