@@ -311,11 +311,15 @@ describe('Runner', () => {
             expect(func).toHaveBeenCalledWith(['arg1', 'arg2', 'arg3'], 'cliOptions')
         })
 
-        test('function error', async () => {
-            func.mockImplementationOnce(() => {throw new Error('boom boom')})
+        test.each([
+            ['boom boom', 'boom boom'],
+            [new Error('boom boom'), 'boom boom'],
+            [123, undefined],
+        ])('function error %p', async (error, expected) => {
+            func.mockImplementationOnce(() => {throw error})
             RunningError.mockImplementationOnce((script, message) => {
                 expect(script).toBe('scriptPath')
-                expect(message).toBe('boom boom')
+                expect(message).toBe(expected)
                 return new Error('boom')
             })
             await expect(async () => await action('arg1', 'arg2', 'arg3', 'cliOptions', 'command')).rejects

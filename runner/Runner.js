@@ -149,7 +149,8 @@ class Runner {
                 try {
                     await this.func(args, cliOptions)
                 } catch (e) {
-                    throw new RunningError(this.scriptPath, e.message)
+                    const message = (typeof e === 'string' || e instanceof String) ? e : e.message
+                    throw new RunningError(this.scriptPath, message)
                 }
             })
         }
