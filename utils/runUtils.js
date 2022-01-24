@@ -14,6 +14,6 @@ const createRun = (buildRunner) => async (script, argsAndOpts = []) => {
     }
 
     await runner.run(safeArgs)
-};
+}
 
 module.exports = {createRun}
