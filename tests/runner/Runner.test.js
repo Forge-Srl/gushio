@@ -291,7 +291,7 @@ describe('Runner', () => {
         beforeEach(() => {
             func = jest.fn()
             runner = new Runner('appPath', 'scriptPath', func)
-            runner.console = {verbose: jest.fn()}
+            runner.console = {verbose: jest.fn(), isVerbose: true}
             runner._gushioFolder = 'someFolder'
 
             dependenciesUtils.buildPatchedRequire.mockImplementationOnce((path, allowedDeps) => {
@@ -309,7 +309,10 @@ describe('Runner', () => {
                 return 'patchedConsoleWrapper'
             })
             fetchWrapper.mockImplementationOnce(() => 'fetchWrapper')
-            fileSystemWrapper.mockImplementationOnce(() => 'fileSystemWrapper')
+            fileSystemWrapper.mockImplementationOnce((isVerbose) => {
+                expect(isVerbose).toBe(runner.console.isVerbose)
+                return 'fileSystemWrapper'
+            })
             gushioWrapper.mockImplementationOnce((buildRunner) => {
                 runner.similarRunnerFromPath = jest.fn()
                 buildRunner('script', 'directory')

@@ -141,7 +141,7 @@ class Runner {
             patchedStringWrapper(),
             patchedConsoleWrapper(this.console),
             fetchWrapper(),
-            fileSystemWrapper(),
+            fileSystemWrapper(this.console.isVerbose),
             gushioWrapper(async (scriptPath, workingDir) => await this.similarRunnerFromPath(scriptPath, workingDir)),
         )
 
