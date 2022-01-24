@@ -18,6 +18,7 @@ const {patchedConsoleWrapper} = require('./patches/patchedConsoleWrapper')
 const {patchedStringWrapper} = require('./patches/patchedStringWrapper')
 const {fetchWrapper} = require('./patches/fetchWrapper')
 const {fileSystemWrapper} = require('./patches/fileSystemWrapper')
+const {gushioWrapper} = require('./patches/gushioWrapper')
 
 class Runner {
 
@@ -98,6 +99,12 @@ class Runner {
         return this
     }
 
+    async similarRunnerFromPath(scriptPath, workingDir) {
+        return (await Runner.fromPath(this.application, scriptPath, workingDir, this.gushioGeneralPath))
+            .setConsole(this.console)
+            .setOptions(this.options)
+    }
+
     async installDependency(path, npmInstallVersion) {
         this.console.info(GushioLogFormat, `Installing dependency ${npmInstallVersion}`)
         try {
@@ -127,14 +134,15 @@ class Runner {
 
     getCommandAction(dependenciesNames) {
         const dependencies = ['shelljs', ...dependenciesNames]
-        const gushioFolder = this.gushioFolder
-        const patchedRequire = buildPatchedRequire(gushioFolder, dependencies, !this.console.isVerbose)
-        const runner = FunctionWrapper.combine(
+        const patchedRequire = buildPatchedRequire(this.gushioFolder, dependencies, !this.console.isVerbose)
+
+        const combinedWrapper = FunctionWrapper.combine(
             patchedRequireWrapper(patchedRequire),
             patchedStringWrapper(),
             patchedConsoleWrapper(this.console),
             fetchWrapper(),
-            fileSystemWrapper()
+            fileSystemWrapper(),
+            gushioWrapper(async (scriptPath, workingDir) => await this.similarRunnerFromPath(scriptPath, workingDir)),
         )
 
         return async (...args) => {
@@ -143,9 +151,9 @@ class Runner {
 
             this.console.verbose(GushioLogFormat, `Running with arguments ${JSON.stringify(args)}`)
             this.console.verbose(GushioLogFormat, `Running with options ${JSON.stringify(cliOptions)}`)
-            this.console.verbose(GushioLogFormat, `Running with dependencies ${JSON.stringify(dependencies)} in ${gushioFolder}`)
+            this.console.verbose(GushioLogFormat, `Running with dependencies ${JSON.stringify(dependencies)} in ${(this.gushioFolder)}`)
 
-            await runner.run(async () => {
+            await combinedWrapper.run(async () => {
                 try {
                     await this.func(args, cliOptions)
                 } catch (e) {

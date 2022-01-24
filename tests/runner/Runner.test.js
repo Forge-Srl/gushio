@@ -1,7 +1,7 @@
 describe('Runner', () => {
     let Runner, LoadingError, RunningError, parseSyntaxError, ScriptChecker, dependenciesUtils, patchedRequireWrapper,
-        patchedStringWrapper, patchedConsoleWrapper, fetchWrapper, fileSystemWrapper, FunctionWrapper, Command,
-        Argument, Option, path
+        patchedStringWrapper, patchedConsoleWrapper, fetchWrapper, fileSystemWrapper, gushioWrapper, FunctionWrapper,
+        Command, Argument, Option, path
 
     beforeEach(() => {
         jest.mock('path')
@@ -22,6 +22,8 @@ describe('Runner', () => {
         fetchWrapper = require('../../runner/patches/fetchWrapper').fetchWrapper
         jest.mock('../../runner/patches/fileSystemWrapper')
         fileSystemWrapper = require('../../runner/patches/fileSystemWrapper').fileSystemWrapper
+        jest.mock('../../runner/patches/gushioWrapper')
+        gushioWrapper = require('../../runner/patches/gushioWrapper').gushioWrapper
 
         jest.mock('../../runner/patches/FunctionWrapper')
         FunctionWrapper = require('../../runner/patches/FunctionWrapper').FunctionWrapper
@@ -191,6 +193,29 @@ describe('Runner', () => {
         expect(runner.console).toBe('console')
     })
 
+    test('similarRunnerFromPath', async () => {
+        const runner = new Runner('appPath', 'scriptPath', 'run', undefined, undefined, 'gushioPath')
+        runner.console = 'console'
+        runner.options = 'options'
+
+        const fakeRunner = {
+            setConsole: jest.fn().mockImplementationOnce(() => fakeRunner),
+            setOptions: jest.fn().mockImplementationOnce(() => fakeRunner),
+        }
+
+        Runner.fromPath = (application, scriptPath, workingDir, gushioGeneralPath) => {
+            expect(application).toBe(runner.application)
+            expect(scriptPath).toBe('newPath')
+            expect(workingDir).toBe('newDir')
+            expect(gushioGeneralPath).toBe(runner.gushioGeneralPath)
+            return fakeRunner
+        }
+
+        expect(await runner.similarRunnerFromPath('newPath', 'newDir')).toBe(fakeRunner)
+        expect(fakeRunner.setConsole).toHaveBeenCalledWith(runner.console)
+        expect(fakeRunner.setOptions).toHaveBeenCalledWith(runner.options)
+    })
+
     test.each([
         [{name: 'script name', version: 'my super   duper\tversion'}, '0d858590-script_name-my_super_duper_version'],
         [{version: 'my super   duper\tversion'}, '0d858590-my_super_duper_version'],
@@ -285,10 +310,16 @@ describe('Runner', () => {
             })
             fetchWrapper.mockImplementationOnce(() => 'fetchWrapper')
             fileSystemWrapper.mockImplementationOnce(() => 'fileSystemWrapper')
+            gushioWrapper.mockImplementationOnce((buildRunner) => {
+                runner.similarRunnerFromPath = jest.fn()
+                buildRunner('script', 'directory')
+                expect(runner.similarRunnerFromPath).toHaveBeenCalledWith('script', 'directory')
+                return 'gushioWrapper'
+            })
             FunctionWrapper.combine = (...runners) => {
                 expect(runners).toStrictEqual([
                     'patchedRequireWrapper', 'patchedStringWrapper', 'patchedConsoleWrapper', 'fetchWrapper',
-                    'fileSystemWrapper'
+                    'fileSystemWrapper', 'gushioWrapper'
                 ])
                 return {
                     run: async (func) => await func()

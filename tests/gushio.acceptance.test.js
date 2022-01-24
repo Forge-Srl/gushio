@@ -146,4 +146,10 @@ describe('Gushio', () => {
             })
         })
     })
+
+    test('run other script', () => {
+        const result = runScript(tmpDir, absoluteScript('acceptance_sample_run_other_script.js'))
+        expect(result.code).toBe(0)
+        expect(result.stdout).toBe(`Global Don't try this at home!\nBefore script run\n[Gushio] Checking dependencies\n[Gushio] Installing dependency is-odd@latest\n[Gushio] Dependency is-odd@latest successfully installed\nInner script begin\nGlobal Don't try this at home!\nArguments [ 'first', \`second "with" 'spaces'\` ]\nOptions { asd: true, bsd: \`something "else" 'with' spaces\` }\nInner script end\nAfter script run\nGlobal changed\n`)
+    })
 })
