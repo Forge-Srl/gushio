@@ -106,6 +106,16 @@ module.exports = {
 }
 ```
 
+Additionally, Gushio provides `fs.glob`, a promisified version of [`glob`](https://www.npmjs.com/package/glob):
+```javascript
+module.exports = {
+    run: async () => {
+        const matches = await fs.glob('myPath/*.txt')
+        console.log(matches)
+    }
+}
+```
+
 ##### Exit with error
 
 If you need to notify to the user the failure of your script you can simply throw an `Error` (possibly with an 
