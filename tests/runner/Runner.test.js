@@ -1,7 +1,7 @@
 describe('Runner', () => {
     let Runner, LoadingError, RunningError, parseSyntaxError, ScriptChecker, dependenciesUtils, patchedRequireWrapper,
-        patchedStringWrapper, patchedConsoleWrapper, fetchWrapper, fileSystemWrapper, gushioWrapper, FunctionWrapper,
-        Command, Argument, Option, path
+        patchedStringWrapper, patchedConsoleWrapper, fetchWrapper, YAMLWrapper, fileSystemWrapper, gushioWrapper,
+        FunctionWrapper, Command, Argument, Option, path
 
     beforeEach(() => {
         jest.mock('path')
@@ -12,6 +12,7 @@ describe('Runner', () => {
 
         jest.mock('../../utils/dependenciesUtils')
         dependenciesUtils = require('../../utils/dependenciesUtils')
+
         jest.mock('../../runner/patches/patchedRequireWrapper')
         patchedRequireWrapper = require('../../runner/patches/patchedRequireWrapper').patchedRequireWrapper
         jest.mock('../../runner/patches/patchedStringWrapper')
@@ -20,6 +21,8 @@ describe('Runner', () => {
         patchedConsoleWrapper = require('../../runner/patches/patchedConsoleWrapper').patchedConsoleWrapper
         jest.mock('../../runner/patches/fetchWrapper')
         fetchWrapper = require('../../runner/patches/fetchWrapper').fetchWrapper
+        jest.mock('../../runner/patches/YAMLWrapper')
+        YAMLWrapper = require('../../runner/patches/YAMLWrapper').YAMLWrapper
         jest.mock('../../runner/patches/fileSystemWrapper')
         fileSystemWrapper = require('../../runner/patches/fileSystemWrapper').fileSystemWrapper
         jest.mock('../../runner/patches/gushioWrapper')
@@ -309,6 +312,7 @@ describe('Runner', () => {
                 return 'patchedConsoleWrapper'
             })
             fetchWrapper.mockImplementationOnce(() => 'fetchWrapper')
+            YAMLWrapper.mockImplementationOnce(() => 'YAMLWrapper')
             fileSystemWrapper.mockImplementationOnce((isVerbose) => {
                 expect(isVerbose).toBe(runner.console.isVerbose)
                 return 'fileSystemWrapper'
@@ -322,7 +326,7 @@ describe('Runner', () => {
             FunctionWrapper.combine = (...runners) => {
                 expect(runners).toStrictEqual([
                     'patchedRequireWrapper', 'patchedStringWrapper', 'patchedConsoleWrapper', 'fetchWrapper',
-                    'fileSystemWrapper', 'gushioWrapper'
+                    'YAMLWrapper', 'fileSystemWrapper', 'gushioWrapper'
                 ])
                 return {
                     run: async (func) => await func()

@@ -118,6 +118,20 @@ module.exports = {
 
 Also, instead of `const path = require('path')` you can simply access `fs.path`.
 
+##### JSON and YAML
+
+JavaScript already provides `JSON` object for handling JSON format. Gushio adds a similar support for the YAML format 
+via the `YAML` global objects which is the [`yaml`](https://www.npmjs.com/package/yaml/v/next) library:
+```javascript
+module.exports = {
+    run: async () => {
+        const yamlFile = await fs.readFile('myFile.yml').toString()
+        const asJson = JSON.stringify(YAML.parse(yamlFile))
+        console.log(asJson)
+    }
+}
+```
+
 ##### Exit with error
 
 If you need to notify to the user the failure of your script you can simply throw an `Error` (possibly with an 

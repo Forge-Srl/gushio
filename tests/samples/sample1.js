@@ -26,8 +26,13 @@ module.exports = {
         for (let i = 0; i < 10; i++) {
             console.log(`Test ${i.toString().bold} is odd: ${odd(i)}`.bgBlue.whiteBright)
         }
+
+        const yamlString = YAML.stringify({some: 'key', other: [1, 123, {boom: 'asda', pippo: null}]})
+        console.log(yamlString)
+
         const goog = await console.spinner(fetch('https://www.google.it'), 'Fetching google')
         console.log(await goog.text())
+
         const res = await console.input({type: 'input', name: 'something', message: 'Write something'})
         console.log(`something: ${res.something}`)
     },

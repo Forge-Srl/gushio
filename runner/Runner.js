@@ -17,6 +17,7 @@ const {patchedRequireWrapper} = require('./patches/patchedRequireWrapper')
 const {patchedConsoleWrapper} = require('./patches/patchedConsoleWrapper')
 const {patchedStringWrapper} = require('./patches/patchedStringWrapper')
 const {fetchWrapper} = require('./patches/fetchWrapper')
+const {YAMLWrapper} = require('./patches/YAMLWrapper')
 const {fileSystemWrapper} = require('./patches/fileSystemWrapper')
 const {gushioWrapper} = require('./patches/gushioWrapper')
 
@@ -141,6 +142,7 @@ class Runner {
             patchedStringWrapper(),
             patchedConsoleWrapper(this.console),
             fetchWrapper(),
+            YAMLWrapper(),
             fileSystemWrapper(this.console.isVerbose),
             gushioWrapper(async (scriptPath, workingDir) => await this.similarRunnerFromPath(scriptPath, workingDir)),
         )
