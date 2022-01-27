@@ -14,6 +14,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         node_version: [14, 16, 17]
+    env:
+      OS: ${{ matrix.os }}
+      NODEJS: ${{ matrix.node_version }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -31,3 +34,8 @@ jobs:
           npm install
           npm test
           npm run lint
+      - name: Track test coverage
+        uses: codecov/codecov-action@v2
+        with:
+          env_vars: OS,NODEJS
+          fail_ci_if_error: true
