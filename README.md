@@ -116,6 +116,8 @@ module.exports = {
 }
 ```
 
+Also, instead of `const path = require('path')` you can simply access `fs.path`.
+
 ##### Exit with error
 
 If you need to notify to the user the failure of your script you can simply throw an `Error` (possibly with an 

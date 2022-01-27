@@ -50,6 +50,7 @@ describe('fetchWrapper', () => {
             expect(await global.fs.glob('pattern2', {some: 'thing', cwd: 'other'})).toStrictEqual(['globResult1'])
             await expect(async () => await global.fs.glob('pattern3')).rejects.toThrow('Glob Error')
 
+            expect(global.fs.path).toBe(require('path'))
             return 'something'
         }
         expect(global.fs).toBeUndefined()

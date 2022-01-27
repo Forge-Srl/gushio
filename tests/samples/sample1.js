@@ -20,7 +20,6 @@ module.exports = {
     ],
     run: async (args, options) => {
         const odd = require('is-odd')
-        const path = require('path')
 
         console.log('args -->'.red, args)
         console.log('options -->'.green.bold, options)

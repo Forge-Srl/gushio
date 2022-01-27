@@ -2,6 +2,7 @@ const {FunctionWrapper} = require('./FunctionWrapper')
 const shell = require('shelljs')
 const fsExtra = require('fs-extra')
 const glob = require('glob')
+const path = require('path')
 
 const fileSystemWrapper = (isVerbose) => {
     const originalFs = global.fs
@@ -15,6 +16,7 @@ const fileSystemWrapper = (isVerbose) => {
                 glob(pattern, globOptions, (err, files) => err === null ? resolve(files) : reject(err))
             })
         }
+        global.fs.path = path
     }
     const after = () => {
         global.fs = originalFs
