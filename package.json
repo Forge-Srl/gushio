@@ -38,7 +38,7 @@
     "test": "jest --coverage",
     "lint": "eslint .",
     "prerelease": "npm test && npm run lint",
-    "release": "npm version -m \"build: prepare release %s\"",
+    "release": "standard-version",
     "postrelease": "git push --follow-tags",
     "sample": "node cli/cli.js -c tests/samples/sample1.js someQuix --baz boom"
   },
@@ -67,7 +67,8 @@
     "eslint": "^8.7.0",
     "jest": "^27.4.7",
     "jest-worker": "^27.4.6",
-    "mock-http-server": "^1.4.5"
+    "mock-http-server": "^1.4.5",
+    "standard-version": "^9.3.2"
   },
   "engines": {
     "node": "^14 || >=16"
@@ -94,5 +95,9 @@
         "statements": 90
       }
     }
+  },
+  "standard-version": {
+    "header": "Gushio - CHANGELOG\n---",
+    "tag-prefix": "release/"
   }
 }
