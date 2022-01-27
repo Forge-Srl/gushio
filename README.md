@@ -5,6 +5,7 @@
 [![npm](https://img.shields.io/npm/v/gushio)](https://www.npmjs.com/package/gushio)
 [![GitHub](https://img.shields.io/github/license/Forge-Srl/gushio)](LICENSE.md)
 [![Build Gushio](https://github.com/Forge-Srl/gushio/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/Forge-Srl/gushio/actions/workflows/build.yml)
+[![codecov](https://codecov.io/gh/Forge-Srl/gushio/branch/main/graph/badge.svg?token=891XITVRXG)](https://codecov.io/gh/Forge-Srl/gushio)
 
 Gushio* is built on top of battle-tested libraries like [commander](https://www.npmjs.com/package/commander) and 
 [shelljs](https://www.npmjs.com/package/shelljs) and allows you to write a multiplatform shell script in a single 
