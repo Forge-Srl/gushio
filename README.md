@@ -21,6 +21,11 @@ Install with npm:
 npm install -g gushio
 ```
 
+## A quick note about the docs
+
+For documentation on all the latest features, check out our [README](https://github.com/Forge-Srl/gushio). To read docs
+that are consistent with the latest release, check out [the npm page](https://www.npmjs.com/package/gushio).
+
 ## Usage
 
 ### Creating a Gushio script
@@ -247,7 +252,7 @@ module.exports = {
 }
 ```
 
-The values of the arguments are provided as an array in the second parameter of the `run` function.
+The values of the arguments are provided as an array in the first parameter of the `run` function.
 
 #### Options
 
@@ -287,7 +292,7 @@ module.exports = {
 }
 ```
 
-The values of the flags are provided as an object in the third parameter of the `run` function.
+The values of the flags are provided as an object in the second parameter of the `run` function.
 
 #### Script metadata
 
