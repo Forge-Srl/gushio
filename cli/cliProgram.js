@@ -52,11 +52,14 @@ class Program {
         const cleanRunOption = new Option('-c, --clean-run',
             'clear gushio cache folder before run (dependencies will be re-downloaded)')
 
+        const footerNote = `\n${packageInfo.name} is provided under ${packageInfo.license} license.\nFor more info see: ${packageInfo.homepage}`
+
         return new Command()
             .name(packageInfo.name)
             .description(packageInfo.description)
             .version(packageInfo.version)
             .enablePositionalOptions()
+            .addHelpText('after', footerNote)
             .passThroughOptions()
             .argument('<script>', 'path to the script')
             .addOption(verboseOption)
