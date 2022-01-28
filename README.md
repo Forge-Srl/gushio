@@ -342,6 +342,31 @@ Gushio can receive options before the script argument. The following options are
   environment variable). The default value is the `.gushio` folder in the user home directory.
 - `-c`, `--clean-run` clear gushio cache folder before running the script (dependencies will be re-downloaded).
 
+## FAQ
+
+### Why should I use Gushio?
+
+We don't claim that Gushio is the perfect solution for everyone. However, we believe that in some circumstances you 
+should give it a try:
+- if you need your script to run on different platforms (Windows, Linux, macOS);
+- if you want to write automation scripts for a JavaScript/TypeScript project;
+- if you want your script to be more easily maintainable than a Bash/PowerShell script;
+- if you would like to use functionalities from NPM libraries in your script;
+
+### How is `gushio` different from `zx`?
+
+There are two main differences between [`zx`](https://github.com/google/zx) and `gushio`:
+1. `zx` uses ESM while `gushio` uses CJS. This choice has some major implications in how you can write a script and how 
+   you import/require dependencies.
+2. `zx` doesn't provide a way to use NPM libraries in the scripts.
+
+Apart from that, there are some other minor differences in the functionalities provided out of the box. For example,
+`zx` uses [`chalk`](https://www.npmjs.com/package/chalk) and [`globby`](https://www.npmjs.com/package/globby) while
+`gushio` uses [`ansi-colors`](https://www.npmjs.com/package/chalk) and [`glob`](https://www.npmjs.com/package/glob).
+
+We think they are both fantastic tools, and we encourage folks to use `zx` instead of `gushio` if it makes sense for 
+their use-case.
+
 ## License
 
 See the [LICENSE](LICENSE.md) file for license rights and limitations (MIT).
