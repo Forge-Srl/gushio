@@ -362,7 +362,7 @@ There are two main differences between [`zx`](https://github.com/google/zx) and 
 
 Apart from that, there are some other minor differences in the functionalities provided out of the box. For example,
 `zx` uses [`chalk`](https://www.npmjs.com/package/chalk) and [`globby`](https://www.npmjs.com/package/globby) while
-`gushio` uses [`ansi-colors`](https://www.npmjs.com/package/chalk) and [`glob`](https://www.npmjs.com/package/glob).
+`gushio` uses [`ansi-colors`](https://www.npmjs.com/package/ansi-colors) and [`glob`](https://www.npmjs.com/package/glob).
 
 We think they are both fantastic tools, and we encourage folks to use `zx` instead of `gushio` if it makes sense for 
 their use-case.
