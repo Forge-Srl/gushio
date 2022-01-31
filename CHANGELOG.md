@@ -1,5 +1,14 @@
 Gushio - CHANGELOG
 ---
+## [0.6.0](https://github.com/Forge-Srl/gushio/compare/release/0.5.0...release/0.6.0) (2022-01-31)
+
+
+### Features
+
+* add footer note on help command ([484cdcc](https://github.com/Forge-Srl/gushio/commit/484cdcca74134ceee3877a6898f738207cb44034))
+* add YAML global object ([7110a31](https://github.com/Forge-Srl/gushio/commit/7110a31910644513abe4cb6174278d41a4f2c713))
+* node `path` module available from `fs.path` ([54fbfb9](https://github.com/Forge-Srl/gushio/commit/54fbfb94875c0840a268b7391c35f624cf208f40))
+
 ### 0.5.0 (2022-01-26)
 
 
