@@ -79,8 +79,8 @@ describe('Gushio', () => {
         const result = runScript(tmpDir, absoluteScript('acceptance_sample_dependency_installation.js'))
         expect(result.code).toBe(0)
         expect(result.stdout).toBe('[Gushio] Checking dependencies\n' +
-            '[Gushio] Installing dependency glob@latest\n' +
-            '[Gushio] Dependency glob@latest successfully installed\n' +
+            '[Gushio] Installing dependency jimp@latest\n' +
+            '[Gushio] Dependency jimp@latest successfully installed\n' +
             '[Gushio] Installing dependency check-odd@npm:is-odd@latest\n' +
             '[Gushio] Dependency check-odd@npm:is-odd@latest successfully installed\n' +
             'Written on console ' + colors.yellow.bold('after') + ' requiring deps\n')
@@ -88,15 +88,15 @@ describe('Gushio', () => {
         const hash = crypto.createHash('md5').update(path.resolve(samplesDir, 'acceptance_sample_dependency_installation.js')).digest('hex').substring(0, 8)
         const installedDeps = shelljs.ls(`${tmpDir}/.gushio/${hash}-sample_5/node_modules`)
         expect(installedDeps).toContain('check-odd')
-        expect(installedDeps).toContain('glob')
+        expect(installedDeps).toContain('jimp')
 
         /* TODO: the second check fails on macOS with node >= 16
         // Now run again to check dependencies are already installed
         const result2 = runScript(tmpDir, 'acceptance_sample_dependency_installation.js')
         expect(result2.code).toBe(0)
         expect(result2.stdout).toBe('[Gushio] Checking dependencies\n' +
-            '[Gushio] Installing dependency glob@latest\n' +
-            '[Gushio] Dependency glob@latest already installed\n' +
+            '[Gushio] Installing dependency jimp@latest\n' +
+            '[Gushio] Dependency jimp@latest already installed\n' +
             '[Gushio] Installing dependency check-odd@npm:is-odd@latest\n' +
             '[Gushio] Dependency check-odd@npm:is-odd@latest already installed\n' +
             'Written on console ' + colors.yellow.bold('after') + ' requiring deps\n')
@@ -133,7 +133,7 @@ describe('Gushio', () => {
         test('local', () => {
             const result = runScript(tmpDir, scriptPath)
             expect(result.code).toBe(0)
-            expect(result.stdout).toBe(`__filename=${scriptPath}\n__dirname=${samplesDir}\nresolved=${scriptPath}\n$.pwd()=${expectedTmpDir}\n`)
+            expect(result.stdout).toBe(`__filename=${scriptPath}\n__dirname=${samplesDir}\nresolved=${scriptPath}\n$.pwd()=${expectedTmpDir}\nGlob "./*" [ './temp_folder' ]\n`)
         })
 
         test('remote', async () => {
@@ -142,7 +142,7 @@ describe('Gushio', () => {
 
                 const result = runScript(tmpDir, `${await server.getBaseURL()}/remote_file.js`)
                 expect(result.code).toBe(0)
-                expect(result.stdout).toBe(`__filename=\n__dirname=.\nresolved=${expectedTmpDir}\n$.pwd()=${expectedTmpDir}\n`)
+                expect(result.stdout).toBe(`__filename=\n__dirname=.\nresolved=${expectedTmpDir}\n$.pwd()=${expectedTmpDir}\nGlob "./*" [ './temp_folder' ]\n`)
             })
         })
     })
