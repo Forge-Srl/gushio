@@ -88,6 +88,7 @@
     "collectCoverageFrom": [
       "**/*.{js,cjs,mjs}",
       "!**/node_modules/**",
+      "!**/examples/**",
       "!**/tests/**",
       "!**/coverage/**",
       "!**/.eslintrc.js"
