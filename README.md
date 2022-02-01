@@ -149,7 +149,10 @@ If you want to write more compact code, you can also throw the error message str
 
 ##### Gushio utilities
 
-Gushio provides one additional global object: `gushio`.
+Gushio provides one additional global object `gushio` containing utilities and information about Gushio itself.
+
+`gushio.version` returns the version of Gushio running the script. The version is wrapped as a 
+[SemVer](https://www.npmjs.com/package/semver) object.
 
 With `gushio.run()` you can execute another gushio script. The target script runs in the same process of the "parent"
 script and inherits its Gushio settings (folder, verbose mode, ...).

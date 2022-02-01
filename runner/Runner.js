@@ -136,7 +136,8 @@ class Runner {
     getCommandAction(dependenciesNames) {
         const dependencies = ['shelljs', ...dependenciesNames]
         const patchedRequire = buildPatchedRequire(this.gushioFolder, dependencies, !this.console.isVerbose)
-
+        const buildSimilarRunner = async (scriptPath, workingDir) =>
+            await this.similarRunnerFromPath(scriptPath, workingDir)
         const combinedWrapper = FunctionWrapper.combine(
             patchedRequireWrapper(patchedRequire),
             patchedStringWrapper(),
@@ -144,7 +145,7 @@ class Runner {
             fetchWrapper(),
             YAMLWrapper(),
             fileSystemWrapper(this.console.isVerbose),
-            gushioWrapper(async (scriptPath, workingDir) => await this.similarRunnerFromPath(scriptPath, workingDir)),
+            gushioWrapper(buildSimilarRunner),
         )
 
         return async (...args) => {

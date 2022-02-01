@@ -1,9 +1,14 @@
 describe('gushioWrapper', () => {
-    let wrapper, createRun
+    let wrapper, createRun, semverParse, packageInfo
 
     beforeEach(() => {
         jest.mock('../../../utils/runUtils')
         createRun = require('../../../utils/runUtils').createRun
+        jest.mock('semver/functions/parse')
+        semverParse = require('semver/functions/parse')
+
+        packageInfo = require('../../../package.json')
+
         wrapper = require('../../../runner/patches/gushioWrapper')
     })
 
@@ -12,10 +17,15 @@ describe('gushioWrapper', () => {
             expect(runner).toBe('runner')
             return 'gushioRun'
         })
+        semverParse.mockImplementationOnce((version) => {
+            expect(version).toBe(packageInfo.version)
+            return 'semver'
+        })
 
         const fn = async () => {
             expect(global.gushio).toStrictEqual({
-                run: 'gushioRun'
+                run: 'gushioRun',
+                version: 'semver'
             })
             return 'something'
         }
