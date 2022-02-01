@@ -1,6 +1,6 @@
 # Gushio
 
-*Like bash scripts, but in JavaScript!*
+*Like bash scripts, but in JavaScript*
 
 [![npm](https://img.shields.io/npm/v/gushio)](https://www.npmjs.com/package/gushio)
 [![GitHub](https://img.shields.io/github/license/Forge-Srl/gushio)](LICENSE.md)
@@ -12,6 +12,11 @@ Gushio* is built on top of battle-tested libraries like [commander](https://www.
 JavaScript file without having to worry about `package.json` and dependencies installation.
 
 <sub>_* Gushio is pronounced like the italian word "guscio" (IPA: /'guʃʃo/) which means "shell"._</sub>
+
+> You can find some examples of Gushio scripts [here](/examples). You can even try to run them directly with:
+> ```shell
+> gushio https://github.com/Forge-Srl/gushio/raw/main/examples/<SCRIPT_FILENAME>
+> ```
 
 ## Installation
 
