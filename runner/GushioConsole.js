@@ -1,5 +1,6 @@
 const {Console} = require('console')
 const Enquirer = require('enquirer')
+const isString = require('is-string')
 const {ora} = require('../utils/ora')
 
 const LOG_LEVELS = {
@@ -63,7 +64,7 @@ class GushioConsole extends Console {
 
     async spinner(promise, textOrSettings) {
         let settings
-        if (typeof textOrSettings === 'string' || textOrSettings instanceof String) {
+        if (isString(textOrSettings)) {
             settings = {stream: this._stdout, text: textOrSettings}
         } else {
             settings = Object.assign({stream: this._stdout}, textOrSettings)

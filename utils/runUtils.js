@@ -1,4 +1,5 @@
 const shell = require('shelljs')
+const isString = require('is-string')
 const {parseCommandLineArgsAndOpts} = require('./parsingUtils')
 
 const createRun = (buildRunner) => async (script, argsAndOpts = []) => {
@@ -7,7 +8,7 @@ const createRun = (buildRunner) => async (script, argsAndOpts = []) => {
     let safeArgs
     if (Array.isArray(argsAndOpts)) {
         safeArgs = argsAndOpts
-    } else if (typeof argsAndOpts === 'string' || argsAndOpts instanceof String) {
+    } else if (isString(argsAndOpts)) {
         safeArgs = parseCommandLineArgsAndOpts(argsAndOpts)
     } else {
         throw new Error('argsAndOpts parameter is neither a string nor an array of strings')

@@ -1,6 +1,7 @@
 const {Command, Argument, Option} = require('commander')
 const path = require('path')
 const crypto = require('crypto')
+const isString = require('is-string')
 const {
     requireStrategy,
     buildPatchedRequire,
@@ -133,12 +134,11 @@ class Runner {
         }
     }
 
-    getCommandAction(dependenciesNames) {
-        const dependencies = ['shelljs', ...dependenciesNames]
+    buildCombinedFunctionWrapper(dependencies) {
         const patchedRequire = buildPatchedRequire(this.gushioFolder, dependencies, !this.console.isVerbose)
         const buildSimilarRunner = async (scriptPath, workingDir) =>
             await this.similarRunnerFromPath(scriptPath, workingDir)
-        const combinedWrapper = FunctionWrapper.combine(
+        return FunctionWrapper.combine(
             patchedRequireWrapper(patchedRequire),
             patchedStringWrapper(),
             patchedConsoleWrapper(this.console),
@@ -147,6 +147,11 @@ class Runner {
             fileSystemWrapper(this.console.isVerbose),
             gushioWrapper(buildSimilarRunner),
         )
+    }
+
+    getCommandAction(dependenciesNames) {
+        const dependencies = ['shelljs', ...dependenciesNames]
+        const combinedWrapper = this.buildCombinedFunctionWrapper(dependencies)
 
         return async (...args) => {
             const _command = args.pop()
@@ -160,7 +165,7 @@ class Runner {
                 try {
                     await this.func(args, cliOptions)
                 } catch (e) {
-                    const message = (typeof e === 'string' || e instanceof String) ? e : e.message
+                    const message = isString(e) ? e : e.message
                     throw new RunningError(this.scriptPath, message)
                 }
             })

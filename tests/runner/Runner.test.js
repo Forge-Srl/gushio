@@ -289,6 +289,48 @@ describe('Runner', () => {
         })
     })
 
+    test('buildCombinedFunctionWrapper', () => {
+        const runner = new Runner('appPath', 'scriptPath')
+        runner.console = {verbose: jest.fn(), isVerbose: true}
+        runner._gushioFolder = 'someFolder'
+
+        dependenciesUtils.buildPatchedRequire.mockImplementationOnce((path, allowedDeps) => {
+            expect(path).toBe('someFolder')
+            expect(allowedDeps).toStrictEqual(['dep1', 'dep2'])
+            return 'patched'
+        })
+        patchedRequireWrapper.mockImplementationOnce((patchedRequire) => {
+            expect(patchedRequire).toBe('patched')
+            return 'patchedRequireWrapper'
+        })
+        patchedStringWrapper.mockImplementationOnce(() => 'patchedStringWrapper')
+        patchedConsoleWrapper.mockImplementationOnce((console) => {
+            expect(console).toBe(runner.console)
+            return 'patchedConsoleWrapper'
+        })
+        fetchWrapper.mockImplementationOnce(() => 'fetchWrapper')
+        YAMLWrapper.mockImplementationOnce(() => 'YAMLWrapper')
+        fileSystemWrapper.mockImplementationOnce((isVerbose) => {
+            expect(isVerbose).toBe(runner.console.isVerbose)
+            return 'fileSystemWrapper'
+        })
+        gushioWrapper.mockImplementationOnce((buildRunner) => {
+            runner.similarRunnerFromPath = jest.fn()
+            buildRunner('script', 'directory')
+            expect(runner.similarRunnerFromPath).toHaveBeenCalledWith('script', 'directory')
+            return 'gushioWrapper'
+        })
+        FunctionWrapper.combine = (...runners) => {
+            expect(runners).toStrictEqual([
+                'patchedRequireWrapper', 'patchedStringWrapper', 'patchedConsoleWrapper', 'fetchWrapper',
+                'YAMLWrapper', 'fileSystemWrapper', 'gushioWrapper'
+            ])
+            return 'combined'
+        }
+
+        expect(runner.buildCombinedFunctionWrapper(['dep1', 'dep2'])).toBe('combined')
+    })
+
     describe('getCommandAction', () => {
         let func, runner, action
         beforeEach(() => {
@@ -296,43 +338,12 @@ describe('Runner', () => {
             runner = new Runner('appPath', 'scriptPath', func)
             runner.console = {verbose: jest.fn(), isVerbose: true}
             runner._gushioFolder = 'someFolder'
-
-            dependenciesUtils.buildPatchedRequire.mockImplementationOnce((path, allowedDeps) => {
-                expect(path).toBe('someFolder')
-                expect(allowedDeps).toStrictEqual(['shelljs', 'dep1', 'dep2'])
-                return 'patched'
-            })
-            patchedRequireWrapper.mockImplementationOnce((patchedRequire) => {
-                expect(patchedRequire).toBe('patched')
-                return 'patchedRequireWrapper'
-            })
-            patchedStringWrapper.mockImplementationOnce(() => 'patchedStringWrapper')
-            patchedConsoleWrapper.mockImplementationOnce((console) => {
-                expect(console).toBe(runner.console)
-                return 'patchedConsoleWrapper'
-            })
-            fetchWrapper.mockImplementationOnce(() => 'fetchWrapper')
-            YAMLWrapper.mockImplementationOnce(() => 'YAMLWrapper')
-            fileSystemWrapper.mockImplementationOnce((isVerbose) => {
-                expect(isVerbose).toBe(runner.console.isVerbose)
-                return 'fileSystemWrapper'
-            })
-            gushioWrapper.mockImplementationOnce((buildRunner) => {
-                runner.similarRunnerFromPath = jest.fn()
-                buildRunner('script', 'directory')
-                expect(runner.similarRunnerFromPath).toHaveBeenCalledWith('script', 'directory')
-                return 'gushioWrapper'
-            })
-            FunctionWrapper.combine = (...runners) => {
-                expect(runners).toStrictEqual([
-                    'patchedRequireWrapper', 'patchedStringWrapper', 'patchedConsoleWrapper', 'fetchWrapper',
-                    'YAMLWrapper', 'fileSystemWrapper', 'gushioWrapper'
-                ])
+            runner.buildCombinedFunctionWrapper = (dependencies) => {
+                expect(dependencies).toStrictEqual(['shelljs', 'dep1', 'dep2'])
                 return {
                     run: async (func) => await func()
                 }
             }
-
             action = runner.getCommandAction(['dep1', 'dep2'])
         })
 
