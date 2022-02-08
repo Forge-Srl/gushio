@@ -1,8 +1,8 @@
-const shell = require('shelljs')
-const isString = require('is-string')
-const {parseCommandLineArgsAndOpts} = require('./parsingUtils')
+import isString from 'is-string'
+import shell from 'shelljs'
+import {parseCommandLineArgsAndOpts} from './parsingUtils.js'
 
-const createRun = (buildRunner) => async (script, argsAndOpts = []) => {
+export const createRun = (buildRunner) => async (script, argsAndOpts = []) => {
     const runner = await buildRunner(script, shell.pwd())
 
     let safeArgs
@@ -16,5 +16,3 @@ const createRun = (buildRunner) => async (script, argsAndOpts = []) => {
 
     await runner.run(safeArgs)
 }
-
-module.exports = {createRun}

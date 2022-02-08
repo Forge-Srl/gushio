@@ -1,10 +1,11 @@
-const Module = require('module')
-const shell = require('shelljs')
-const {fetch} = require('./fetch')
-const fsExtra = require('fs-extra')
-const requireFromString = require('require-from-string')
+import path from 'path'
+import fsExtra from 'fs-extra'
+import shell from 'shelljs'
+import requireFromString from 'require-from-string'
+import fetch from 'node-fetch'
+import isString from 'is-string'
 
-const requireStrategy = {
+export const requireStrategy = {
     inMemoryString: async (code, filename) => requireFromString(code, filename),
     localPath: async (path) => {
         const file = await fsExtra.readFile(path)
@@ -16,24 +17,54 @@ const requireStrategy = {
             throw new Error(`Request of "${path}" failed with status code ${response.status}`)
         }
         return requireStrategy.inMemoryString(await response.text(), null)
-    }
+    },
 }
 
-const buildPatchedRequire = (folder, allowedDependencies = [], silent) => {
-    // patchedRequire must be a `function` since will replace `require` which is actually a complex object!
-    const patchedRequire = function (id) {
-        switch (id) {
-            case 'shelljs':
-                return shell
+const packageEntryPoint = async (pathToPackageFolder) => {
+    const pkg = await fsExtra.readJson(`${pathToPackageFolder}/package.json`)
+
+    let entryPoint = pkg.main
+    if (!entryPoint && pkg.exports) {
+        if (isString(pkg.exports)) {
+            entryPoint = pkg.exports
+        } else if (isString(pkg.exports['import'])) {
+            entryPoint = pkg.exports['import']
+        } else if (isString(pkg.exports['.'])) {
+            entryPoint = pkg.exports['.']
+        } else if (pkg.exports['.'] && isString(pkg.exports['.']['import'])) {
+            entryPoint = pkg.exports['.']['import']
+        }
+    }
+
+    if (!entryPoint) {
+        entryPoint = 'index.js'
+    } else if (entryPoint.endsWith('/')) {
+        entryPoint += 'index.js'
+    }
+
+    return `file://${path.join(pathToPackageFolder, entryPoint)}`
+}
+
+export const buildPatchedImport = (folder, allowedDependencies = [], silent) => {
+    const importCache = new Map()
+    const storeAndGet = (id, value) => {
+        importCache.set(id, value)
+        return value
+    }
+
+    importCache.set('shelljs', shell)
+
+    return async id => {
+        if (importCache.has(id)) {
+            return importCache.get(id)
         }
 
-        const require = patchedRequire.__originalRequire.bind(this)
-
         try {
-            return require(id)
+            return storeAndGet(id, await import(id))
         } catch (e) {
             try {
-                return require(`${folder}/node_modules/${id}`)
+                const entryPoint = await packageEntryPoint(`${folder}/node_modules/${id}`)
+                return storeAndGet(id, await import(entryPoint))
             } catch (e) {
                 if (allowedDependencies.includes(id)) {
                     throw new Error(`Dependency "${id}" should be installed but was not found`)
@@ -47,11 +78,9 @@ const buildPatchedRequire = (folder, allowedDependencies = [], silent) => {
             }
         }
     }
-    patchedRequire.__originalRequire = Module.prototype.require
-    return patchedRequire
 }
 
-const dependencyDescriptor = (name, version = 'latest', alias) => {
+export const dependencyDescriptor = (name, version = 'latest', alias) => {
     const depString = `${name}@${version}`
     if (alias) {
         return {name: alias, npmInstallVersion: `${alias}@npm:${depString}`}
@@ -59,7 +88,7 @@ const dependencyDescriptor = (name, version = 'latest', alias) => {
     return {name: name, npmInstallVersion: depString}
 }
 
-const ensureNodeModulesExists = async (folder, clear) => new Promise((resolve, reject) => {
+export const ensureNodeModulesExists = async (folder, clear) => new Promise((resolve, reject) => {
     if (clear) {
         const exec = shell.rm('-rf', folder)
         if (exec.code !== 0) {
@@ -76,7 +105,7 @@ const ensureNodeModulesExists = async (folder, clear) => new Promise((resolve, r
     resolve()
 })
 
-const checkDependencyInstalled = async (folder, npmInstallVersion, silent = true) => new Promise((resolve, reject) => {
+export const checkDependencyInstalled = async (folder, npmInstallVersion, silent = true) => new Promise((resolve, reject) => {
     const exec = shell.exec(`npm list --depth=0 --prefix ${folder} ${npmInstallVersion}`, {silent})
     if (exec.code !== 0) {
         reject(new Error(`Cannot find "${npmInstallVersion}" in "${folder}"`))
@@ -85,7 +114,7 @@ const checkDependencyInstalled = async (folder, npmInstallVersion, silent = true
     resolve()
 })
 
-const installDependency = async (folder, npmInstallVersion, silent = true) => new Promise((resolve, reject) => {
+export const installDependency = async (folder, npmInstallVersion, silent = true) => new Promise((resolve, reject) => {
     const exec = shell.exec(`npm install --prefix ${folder} ${npmInstallVersion}`, {silent})
     if (exec.code !== 0) {
         reject(new Error(`Installation of "${npmInstallVersion}" failed with exit code ${exec.code}`))
@@ -93,12 +122,3 @@ const installDependency = async (folder, npmInstallVersion, silent = true) => ne
     }
     resolve()
 })
-
-module.exports = {
-    requireStrategy,
-    buildPatchedRequire,
-    dependencyDescriptor,
-    ensureNodeModulesExists,
-    checkDependencyInstalled,
-    installDependency
-}

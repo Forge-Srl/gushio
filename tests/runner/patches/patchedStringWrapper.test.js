@@ -1,9 +1,11 @@
+import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect} from '@jest/globals'
+
 describe('patchedStringWrapper', () => {
     let patchedStringWrapper, colors
 
-    beforeEach(() => {
-        colors = require('ansi-colors')
-        patchedStringWrapper = require('../../../runner/patches/patchedStringWrapper').patchedStringWrapper
+    beforeEach(async () => {
+        colors = (await import('ansi-colors')).default
+        patchedStringWrapper = (await import('../../../runner/patches/patchedStringWrapper.js')).patchedStringWrapper
     })
 
     test.each([

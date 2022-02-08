@@ -36,17 +36,19 @@
   "bugs": {
     "url": "https://github.com/Forge-Srl/gushio/issues"
   },
+  "type": "module",
   "main": "cli/cliProgram.js",
+  "bin": {
+    "gushio": "cli/cli.js"
+  },
   "scripts": {
-    "test": "jest --coverage",
+    "test": "node --trace-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
     "lint": "eslint .",
     "prerelease": "npm test && npm run lint",
     "release": "standard-version",
     "postrelease": "git push --follow-tags",
-    "sample": "node cli/cli.js -c tests/samples/sample1.js someQuix --baz boom"
-  },
-  "bin": {
-    "gushio": "cli/cli.js"
+    "sample:sample1": "node cli/cli.js -c tests/samples/sample1.js someQuix --baz boom",
+    "sample:http-cat": "node cli/cli.js -c examples/http-cat.js"
   },
   "files": [
     "/cli",
@@ -84,7 +86,8 @@
     "resetMocks": true,
     "resetModules": true,
     "moduleNameMapper": {
-      "^.*/dynamicLoad$": "<rootDir>/tests/mocks/dynamicLoadMock.js"
+      "#ansi-styles": "chalk/source/vendor/ansi-styles/index.js",
+      "#supports-color": "chalk/source/vendor/supports-color/index.js"
     },
     "collectCoverageFrom": [
       "**/*.{js,cjs,mjs}",

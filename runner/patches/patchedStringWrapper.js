@@ -1,7 +1,7 @@
-const c = require('ansi-colors')
-const {FunctionWrapper} = require('./FunctionWrapper')
+import c from 'ansi-colors'
+import {FunctionWrapper} from './FunctionWrapper.js'
 
-const patchedStringWrapper = () => {
+export const patchedStringWrapper = () => {
     const excluded = ['theme', 'alias']
     const properties = Object.getOwnPropertyNames(c).filter(n => !excluded.includes(n))
 
@@ -23,5 +23,3 @@ const patchedStringWrapper = () => {
 
     return new FunctionWrapper(before, after)
 }
-
-module.exports = {patchedStringWrapper}

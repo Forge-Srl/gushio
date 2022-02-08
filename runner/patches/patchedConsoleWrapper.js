@@ -1,6 +1,6 @@
-const {FunctionWrapper} = require('./FunctionWrapper')
+import {FunctionWrapper} from './FunctionWrapper.js'
 
-const patchedConsoleWrapper = (patchedConsole) => {
+export const patchedConsoleWrapper = (patchedConsole) => {
     const originalConsole = global.console
     const before = () => {
         global.console = patchedConsole
@@ -11,5 +11,3 @@ const patchedConsoleWrapper = (patchedConsole) => {
 
     return new FunctionWrapper(before, after)
 }
-
-module.exports = {patchedConsoleWrapper}

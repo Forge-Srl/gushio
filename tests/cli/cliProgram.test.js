@@ -1,22 +1,29 @@
-describe('cliProgram', () => {
-    let program, Program, path, Command, Option, Runner, GushioConsole, packageInfo, RunningError, LoadingError
+import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect} from '@jest/globals'
+import path from 'path'
+import os from 'os'
+import {createRequire} from 'module'
+const require = createRequire(import.meta.url)
 
-    beforeEach(() => {
-        jest.mock('path')
-        path = require('path')
-        jest.mock('commander')
-        Command = require('commander').Command
-        Option = require('commander').Option
-        jest.mock('../../runner/Runner')
-        Runner = require('../../runner/Runner').Runner
-        jest.mock('../../runner/GushioConsole')
-        GushioConsole = require('../../runner/GushioConsole').GushioConsole
+describe('cliProgram', () => {
+    let program, Program, Command, Option, Runner, GushioConsole, GushioLogFormat, packageInfo,
+        RunningError, LoadingError
+
+    beforeEach(async () => {
+        Command = jest.fn()
+        Option = jest.fn()
+        jest.unstable_mockModule('commander', () => ({Command, Option}))
+        Runner = jest.fn()
+        jest.unstable_mockModule('../../runner/Runner.js', () => ({Runner}))
+        GushioConsole = jest.fn()
+        GushioLogFormat = 'GUSHIO_FORMAT'
+        jest.unstable_mockModule('../../runner/GushioConsole.js', () => ({GushioConsole, GushioLogFormat}))
+
+        RunningError = (await import('../../runner/errors.js')).RunningError
+        LoadingError = (await import('../../runner/errors.js')).LoadingError
 
         packageInfo = require('../../package.json')
-        RunningError = require('../../runner/errors').RunningError
-        LoadingError = require('../../runner/errors').LoadingError
 
-        Program = require('../../cli/cliProgram').Program
+        Program = (await import('../../cli/cliProgram.js')).Program
         program = new Program(process.stdin, process.stdout, process.stderr)
     })
 
@@ -28,9 +35,6 @@ describe('cliProgram', () => {
     })
 
     test('getCommand', () => {
-        const path = require('path')
-        const os = require('os')
-
         const commandObj = {}
         Command.mockImplementationOnce(() => commandObj)
         commandObj.name = jest.fn().mockImplementationOnce(() => commandObj)
@@ -148,7 +152,7 @@ describe('cliProgram', () => {
             }
 
             expect(run).toHaveBeenCalledWith(['someArgs'])
-            expect(console.error).toHaveBeenCalledWith('[Gushio] %s', error.message)
+            expect(console.error).toHaveBeenCalledWith(GushioLogFormat, error.message)
         })
 
         test('failure LoadingError', async () => {
@@ -165,7 +169,7 @@ describe('cliProgram', () => {
             }
 
             expect(run).toHaveBeenCalledWith(['someArgs'])
-            expect(console.error).toHaveBeenCalledWith('[Gushio] %s', error.message)
+            expect(console.error).toHaveBeenCalledWith(GushioLogFormat, error.message)
         })
 
         test('failure generic Error', async () => {
@@ -182,7 +186,7 @@ describe('cliProgram', () => {
             }
 
             expect(run).toHaveBeenCalledWith(['someArgs'])
-            expect(console.error).toHaveBeenCalledWith('[Gushio] %s', error.stack)
+            expect(console.error).toHaveBeenCalledWith(GushioLogFormat, error.stack)
         })
     })
 

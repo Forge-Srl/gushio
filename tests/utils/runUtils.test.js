@@ -1,14 +1,16 @@
+import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect} from '@jest/globals'
+
 describe('runUtils', () => {
     let createRun, shelljs, parseCommandLineArgsAndOpts
 
-    beforeEach(() => {
-        jest.mock('shelljs')
-        shelljs = require('shelljs')
+    beforeEach(async () => {
+        shelljs = jest.fn()
+        jest.unstable_mockModule('shelljs', () => ({default: shelljs}))
 
-        jest.mock('../../utils/parsingUtils')
-        parseCommandLineArgsAndOpts = require('../../utils/parsingUtils').parseCommandLineArgsAndOpts
+        parseCommandLineArgsAndOpts = jest.fn()
+        jest.unstable_mockModule('../../utils/parsingUtils.js', () => ({parseCommandLineArgsAndOpts}))
 
-        createRun = require('../../utils/runUtils').createRun
+        createRun = (await import('../../utils/runUtils')).createRun
     })
 
     describe('createRun', () => {

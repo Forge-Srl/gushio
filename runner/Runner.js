@@ -1,28 +1,27 @@
-const {Command, Argument, Option} = require('commander')
-const path = require('path')
-const crypto = require('crypto')
-const isString = require('is-string')
-const {
-    requireStrategy,
-    buildPatchedRequire,
+import path from 'path'
+import crypto from 'crypto'
+import {Argument, Command, Option} from 'commander'
+import isString from 'is-string'
+import {
+    buildPatchedImport,
+    checkDependencyInstalled,
     dependencyDescriptor,
     ensureNodeModulesExists,
-    checkDependencyInstalled,
-    installDependency
-} = require('../utils/dependenciesUtils')
-const {GushioLogFormat} = require('./GushioConsole')
-const {ScriptChecker} = require('./ScriptChecker')
-const {LoadingError, RunningError, parseSyntaxError} = require('./errors')
-const {FunctionWrapper} = require('./patches/FunctionWrapper')
-const {patchedRequireWrapper} = require('./patches/patchedRequireWrapper')
-const {patchedConsoleWrapper} = require('./patches/patchedConsoleWrapper')
-const {patchedStringWrapper} = require('./patches/patchedStringWrapper')
-const {fetchWrapper} = require('./patches/fetchWrapper')
-const {YAMLWrapper} = require('./patches/YAMLWrapper')
-const {fileSystemWrapper} = require('./patches/fileSystemWrapper')
-const {gushioWrapper} = require('./patches/gushioWrapper')
+    installDependency,
+    requireStrategy,
+} from '../utils/dependenciesUtils.js'
+import {GushioLogFormat} from './GushioConsole.js'
+import {ScriptChecker} from './ScriptChecker.js'
+import {LoadingError, parseSyntaxError, RunningError} from './errors.js'
+import {FunctionWrapper} from './patches/FunctionWrapper.js'
+import {patchedConsoleWrapper} from './patches/patchedConsoleWrapper.js'
+import {patchedStringWrapper} from './patches/patchedStringWrapper.js'
+import {fetchWrapper} from './patches/fetchWrapper.js'
+import {YAMLWrapper} from './patches/YAMLWrapper.js'
+import {fileSystemWrapper} from './patches/fileSystemWrapper.js'
+import {gushioWrapper} from './patches/gushioWrapper.js'
 
-class Runner {
+export class Runner {
 
     static async fromPath(application, scriptPath, workingDir, gushioGeneralPath) {
         if (scriptPath.startsWith('http')) {
@@ -135,17 +134,18 @@ class Runner {
     }
 
     buildCombinedFunctionWrapper(dependencies) {
-        const patchedRequire = buildPatchedRequire(this.gushioFolder, dependencies, !this.console.isVerbose)
+        const patchedImport = buildPatchedImport(this.gushioFolder, dependencies, !this.console.isVerbose)
         const buildSimilarRunner = async (scriptPath, workingDir) =>
             await this.similarRunnerFromPath(scriptPath, workingDir)
+
         return FunctionWrapper.combine(
-            patchedRequireWrapper(patchedRequire),
+            //patchedRequireWrapper(patchedImport),
             patchedStringWrapper(),
             patchedConsoleWrapper(this.console),
             fetchWrapper(),
             YAMLWrapper(),
             fileSystemWrapper(this.console.isVerbose),
-            gushioWrapper(buildSimilarRunner),
+            gushioWrapper(buildSimilarRunner, patchedImport),
         )
     }
 
@@ -221,5 +221,3 @@ class Runner {
         await command.parseAsync([this.application, this.scriptPath, ...args])
     }
 }
-
-module.exports = {Runner}

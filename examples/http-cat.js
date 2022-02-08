@@ -11,7 +11,7 @@ module.exports = {
         {name: 'terminaltools', version: '2.1.0'}
     ],
     run: async (args, flags) => {
-        const tools = require('terminaltools')
+        const tools = await gushio.import('terminaltools')
 
         let statusCode = Number.parseInt(args[0])
         while (!Number.isInteger(statusCode) || statusCode < 0) {

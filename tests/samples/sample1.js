@@ -19,7 +19,7 @@ module.exports = {
         {name: 'is-odd'},
     ],
     run: async (args, options) => {
-        const odd = require('is-odd')
+        const {default: odd} = await gushio.import('is-odd')
 
         console.log('args -->'.red, args)
         console.log('options -->'.green.bold, options)

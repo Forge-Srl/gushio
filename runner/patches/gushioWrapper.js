@@ -1,14 +1,18 @@
-const {FunctionWrapper} = require('./FunctionWrapper')
-const {createRun} = require('../../utils/runUtils')
-const packageInfo = require('../../package.json')
-const semverParse = require('semver/functions/parse')
+import {createRequire} from 'module'
+import semverParse from 'semver/functions/parse.js'
+import {FunctionWrapper} from './FunctionWrapper.js'
+import {createRun} from '../../utils/runUtils.js'
 
-const gushioWrapper = (buildRunner) => {
+const require = createRequire(import.meta.url)
+const packageInfo = require('../../package.json')
+
+export const gushioWrapper = (buildRunner, patchedImport) => {
     const originalGushio = global.gushio
     const before = () => {
         global.gushio = {
             run: createRun(buildRunner),
-            version: semverParse(packageInfo.version)
+            version: semverParse(packageInfo.version),
+            import: patchedImport
         }
     }
     const after = () => {
@@ -17,5 +21,3 @@ const gushioWrapper = (buildRunner) => {
 
     return new FunctionWrapper(before, after)
 }
-
-module.exports = {gushioWrapper}

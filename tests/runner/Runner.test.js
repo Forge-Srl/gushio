@@ -1,47 +1,54 @@
+import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect} from '@jest/globals'
+
 describe('Runner', () => {
-    let Runner, LoadingError, RunningError, parseSyntaxError, ScriptChecker, dependenciesUtils, patchedRequireWrapper,
+    let Runner, LoadingError, RunningError, parseSyntaxError, ScriptChecker, dependenciesUtils,
         patchedStringWrapper, patchedConsoleWrapper, fetchWrapper, YAMLWrapper, fileSystemWrapper, gushioWrapper,
-        FunctionWrapper, Command, Argument, Option, path
+        FunctionWrapper, Command, Argument, Option, mockedPath
 
-    beforeEach(() => {
-        jest.mock('path')
-        path = require('path')
+    beforeEach(async () => {
+        mockedPath = jest.fn()
+        jest.unstable_mockModule('path', () => ({default: mockedPath}))
 
-        jest.mock('../../runner/ScriptChecker')
-        ScriptChecker = require('../../runner/ScriptChecker').ScriptChecker
+        ScriptChecker = jest.fn()
+        jest.unstable_mockModule('../../runner/ScriptChecker.js', () => ({ScriptChecker}))
 
-        jest.mock('../../utils/dependenciesUtils')
-        dependenciesUtils = require('../../utils/dependenciesUtils')
+        dependenciesUtils = {
+            buildPatchedImport: jest.fn(),
+            checkDependencyInstalled: jest.fn(),
+            dependencyDescriptor: jest.fn(),
+            ensureNodeModulesExists: jest.fn(),
+            installDependency: jest.fn(),
+            requireStrategy: jest.fn(),
+        }
+        jest.unstable_mockModule('../../utils/dependenciesUtils.js', () => dependenciesUtils)
 
-        jest.mock('../../runner/patches/patchedRequireWrapper')
-        patchedRequireWrapper = require('../../runner/patches/patchedRequireWrapper').patchedRequireWrapper
-        jest.mock('../../runner/patches/patchedStringWrapper')
-        patchedStringWrapper = require('../../runner/patches/patchedStringWrapper').patchedStringWrapper
-        jest.mock('../../runner/patches/patchedConsoleWrapper')
-        patchedConsoleWrapper = require('../../runner/patches/patchedConsoleWrapper').patchedConsoleWrapper
-        jest.mock('../../runner/patches/fetchWrapper')
-        fetchWrapper = require('../../runner/patches/fetchWrapper').fetchWrapper
-        jest.mock('../../runner/patches/YAMLWrapper')
-        YAMLWrapper = require('../../runner/patches/YAMLWrapper').YAMLWrapper
-        jest.mock('../../runner/patches/fileSystemWrapper')
-        fileSystemWrapper = require('../../runner/patches/fileSystemWrapper').fileSystemWrapper
-        jest.mock('../../runner/patches/gushioWrapper')
-        gushioWrapper = require('../../runner/patches/gushioWrapper').gushioWrapper
+        patchedStringWrapper = jest.fn()
+        jest.unstable_mockModule('../../runner/patches/patchedStringWrapper.js', () => ({patchedStringWrapper}))
+        patchedConsoleWrapper = jest.fn()
+        jest.unstable_mockModule('../../runner/patches/patchedConsoleWrapper.js', () => ({patchedConsoleWrapper}))
+        fetchWrapper = jest.fn()
+        jest.unstable_mockModule('../../runner/patches/fetchWrapper.js', () => ({fetchWrapper}))
+        YAMLWrapper = jest.fn()
+        jest.unstable_mockModule('../../runner/patches/YAMLWrapper.js', () => ({YAMLWrapper}))
+        fileSystemWrapper = jest.fn()
+        jest.unstable_mockModule('../../runner/patches/fileSystemWrapper.js', () => ({fileSystemWrapper}))
+        gushioWrapper = jest.fn()
+        jest.unstable_mockModule('../../runner/patches/gushioWrapper.js', () => ({gushioWrapper}))
 
-        jest.mock('../../runner/patches/FunctionWrapper')
-        FunctionWrapper = require('../../runner/patches/FunctionWrapper').FunctionWrapper
+        FunctionWrapper = jest.fn()
+        jest.unstable_mockModule('../../runner/patches/FunctionWrapper.js', () => ({FunctionWrapper}))
 
-        jest.mock('../../runner/errors')
-        LoadingError = require('../../runner/errors').LoadingError
-        RunningError = require('../../runner/errors').RunningError
-        parseSyntaxError = require('../../runner/errors').parseSyntaxError
+        LoadingError = jest.fn()
+        RunningError = jest.fn()
+        parseSyntaxError = jest.fn()
+        jest.unstable_mockModule('../../runner/errors.js', () => ({LoadingError, RunningError, parseSyntaxError }))
 
-        jest.mock('commander')
-        Command = require('commander').Command
-        Argument = require('commander').Argument
-        Option = require('commander').Option
+        Command = jest.fn()
+        Argument = jest.fn()
+        Option = jest.fn()
+        jest.unstable_mockModule('commander', () => ({Command, Argument, Option}))
 
-        Runner = require('../../runner/Runner').Runner
+        Runner = (await import('../../runner/Runner.js')).Runner
     })
 
     describe('fromPath', () => {
@@ -65,7 +72,7 @@ describe('Runner', () => {
         test('Local path', async () => {
             const scriptPath = 'some/local/path'
             dependenciesUtils.requireStrategy.localPath = 'local strategy'
-            path.resolve.mockImplementationOnce(() => 'local/dir')
+            mockedPath.resolve = jest.fn().mockImplementationOnce(() => 'local/dir')
             Runner.fromRequire = (application, scriptPath, requireStrategy, gushioGeneralPath) => {
                 expect(application).toBe(app)
                 expect(scriptPath).toBe('local/dir')
@@ -75,7 +82,7 @@ describe('Runner', () => {
             }
 
             expect(await Runner.fromPath(app, scriptPath, workingDir, gushioPath)).toBe('runnerObj')
-            expect(path.resolve).toHaveBeenCalledWith(workingDir, scriptPath)
+            expect(mockedPath.resolve).toHaveBeenCalledWith(workingDir, scriptPath)
         })
     })
 
@@ -224,13 +231,15 @@ describe('Runner', () => {
         [{version: 'my super   duper\tversion'}, '0d858590-my_super_duper_version'],
         [{name: 'script name'}, '0d858590-script_name'],
         [{}, '0d858590'],
-    ])('gushioFolder', (cli, expected) => {
-        const path = require('path')
-        const generalPath = path.resolve('fake_folder')
-        const runner = new Runner('appPath', 'scriptPath', 'run', cli, undefined, generalPath)
+    ])('gushioFolder', async (cli, expected) => {
+        mockedPath.resolve = jest.fn().mockImplementationOnce(() => 'resolved_folder')
+        const runner = new Runner('appPath', 'scriptPath', 'run', cli, undefined, 'fake_folder')
 
-        expect(runner.gushioFolder)
-            .toBe(path.resolve(generalPath, expected))
+        expect(runner.gushioFolder).toBe('resolved_folder')
+        expect(mockedPath.resolve).toHaveBeenCalledWith('fake_folder', expected)
+        // Call again to check caching
+        expect(runner.gushioFolder).toBe('resolved_folder')
+        expect(mockedPath.resolve).toHaveBeenCalledTimes(1)
     })
 
     describe('installDependency', () => {
@@ -294,14 +303,10 @@ describe('Runner', () => {
         runner.console = {verbose: jest.fn(), isVerbose: true}
         runner._gushioFolder = 'someFolder'
 
-        dependenciesUtils.buildPatchedRequire.mockImplementationOnce((path, allowedDeps) => {
+        dependenciesUtils.buildPatchedImport.mockImplementationOnce((path, allowedDeps) => {
             expect(path).toBe('someFolder')
             expect(allowedDeps).toStrictEqual(['dep1', 'dep2'])
             return 'patched'
-        })
-        patchedRequireWrapper.mockImplementationOnce((patchedRequire) => {
-            expect(patchedRequire).toBe('patched')
-            return 'patchedRequireWrapper'
         })
         patchedStringWrapper.mockImplementationOnce(() => 'patchedStringWrapper')
         patchedConsoleWrapper.mockImplementationOnce((console) => {
@@ -322,7 +327,7 @@ describe('Runner', () => {
         })
         FunctionWrapper.combine = (...runners) => {
             expect(runners).toStrictEqual([
-                'patchedRequireWrapper', 'patchedStringWrapper', 'patchedConsoleWrapper', 'fetchWrapper',
+                'patchedStringWrapper', 'patchedConsoleWrapper', 'fetchWrapper',
                 'YAMLWrapper', 'fileSystemWrapper', 'gushioWrapper'
             ])
             return 'combined'

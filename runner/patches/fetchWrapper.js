@@ -1,7 +1,7 @@
-const {FunctionWrapper} = require('./FunctionWrapper')
-const {fetch: nodeFetch} = require('../../utils/fetch')
+import {FunctionWrapper} from './FunctionWrapper.js'
+import {default as nodeFetch} from 'node-fetch'
 
-const fetchWrapper = () => {
+export const fetchWrapper = () => {
     const originalFetch = global.fetch
     const before = () => {
         global.fetch = nodeFetch
@@ -12,5 +12,3 @@ const fetchWrapper = () => {
 
     return new FunctionWrapper(before, after)
 }
-
-module.exports = {fetchWrapper}

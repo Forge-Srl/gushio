@@ -3,7 +3,7 @@ const SINGLE_QUOTE = '\''
 const NO_QUOTE = Symbol('No quote')
 const SINGLE_CHAR_POSSIBLY_ESCAPED = /\\?.|^$/g
 
-const parseCommandLineArgsAndOpts = (argsString) => {
+export const parseCommandLineArgsAndOpts = (argsString) => {
     const aggregator = {
         result: [''],
         quote: false,
@@ -48,5 +48,3 @@ const parseCommandLineArgsAndOpts = (argsString) => {
 
     return parsedArgs.result.filter(string => string)
 }
-
-module.exports = {parseCommandLineArgsAndOpts}

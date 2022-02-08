@@ -1,8 +1,10 @@
+import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect} from '@jest/globals'
+
 describe('FunctionWrapper', () => {
     let FunctionWrapper
 
-    beforeEach(() => {
-        FunctionWrapper = require('../../../runner/patches/FunctionWrapper').FunctionWrapper
+    beforeEach(async () => {
+        FunctionWrapper = (await import('../../../runner/patches/FunctionWrapper')).FunctionWrapper
     })
 
     test('run', async () => {

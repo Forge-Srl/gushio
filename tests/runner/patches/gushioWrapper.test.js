@@ -1,15 +1,19 @@
-describe('gushioWrapper', () => {
-    let wrapper, createRun, semverParse, packageInfo
+import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect} from '@jest/globals'
+import {createRequire} from 'module'
+const require = createRequire(import.meta.url)
 
-    beforeEach(() => {
-        jest.mock('../../../utils/runUtils')
-        createRun = require('../../../utils/runUtils').createRun
-        jest.mock('semver/functions/parse')
-        semverParse = require('semver/functions/parse')
+describe('gushioWrapper', () => {
+    let gushioWrapper, createRun, semverParse, packageInfo
+
+    beforeEach(async () => {
+        createRun = jest.fn()
+        jest.unstable_mockModule('../../../utils/runUtils.js', () => ({createRun}))
+        semverParse = jest.fn()
+        jest.unstable_mockModule('semver/functions/parse.js', () => ({default: semverParse}))
 
         packageInfo = require('../../../package.json')
 
-        wrapper = require('../../../runner/patches/gushioWrapper')
+        gushioWrapper = (await import('../../../runner/patches/gushioWrapper.js')).gushioWrapper
     })
 
     test('gushioWrapper', async () => {
@@ -25,12 +29,13 @@ describe('gushioWrapper', () => {
         const fn = async () => {
             expect(global.gushio).toStrictEqual({
                 run: 'gushioRun',
-                version: 'semver'
+                version: 'semver',
+                import: 'import',
             })
             return 'something'
         }
         expect(global.gushio).toBeUndefined()
-        expect(await wrapper.gushioWrapper('runner').run(fn)).toBe('something')
+        expect(await gushioWrapper('runner', 'import').run(fn)).toBe('something')
         expect(global.gushio).toBeUndefined()
     })
 })

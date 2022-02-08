@@ -1,27 +1,26 @@
+import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect} from '@jest/globals'
+import * as URL from 'url'
+
 describe('dependenciesUtils', () => {
-    let shelljs, mockRequireFromString, fsExtra, fetch, requireStrategy, buildPatchedRequire, dependencyDescriptor,
-        ensureNodeModulesExists, checkDependencyInstalled, installDependency, Module
+    let shelljs, mockRequireFromString, fsExtra, fetch, requireStrategy, buildPatchedImport, dependencyDescriptor,
+        ensureNodeModulesExists, checkDependencyInstalled, installDependency
 
-    beforeEach(() => {
-        jest.mock('shelljs', () => ({dummy: 'dummy'}))
-        shelljs = require('shelljs')
-
+    beforeEach(async () => {
+        shelljs = {dummy: 'dummy'}
+        jest.unstable_mockModule('shelljs', () => ({default: shelljs}))
         mockRequireFromString = jest.fn()
-        jest.mock('require-from-string', () => mockRequireFromString)
+        jest.unstable_mockModule('require-from-string', () => ({default: mockRequireFromString}))
+        fsExtra = jest.fn()
+        jest.unstable_mockModule('fs-extra', () => ({default: fsExtra}))
+        fetch = jest.fn()
+        jest.unstable_mockModule('node-fetch', () => ({default: fetch}))
 
-        jest.mock('fs-extra')
-        fsExtra = require('fs-extra')
-        jest.mock('../../utils/fetch')
-        fetch = require('../../utils/fetch').fetch
-
-        Module = require('module')
-
-        requireStrategy = require('../../utils/dependenciesUtils').requireStrategy
-        buildPatchedRequire = require('../../utils/dependenciesUtils').buildPatchedRequire
-        dependencyDescriptor = require('../../utils/dependenciesUtils').dependencyDescriptor
-        ensureNodeModulesExists = require('../../utils/dependenciesUtils').ensureNodeModulesExists
-        checkDependencyInstalled = require('../../utils/dependenciesUtils').checkDependencyInstalled
-        installDependency = require('../../utils/dependenciesUtils').installDependency
+        requireStrategy = (await import('../../utils/dependenciesUtils')).requireStrategy
+        buildPatchedImport = (await import('../../utils/dependenciesUtils')).buildPatchedImport
+        dependencyDescriptor = (await import('../../utils/dependenciesUtils')).dependencyDescriptor
+        ensureNodeModulesExists = (await import('../../utils/dependenciesUtils')).ensureNodeModulesExists
+        checkDependencyInstalled = (await import('../../utils/dependenciesUtils')).checkDependencyInstalled
+        installDependency = (await import('../../utils/dependenciesUtils')).installDependency
     })
 
     describe('requireStrategy', () => {
@@ -32,7 +31,7 @@ describe('dependenciesUtils', () => {
         })
 
         test('localPath', async () => {
-            fsExtra.readFile.mockImplementationOnce(file => ({toString: () => 'someCode'}))
+            fsExtra.readFile = jest.fn().mockImplementationOnce(file => ({toString: () => 'someCode'}))
             requireStrategy.inMemoryString = (code, filename) => {
                 expect(code).toBe('someCode')
                 expect(filename).toBe('someFile')
@@ -61,45 +60,69 @@ describe('dependenciesUtils', () => {
         })
     })
 
-    describe('buildPatchedRequire', () => {
-        let patchedRequire
+    describe('buildPatchedImport', () => {
+        const folder = 'localFolder'
+        let patchedImport
 
         beforeEach(() => {
-            patchedRequire = buildPatchedRequire('localFolder', ['installed-fake-module'])
-            expect(patchedRequire.__originalRequire).toBe(Module.prototype.require)
+            patchedImport = buildPatchedImport(folder, ['installed-fake-module'])
         })
 
-        test('not found', () => {
-            patchedRequire.__originalRequire = function(id) {
-                expect(id).toBe('installed-fake-module')
-                throw new Error()
-            }
-            expect(() => patchedRequire('installed-fake-module'))
+        test('not found', async () => {
+            await expect(patchedImport('installed-fake-module')).rejects
                 .toThrow('Dependency "installed-fake-module" should be installed but was not found')
         })
 
-        test('not available', () => {
-            patchedRequire.__originalRequire = function(id) {
-                expect(id).toBe('other-fake-module')
-                throw new Error()
-            }
-            expect(() => patchedRequire('other-fake-module'))
+        test('not available', async () => {
+            await expect(patchedImport('other-fake-module')).rejects
                 .toThrow('Dependency "other-fake-module" has been required but is not available')
         })
 
         test.each([
             'shelljs'
-        ])('found %s', (dep) => {
-            patchedRequire.__originalRequire = undefined
-            expect(patchedRequire(dep)).toBe(require(dep))
+        ])('found %s', async (dep) => {
+            expect(await patchedImport(dep)).toBe((await import(dep)).default)
         })
 
-        test('found in local folder', () => {
-            patchedRequire.__originalRequire = function(id) {
-                expect(id).toBe('localFolder/node_modules/a-fake-module')
-                return 'theModule'
-            }
-            expect(patchedRequire('a-fake-module')).toBe('theModule')
+        test.each([
+            'path',
+            'os',
+            'module'
+        ])('found core module %s', async (dep) => {
+            expect(await patchedImport(dep)).toBe(await import(dep))
+        })
+
+        test.each([
+            {},
+            {main: 'index.js'},
+            {main: '/'},
+            {exports: 'index.js'},
+            {exports: '/'},
+            {exports: {import: 'index.js'}},
+            {exports: {import: '/'}},
+            {exports: {'.': 'index.js'}},
+            {exports: {'.': '/'}},
+            {exports: {'.': {import: 'index.js'}}},
+            {exports: {'.': {import: '/'}}},
+            {exports: {'.': {import: null}}},
+        ])('found in local folder %p', async (pkgStructure) => {
+            const moduleMock = {default: 'theModule'}
+            const moduleMockName = URL.fileURLToPath(`file://${folder}/node_modules/a-fake-module/index.js`)
+            const moduleMockFactory = () => moduleMock
+            const moduleMockOptions = {virtual: true}
+
+            jest.mock(moduleMockName, moduleMockFactory, moduleMockOptions)
+            jest.unstable_mockModule(moduleMockName, moduleMockFactory, moduleMockOptions)
+
+            fsExtra.readJson = jest.fn().mockImplementationOnce((path) => {
+                expect(path).toBe(`${folder}/node_modules/a-fake-module/package.json`)
+                return pkgStructure
+            })
+
+            expect(JSON.stringify(await patchedImport('a-fake-module'))).toStrictEqual(JSON.stringify(moduleMock))
+            // call again to assert caching
+            expect(JSON.stringify(await patchedImport('a-fake-module'))).toStrictEqual(JSON.stringify(moduleMock))
+            expect(fsExtra.readJson).toHaveBeenCalledTimes(1)
         })
     })
 

@@ -1,7 +1,7 @@
-const {Console} = require('console')
-const Enquirer = require('enquirer')
-const isString = require('is-string')
-const {ora} = require('../utils/ora')
+import {Console} from 'console'
+import Enquirer from 'enquirer'
+import isString from 'is-string'
+import {oraPromise} from 'ora'
 
 const LOG_LEVELS = {
     verbose: 10,
@@ -10,9 +10,9 @@ const LOG_LEVELS = {
     silent: 0
 }
 
-const GushioLogFormat = '[Gushio] %s'
+export const GushioLogFormat = '[Gushio] %s'
 
-class GushioConsole extends Console {
+export class GushioConsole extends Console {
 
     constructor(stdin, stdout, stderr, logLevel = 'info') {
         super({stdout, stderr, groupIndentation: 4})
@@ -70,12 +70,10 @@ class GushioConsole extends Console {
             settings = Object.assign({stream: this._stdout}, textOrSettings)
         }
         settings.isSilent = !this.isInfo
-        return await ora(promise, settings)
+        return await oraPromise(promise, settings)
     }
 
     async input(...questions) {
         return await this.enquirer.prompt(questions)
     }
 }
-
-module.exports = {GushioConsole, GushioLogFormat}

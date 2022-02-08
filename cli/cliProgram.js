@@ -1,13 +1,16 @@
-const {Command, Option} = require('commander')
-const path = require('path')
-const os = require('os')
+import os from 'os'
+import path from 'path'
+import {createRequire} from 'module'
+import {Command, Option} from 'commander'
+import {Runner} from '../runner/Runner.js'
+import {LoadingError, RunningError} from '../runner/errors.js'
+import {GushioConsole, GushioLogFormat} from '../runner/GushioConsole.js'
+
+const require = createRequire(import.meta.url)
 const packageInfo = require('../package.json')
-const {Runner} = require('../runner/Runner')
-const {RunningError, LoadingError} = require('../runner/errors')
-const {GushioConsole, GushioLogFormat} = require('../runner/GushioConsole')
 const GUSHIO_FOLDER_NAME = '.gushio'
 
-class Program {
+export class Program {
 
     constructor(stdin, stdout, stderr) {
         this.stdin = stdin
@@ -27,7 +30,7 @@ class Program {
                 const runner = (await Runner.fromPath(command.rawArgs[1], scriptPath, workingDir, options.gushioFolder))
                     .setConsole(console)
                     .setOptions({
-                        cleanRun: options.cleanRun
+                        cleanRun: options.cleanRun,
                     })
                 const _removedScriptPathArg = command.args.shift()
 
@@ -79,10 +82,8 @@ class Program {
     }
 }
 
-const start = () => {
+export const start = () => {
     return new Program(process.stdin, process.stdout, process.stderr)
         .start(process.cwd(), process.argv)
         .then(exitCode => process.exit(exitCode))
 }
-
-module.exports = {start, Program}

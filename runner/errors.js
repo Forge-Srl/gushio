@@ -1,11 +1,11 @@
-class ScriptError extends Error {
+export class ScriptError extends Error {
     constructor(message, errorCode) {
         super(message)
         this.errorCode = errorCode
     }
 }
 
-class LoadingError extends ScriptError {
+export class LoadingError extends ScriptError {
     static get code() {
         return 2
     }
@@ -15,7 +15,7 @@ class LoadingError extends ScriptError {
     }
 }
 
-class RunningError extends ScriptError {
+export class RunningError extends ScriptError {
     static get code() {
         return 1
     }
@@ -25,7 +25,7 @@ class RunningError extends ScriptError {
     }
 }
 
-const parseSyntaxError = (error) => {
+export const parseSyntaxError = (error) => {
     const stackLines = error.stack.substring(0, error.stack.indexOf('    at '))
         .split('\n')
         .filter(l => l)
@@ -40,5 +40,3 @@ const parseSyntaxError = (error) => {
         details: errorDetails,
     }
 }
-
-module.exports = {ScriptError, LoadingError, RunningError, parseSyntaxError}

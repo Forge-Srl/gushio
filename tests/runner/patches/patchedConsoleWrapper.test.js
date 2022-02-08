@@ -1,8 +1,10 @@
+import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect} from '@jest/globals'
+
 describe('patchedConsoleWrapper', () => {
     let patchedConsoleWrapper
 
-    beforeEach(() => {
-        patchedConsoleWrapper = require('../../../runner/patches/patchedConsoleWrapper').patchedConsoleWrapper
+    beforeEach(async () => {
+        patchedConsoleWrapper = (await import('../../../runner/patches/patchedConsoleWrapper.js')).patchedConsoleWrapper
     })
 
     test('patchedConsoleWrapper', async () => {

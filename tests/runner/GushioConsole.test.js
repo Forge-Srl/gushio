@@ -1,4 +1,5 @@
-const {Readable, Writable} = require('stream')
+import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect} from '@jest/globals'
+import {Readable, Writable} from 'stream'
 
 describe('GushioConsole', () => {
     let superConsole, GushioConsole, GushioLogFormat, Enquirer, enquirer, ora, inStream, outStream, errStream, myConsole
@@ -8,17 +9,17 @@ describe('GushioConsole', () => {
     // This is probably a Jest bug, but I have no time to investigate further...
     const dio = jest.fn()
 
-    beforeEach(() => {
+    beforeEach(async () => {
         inStream = new Readable()
         outStream = new Writable()
         errStream = new Writable()
 
-        jest.mock('../../utils/ora', () => ({ora: dio}))
-        ora = require('../../utils/ora').ora
+        ora = dio
+        jest.unstable_mockModule('ora', () => ({ora, oraPromise: ora}))
 
         enquirer = {}
-        jest.mock('enquirer')
-        Enquirer = require('enquirer')
+        Enquirer = jest.fn()
+        jest.unstable_mockModule('enquirer', () => ({default: Enquirer}))
         Enquirer.mockImplementationOnce((options) => {
             //TODO: uncomment together with GushioConsole.js line 21
             //expect(options).toStrictEqual({stdin: inStream, stdout: outStream})
@@ -42,10 +43,10 @@ describe('GushioConsole', () => {
             log(...args) { this.logMock(...args) }
             error(...args) { this.errorMock(...args) }
         }
-        jest.mock('console', () => ({Console: MockConsole}))
+        jest.unstable_mockModule('console', () => ({Console: MockConsole}))
 
-        GushioConsole = require('../../runner/GushioConsole').GushioConsole
-        GushioLogFormat = require('../../runner/GushioConsole').GushioLogFormat
+        GushioConsole = (await import('../../runner/GushioConsole')).GushioConsole
+        GushioLogFormat = (await import('../../runner/GushioConsole')).GushioLogFormat
         myConsole = new GushioConsole(inStream, outStream, errStream)
         expect(myConsole.logLevel).toBe('info')
     })

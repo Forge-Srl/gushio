@@ -1,4 +1,4 @@
-class FunctionWrapper {
+export class FunctionWrapper {
     static combine(...wrappers) {
         const before = async () => {
             for (let i = 0; i < wrappers.length; i++) {
@@ -25,5 +25,3 @@ class FunctionWrapper {
         return result
     }
 }
-
-module.exports = {FunctionWrapper}

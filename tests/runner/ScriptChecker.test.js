@@ -1,10 +1,12 @@
+import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect} from '@jest/globals'
+
 describe('ScriptChecker', () => {
     const scriptPath = 'path'
     let ScriptChecker, LoadingError, checker
 
-    beforeEach(() => {
-        ScriptChecker = require('../../runner/ScriptChecker').ScriptChecker
-        LoadingError = require('../../runner/errors').LoadingError
+    beforeEach(async () => {
+        ScriptChecker = (await import('../../runner/ScriptChecker')).ScriptChecker
+        LoadingError = (await import('../../runner/errors')).LoadingError
         checker = new ScriptChecker(scriptPath)
     })
 

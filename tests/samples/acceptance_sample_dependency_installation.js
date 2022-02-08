@@ -8,8 +8,8 @@ module.exports = {
         {name: 'is-odd', alias: 'check-odd'}
     ],
     run: async (args, options) => {
-        const _jimp = require('jimp')
-        const _checkOdd = require('check-odd')
+        const _jimp = await gushio.import('jimp')
+        const _checkOdd = await gushio.import('check-odd')
 
         console.log(`Written on console ${'after'.bold.yellow} requiring deps`)
     },

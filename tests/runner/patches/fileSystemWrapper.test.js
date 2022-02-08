@@ -1,20 +1,25 @@
-describe('fetchWrapper', () => {
+import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect} from '@jest/globals'
+import {createRequire} from 'module'
+const require = createRequire(import.meta.url)
+
+describe('fileSystemWrapper', () => {
     let fileSystemWrapper, fsExtra, shelljs, glob
 
-    beforeEach(() => {
-        jest.mock('fs-extra')
-        fsExtra = require('fs-extra')
-        jest.mock('shelljs')
-        shelljs = require('shelljs')
-        jest.mock('glob')
-        glob = require('glob')
-        fileSystemWrapper = require('../../../runner/patches/fileSystemWrapper').fileSystemWrapper
+    beforeEach(async () => {
+        fsExtra = jest.fn()
+        jest.unstable_mockModule('fs-extra', () => ({default: fsExtra}))
+        shelljs = jest.fn()
+        jest.unstable_mockModule('shelljs', () => ({default: shelljs}))
+        glob = jest.fn()
+        jest.unstable_mockModule('glob', () => ({default: glob}))
+
+        fileSystemWrapper = (await import('../../../runner/patches/fileSystemWrapper')).fileSystemWrapper
     })
 
     test.each([
         true, false
-    ])('fetchWrapper %p', async (isVerbose) => {
-        fsExtra.readFile.mockImplementationOnce(() => 'fileContent')
+    ])('fileSystemWrapper %p', async (isVerbose) => {
+        fsExtra.readFile = jest.fn().mockImplementationOnce(() => 'fileContent')
         shelljs.pwd = jest.fn().mockImplementation(() => 'workingDir')
         glob.mockImplementationOnce((pattern, options, callback) => {
             expect(pattern).toBe('pattern1')

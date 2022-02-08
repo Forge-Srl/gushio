@@ -1,7 +1,7 @@
-const {FunctionWrapper} = require('./FunctionWrapper')
-const YAML = require('yaml')
+import YAML from 'yaml'
+import {FunctionWrapper} from './FunctionWrapper.js'
 
-const YAMLWrapper = () => {
+export const YAMLWrapper = () => {
     const originalYAML = global.YAML
     const before = () => {
         global.YAML = YAML
@@ -12,5 +12,3 @@ const YAMLWrapper = () => {
 
     return new FunctionWrapper(before, after)
 }
-
-module.exports = {YAMLWrapper}

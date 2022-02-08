@@ -1,3 +1,3 @@
 #!/usr/bin/env node
-
-require('./cliProgram').start()
+import {start} from './cliProgram.js'
+await start()

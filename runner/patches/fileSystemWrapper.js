@@ -1,10 +1,10 @@
-const {FunctionWrapper} = require('./FunctionWrapper')
-const shell = require('shelljs')
-const fsExtra = require('fs-extra')
-const glob = require('glob')
-const path = require('path')
+import path from 'path'
+import fsExtra from 'fs-extra'
+import glob from 'glob'
+import shell from 'shelljs'
+import {FunctionWrapper} from './FunctionWrapper.js'
 
-const fileSystemWrapper = (isVerbose) => {
+export const fileSystemWrapper = (isVerbose) => {
     const originalFs = global.fs
     const before = () => {
         global.fs = fsExtra
@@ -24,5 +24,3 @@ const fileSystemWrapper = (isVerbose) => {
 
     return new FunctionWrapper(before, after)
 }
-
-module.exports = {fileSystemWrapper}

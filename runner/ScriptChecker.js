@@ -1,6 +1,6 @@
-const {LoadingError} = require('./errors')
+import {LoadingError} from './errors.js'
 
-class ScriptChecker {
+export class ScriptChecker {
 
     constructor(scriptPath) {
         this.scriptPath = scriptPath
@@ -86,5 +86,3 @@ class ScriptChecker {
         }
     }
 }
-
-module.exports = {ScriptChecker}

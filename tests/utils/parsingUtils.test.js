@@ -1,8 +1,10 @@
+import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect} from '@jest/globals'
+
 describe('parsingUtils', () => {
     let parseCommandLineArgsAndOpts
 
-    beforeEach(() => {
-        parseCommandLineArgsAndOpts = require('../../utils/parsingUtils').parseCommandLineArgsAndOpts
+    beforeEach(async () => {
+        parseCommandLineArgsAndOpts = (await import('../../utils/parsingUtils')).parseCommandLineArgsAndOpts
     })
 
     test.each([
