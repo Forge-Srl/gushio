@@ -105,14 +105,15 @@ export const ensureNodeModulesExists = async (folder, clear) => new Promise((res
     resolve()
 })
 
-export const checkDependencyInstalled = async (folder, npmInstallVersion, silent = true) => new Promise((resolve, reject) => {
-    const exec = shell.exec(`npm list --depth=0 --prefix ${folder} ${npmInstallVersion}`, {silent})
-    if (exec.code !== 0) {
-        reject(new Error(`Cannot find "${npmInstallVersion}" in "${folder}"`))
-        return
-    }
-    resolve()
-})
+export const checkDependencyInstalled = async (folder, npmInstallVersion, silent = true) =>
+    new Promise((resolve, reject) => {
+        const exec = shell.exec(`npm list --depth=0 --prefix ${folder} ${npmInstallVersion}`, {silent})
+        if (exec.code !== 0) {
+            reject(new Error(`Cannot find "${npmInstallVersion}" in "${folder}"`))
+            return
+        }
+        resolve()
+    })
 
 export const installDependency = async (folder, npmInstallVersion, silent = true) => new Promise((resolve, reject) => {
     const exec = shell.exec(`npm install --prefix ${folder} ${npmInstallVersion}`, {silent})
