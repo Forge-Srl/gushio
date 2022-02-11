@@ -1,4 +1,5 @@
 import path from 'path'
+import os from 'os'
 import fsExtra from 'fs-extra'
 import shell from 'shelljs'
 import requireFromString from 'require-from-string'
@@ -48,7 +49,8 @@ const packageEntryPoint = async (pathToPackageFolder) => {
         entryPoint += 'index.js'
     }
 
-    return `file://${path.join(pathToPackageFolder, entryPoint)}`
+    const completePath = path.join(pathToPackageFolder, entryPoint)
+    return os.platform() === 'win32' ? `file://${completePath}` : `file://localhost/${completePath}`
 }
 
 export const buildPatchedImport = (folder, allowedDependencies = [], silent) => {

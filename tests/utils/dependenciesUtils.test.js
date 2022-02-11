@@ -1,5 +1,6 @@
 import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect} from '@jest/globals'
 import * as URL from 'url'
+import os from 'os'
 
 describe('dependenciesUtils', () => {
     let shelljs, fsExtra, fetch, mockRequireFromString, requireStrategy, buildPatchedImport, dependencyDescriptor,
@@ -123,7 +124,7 @@ describe('dependenciesUtils', () => {
             {exports: {'.': {import: null}}},
         ])('found in local folder %p', async (pkgStructure) => {
             const moduleMock = {default: 'theModule'}
-            const moduleMockName = URL.fileURLToPath(`file://${folder}/node_modules/a-fake-module/index.js`)
+            const moduleMockName = URL.fileURLToPath(`file://${os.platform() === 'win32' ? '' : 'localhost/'}${folder}/node_modules/a-fake-module/index.js`)
             const moduleMockFactory = () => moduleMock
             const moduleMockOptions = {virtual: true}
 
