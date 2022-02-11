@@ -6,7 +6,13 @@ import fetch from 'node-fetch'
 import isString from 'is-string'
 
 export const requireStrategy = {
-    inMemoryString: async (code, filename) => requireFromString(code, filename),
+    inMemoryString: async (code, filename) => {
+        try {
+            return await import(`data:text/javascript;charset=utf-8,${encodeURIComponent(code)}`)
+        } catch (e) {
+            return requireFromString(code, filename)
+        }
+    },
     localPath: async (path) => {
         const file = await fsExtra.readFile(path)
         return requireStrategy.inMemoryString(file.toString(), path)

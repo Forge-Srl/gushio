@@ -82,8 +82,7 @@ export class Program {
     }
 }
 
-export const start = () => {
-    return new Program(process.stdin, process.stdout, process.stderr)
-        .start(process.cwd(), process.argv)
-        .then(exitCode => process.exit(exitCode))
+export const start = async () => {
+    const program = new Program(process.stdin, process.stdout, process.stderr)
+    process.exit(await program.start(process.cwd(), process.argv))
 }

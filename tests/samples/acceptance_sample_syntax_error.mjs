@@ -1,0 +1,11 @@
+#!/usr/bin/env gushio
+/*
+* WARNING:
+* This sample specifically contains errors in order to test how Gushio behaves in such situation
+* */
+
+In this line there's JavaScript syntax error
+
+export const run = async (args, options) => {
+    console.log('This line will never be executed')
+}

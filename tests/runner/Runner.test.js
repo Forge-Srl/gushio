@@ -56,8 +56,10 @@ describe('Runner', () => {
         const gushioPath = 'gushio'
         const workingDir = 'workingDir'
 
-        test('Remote url', async () => {
-            const scriptPath = 'http://someUrl'
+        test.each([
+            'http://someUrl',
+            'https://someUrl'
+        ])('Remote url %s', async (scriptPath) => {
             dependenciesUtils.requireStrategy.remotePath = 'remote strategy'
             Runner.fromRequire = (application, scriptPath1, requireStrategy, gushioGeneralPath) => {
                 expect(application).toBe(app)
@@ -69,8 +71,10 @@ describe('Runner', () => {
 
             expect(await Runner.fromPath(app, scriptPath, workingDir, gushioPath)).toBe('runnerObj')
         })
-        test('Local path', async () => {
-            const scriptPath = 'some/local/path'
+        test.each([
+            'some/local/path',
+            'http/Folder/starting_with_http'
+        ])('Local path %s', async (scriptPath) => {
             dependenciesUtils.requireStrategy.localPath = 'local strategy'
             mockedPath.resolve = jest.fn().mockImplementationOnce(() => 'local/dir')
             Runner.fromRequire = (application, scriptPath, requireStrategy, gushioGeneralPath) => {
@@ -315,7 +319,8 @@ describe('Runner', () => {
         })
         fetchWrapper.mockImplementationOnce(() => 'fetchWrapper')
         YAMLWrapper.mockImplementationOnce(() => 'YAMLWrapper')
-        fileSystemWrapper.mockImplementationOnce((isVerbose) => {
+        fileSystemWrapper.mockImplementationOnce((scriptPath, isVerbose) => {
+            expect(scriptPath).toBe(runner.scriptPath)
             expect(isVerbose).toBe(runner.console.isVerbose)
             return 'fileSystemWrapper'
         })

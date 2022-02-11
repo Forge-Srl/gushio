@@ -48,7 +48,9 @@
     "release": "standard-version",
     "postrelease": "git push --follow-tags",
     "sample:sample1": "node cli/cli.js -c tests/samples/sample1.js someQuix --baz boom",
-    "sample:http-cat": "node cli/cli.js -c examples/http-cat.js"
+    "sample:http-cat": "node cli/cli.js -c examples/http-cat.js",
+    "sample:word-sort:cjs": "node cli/cli.js -c examples/word-sort.cjs --file package.json",
+    "sample:word-sort:esm": "node cli/cli.js -c examples/word-sort.mjs --file package.json"
   },
   "files": [
     "/cli",
@@ -73,8 +75,8 @@
   },
   "devDependencies": {
     "eslint": "^8.8.0",
-    "jest": "^27.4.7",
-    "jest-worker": "^27.4.6",
+    "jest": "^27.5.1",
+    "jest-worker": "^27.5.1",
     "mock-http-server": "^1.4.5",
     "standard-version": "^9.3.2"
   },

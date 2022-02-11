@@ -2,7 +2,7 @@ import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect
 import * as URL from 'url'
 
 describe('dependenciesUtils', () => {
-    let shelljs, mockRequireFromString, fsExtra, fetch, requireStrategy, buildPatchedImport, dependencyDescriptor,
+    let shelljs, fsExtra, fetch, mockRequireFromString, requireStrategy, buildPatchedImport, dependencyDescriptor,
         ensureNodeModulesExists, checkDependencyInstalled, installDependency
 
     beforeEach(async () => {
@@ -24,10 +24,26 @@ describe('dependenciesUtils', () => {
     })
 
     describe('requireStrategy', () => {
-        test('inMemoryString', async () => {
-            mockRequireFromString.mockImplementationOnce(code => 'required')
-            expect(await requireStrategy.inMemoryString('someCode', 'filename')).toBe('required')
-            expect(mockRequireFromString).toHaveBeenCalledWith('someCode', 'filename')
+        describe('inMemoryString', () => {
+            const obj = {something: 123}
+
+            test('CJS', async () => {
+                const codeAsCJS = 'module.exports = {something: "some value"}'
+                mockRequireFromString.mockImplementationOnce(() => obj)
+
+                expect(JSON.stringify(await requireStrategy.inMemoryString(codeAsCJS, 'filename'))).toEqual(JSON.stringify(obj))
+                expect(mockRequireFromString).toHaveBeenCalledWith(codeAsCJS, 'filename')
+            })
+
+            test('ESM', async () => {
+                const codeAsESM = 'export const something = "some value"'
+                const moduleName = `data:text/javascript;charset=utf-8,${encodeURIComponent(codeAsESM)}`
+                jest.mock(moduleName, () => null, {virtual: true})
+                jest.unstable_mockModule(moduleName, () => obj, {virtual: true})
+
+                expect(JSON.stringify(await requireStrategy.inMemoryString(codeAsESM, 'filename'))).toEqual(JSON.stringify(obj))
+                expect(mockRequireFromString).not.toHaveBeenCalled()
+            })
         })
 
         test('localPath', async () => {

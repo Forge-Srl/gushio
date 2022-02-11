@@ -23,8 +23,12 @@ import {gushioWrapper} from './patches/gushioWrapper.js'
 
 export class Runner {
 
+    static isUrlHTTP(string) {
+        return string.startsWith('http://') || string.startsWith('https://')
+    }
+
     static async fromPath(application, scriptPath, workingDir, gushioGeneralPath) {
-        if (scriptPath.startsWith('http')) {
+        if (this.isUrlHTTP(scriptPath)) {
             return await this.fromRequire(application, scriptPath, requireStrategy.remotePath, gushioGeneralPath)
         }
         return await this.fromRequire(application, path.resolve(workingDir, scriptPath), requireStrategy.localPath,
@@ -86,7 +90,7 @@ export class Runner {
 
         return {
             versions: dependencies.map(d => d.npmInstallVersion),
-            names: dependencies.map(d => d.name)
+            names: dependencies.map(d => d.name),
         }
     }
 
@@ -137,14 +141,14 @@ export class Runner {
         const patchedImport = buildPatchedImport(this.gushioFolder, dependencies, !this.console.isVerbose)
         const buildSimilarRunner = async (scriptPath, workingDir) =>
             await this.similarRunnerFromPath(scriptPath, workingDir)
+        const scriptPath = Runner.isUrlHTTP(this.scriptPath) ? '' : this.scriptPath
 
         return FunctionWrapper.combine(
-            //patchedRequireWrapper(patchedImport),
             patchedStringWrapper(),
             patchedConsoleWrapper(this.console),
             fetchWrapper(),
             YAMLWrapper(),
-            fileSystemWrapper(this.console.isVerbose),
+            fileSystemWrapper(scriptPath, this.console.isVerbose),
             gushioWrapper(buildSimilarRunner, patchedImport),
         )
     }

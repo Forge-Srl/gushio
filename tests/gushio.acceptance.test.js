@@ -13,12 +13,11 @@ const __dirname = path.dirname(require.resolve('./gushio.acceptance.test.js'))
 const executablePath = path.resolve(__dirname, '../cli/cli.js')
 const samplesDir = path.resolve(__dirname, 'samples')
 
-
 function absoluteScript(scriptName) {
     return path.resolve(samplesDir, scriptName)
 }
-function runScript(tmpDir, scriptPathOrUrl, argsAndOpts = '') {
-    return shelljs.exec(`node ${executablePath} -f ${tmpDir}/.gushio ${scriptPathOrUrl} ${argsAndOpts}`)
+function runScript(tmpDir, scriptPathOrUrl, argsAndOpts = '', gushioOpts = '') {
+    return shelljs.exec(`node ${executablePath} -f ${tmpDir}/.gushio ${gushioOpts} ${scriptPathOrUrl} ${argsAndOpts}`)
 }
 function expectCommandCode(result, expectedExitCode) {
     try {
@@ -54,9 +53,12 @@ describe('Gushio', () => {
         })
     })
 
-    test('get remote script', async () => {
+    test.each([
+        'module.exports = {run: async () => {console.log("Requested file")}}',
+        'export const run = async () => {console.log("Requested file")}'
+    ])('get remote script %s', async (code) => {
         await withServer(async server => {
-            await server.on('GET', '/remote_file.js', 200, `module.exports = {run: async () => {console.log('Requested file')}}`)
+            await server.on('GET', '/remote_file.js', 200, code)
 
             const result = runScript(tmpDir, `${await server.getBaseURL()}/remote_file.js`)
             expectCommandCode(result, 0)
@@ -64,32 +66,49 @@ describe('Gushio', () => {
         })
     })
 
-    test('syntax error', () => {
-        const result = runScript(tmpDir, absoluteScript('acceptance_sample_syntax_error.js'))
+    test.each([
+        'acceptance_sample_syntax_error.cjs',
+        'acceptance_sample_syntax_error.mjs'
+    ])('syntax error %s', (file) => {
+        const result = runScript(tmpDir, absoluteScript(file))
         expectCommandCode(result, 2)
-        expect(result.stderr).toMatch(/^\[Gushio] Error while loading '.*acceptance_sample_syntax_error.js': "SyntaxError: Unexpected token 'this'" at line 7\nIn this line there's JavaScript syntax error\n\s{3}\^\^\^\^\n$/)
+        const expected = new RegExp(`^\\[Gushio] Error while loading '.*${file}': "SyntaxError: Unexpected token 'this'" at line 7\\nIn this line there's JavaScript syntax error\\n\\s{3}\\^\\^\\^\\^\\n$`)
+        expect(result.stderr).toMatch(expected)
     })
 
-    test('throw error', () => {
-        const result = runScript(tmpDir, absoluteScript('acceptance_sample_throw_error.js'))
+    test.each([
+        'acceptance_sample_throw_error.cjs',
+        'acceptance_sample_throw_error.mjs'
+    ])('throw error $s', (file) => {
+        const result = runScript(tmpDir, absoluteScript(file))
         expectCommandCode(result, 1)
-        expect(result.stderr).toMatch(/^\[Gushio] Error while running '.*acceptance_sample_throw_error.js': This script can fail badly\n$/)
+        const expected = new RegExp(`^\\[Gushio] Error while running '.*${file}': This script can fail badly\\n$`)
+        expect(result.stderr).toMatch(expected)
     })
 
-    test('arguments check', () => {
-        const result = runScript(tmpDir, absoluteScript('acceptance_sample_arguments_check.js'), 'foo "bar a bar" quis quix quiz')
+    test.each([
+        'acceptance_sample_arguments_check.cjs',
+        'acceptance_sample_arguments_check.mjs'
+    ])('arguments check %s', (file) => {
+        const result = runScript(tmpDir, absoluteScript(file), 'foo "bar a bar" quis quix quiz')
         expectCommandCode(result, 0)
         expect(result.stdout).toBe('These are the args: ["foo","bar a bar",["quis","quix","quiz"]]\n')
     })
 
-    test('flags check', () => {
-        const result = runScript(tmpDir, absoluteScript('acceptance_sample_flags_check.js'), '-s 123 -s 456 789 -t --first "foo foo"')
+    test.each([
+        'acceptance_sample_flags_check.cjs',
+        'acceptance_sample_flags_check.mjs'
+    ])('flags check %s', (file) => {
+        const result = runScript(tmpDir, absoluteScript(file), '-s 123 -s 456 789 -t --first "foo foo"')
         expectCommandCode(result, 0)
         expect(result.stdout).toBe('These are the options: {"second":["123","456","789"],"third":true,"first":"foo foo"}\n')
     })
 
-    test('dependency installation', () => {
-        const result = runScript(tmpDir, absoluteScript('acceptance_sample_dependency_installation.js'))
+    test.each([
+        'acceptance_sample_dependency_installation.cjs',
+        'acceptance_sample_dependency_installation.mjs'
+    ])('dependency installation %s', (file) => {
+        const result = runScript(tmpDir, absoluteScript(file))
         expectCommandCode(result, 0)
         expect(result.stdout).toBe('[Gushio] Checking dependencies\n' +
             '[Gushio] Installing dependency jimp@latest\n' +
@@ -98,14 +117,14 @@ describe('Gushio', () => {
             '[Gushio] Dependency check-odd@npm:is-odd@latest successfully installed\n' +
             'Written on console ' + colors.yellow.bold('after') + ' requiring deps\n')
 
-        const hash = crypto.createHash('md5').update(path.resolve(samplesDir, 'acceptance_sample_dependency_installation.js')).digest('hex').substring(0, 8)
+        const hash = crypto.createHash('md5').update(path.resolve(samplesDir, file)).digest('hex').substring(0, 8)
         const installedDeps = shelljs.ls(`${tmpDir}/.gushio/${hash}-sample_5/node_modules`)
         expect(installedDeps).toContain('check-odd')
         expect(installedDeps).toContain('jimp')
 
         /* TODO: the second check fails on macOS with node >= 16
         // Now run again to check dependencies are already installed
-        const result2 = runScript(tmpDir, 'acceptance_sample_dependency_installation.js')
+        const result2 = runScript(tmpDir, file)
         expectCommandCode(result, 0)
         expect(result2.stdout).toBe('[Gushio] Checking dependencies\n' +
             '[Gushio] Installing dependency jimp@latest\n' +
@@ -116,28 +135,37 @@ describe('Gushio', () => {
          */
     }, 15000)
 
-    test('shelljs', () => {
-        const result = runScript(tmpDir, absoluteScript('acceptance_sample_shelljs.js'))
+    test.each([
+        'acceptance_sample_shelljs.cjs',
+        'acceptance_sample_shelljs.mjs'
+    ])('shelljs %s', (file) => {
+        const result = runScript(tmpDir, absoluteScript(file))
         const expectedMessageTxt = `this is a message from acceptance_sample_1${os.EOL}`
         expectCommandCode(result, 0)
         expect(result.stdout).toBe(`You have a message to read...\nInside message.txt: "${expectedMessageTxt}"\n`)
         expect(shelljs.cat('temp_folder/message.txt').stdout).toBe(expectedMessageTxt)
     })
 
-    test('global fetch', async () => {
+    test.each([
+        'acceptance_sample_global_fetch.cjs',
+        'acceptance_sample_global_fetch.mjs'
+    ])('global fetch %s', async (file) => {
         const fromTheServer = 'this text comes from the server'
         await withServer(async server => {
             await server.on('GET', '/remote_resource', 200, fromTheServer)
 
-            const result = runScript(tmpDir, absoluteScript('acceptance_sample_global_fetch.js'), `${await server.getBaseURL()}/remote_resource`)
+            const result = runScript(tmpDir, absoluteScript(file), `${await server.getBaseURL()}/remote_resource`)
             expectCommandCode(result, 0)
             expect(result.stdout).toBe(`These is the remote resource: "${fromTheServer}"\n`)
         })
     })
 
-    describe('directories', () => {
+    describe.each([
+        'acceptance_sample_directories.cjs',
+        'acceptance_sample_directories.mjs'
+    ])('directories %s', (file) => {
         let expectedTmpDir
-        const scriptPath = absoluteScript('acceptance_sample_directories.js')
+        const scriptPath = absoluteScript(file)
 
         beforeEach(() => {
             expectedTmpDir = process.platform === 'darwin' ? `/private${tmpDir}` : tmpDir
@@ -160,8 +188,12 @@ describe('Gushio', () => {
         })
     })
 
-    test('run other script', () => {
-        const result = runScript(tmpDir, absoluteScript('acceptance_sample_run_other_script.js'))
+    test.each([
+        'acceptance_sample_run_other_script.cjs',
+        'acceptance_sample_run_other_script.mjs'
+    ])('run other script %s', (file) => {
+        // force clear run because inner script will run twice and has dependencies
+        const result = runScript(tmpDir, absoluteScript(file), undefined, '-c')
         expectCommandCode(result, 0)
         expect(result.stdout).toBe(`Global Don't try this at home!\nBefore script run\n[Gushio] Checking dependencies\n[Gushio] Installing dependency is-odd@latest\n[Gushio] Dependency is-odd@latest successfully installed\nInner script begin\nGlobal Don't try this at home!\nArguments [ 'first', \`second "with" 'spaces'\` ]\nOptions { asd: true, bsd: \`something "else" 'with' spaces\` }\nInner script end\nAfter script run\nGlobal changed\n`)
     })

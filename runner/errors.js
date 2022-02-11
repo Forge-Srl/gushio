@@ -30,12 +30,16 @@ export const parseSyntaxError = (error) => {
         .split('\n')
         .filter(l => l)
 
-    const errorLine = stackLines.shift()
     const errorMessage = stackLines.pop()
-    const errorDetails = stackLines.join('\n')
+    let errorLine = -1
+    let errorDetails = ''
+    if (stackLines.length) {
+        errorLine = Number.parseInt(stackLines.shift().match(/^.*:(\d+)$/)[1])
+        errorDetails = stackLines.join('\n')
+    }
 
     return {
-        line: Number.parseInt(errorLine.match(/^.*:(\d+)$/)[1]),
+        line: errorLine,
         message: errorMessage,
         details: errorDetails,
     }
