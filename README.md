@@ -35,7 +35,13 @@ that are consistent with the latest release, check out [the npm page](https://ww
 
 ### Creating a Gushio script
 
-A Gushio script file is a standard JavaScript file which exports an asynchronous `run` function:
+A Gushio script file is a standard JavaScript file which exports an asynchronous `run` function. You can use both ESM
+```javascript
+export const run = async () => {
+    console.log('Hello world!')
+}
+```
+or CJS
 ```javascript
 module.exports = {
     run: async () => {
@@ -127,7 +133,13 @@ module.exports = {
 }
 ```
 
-Also, instead of `const path = require('path')` you can simply access `fs.path`.
+Also, instead of importing `path` you can simply access `fs.path`.
+
+If you need to refer to files relative to your script location, you can use the global variables `__filename` (the 
+absolute path of your script) and `__dirname` (the absolute path of the directory containing your script). These values 
+are available in both CJS and ESM scripts.
+> When a script is run from a remote url these two variables will assume the values `__filename = ''` and
+> `__dirname = '.'`.
 
 ##### JSON and YAML
 
@@ -159,6 +171,9 @@ Gushio provides one additional global object `gushio` containing utilities and i
 `gushio.version` returns the version of Gushio running the script. The version is wrapped as a 
 [SemVer](https://www.npmjs.com/package/semver) object.
 
+`gushio.import()` allows to import external libraries in your script. For more information see 
+[Dependencies](#dependencies).
+
 With `gushio.run()` you can execute another gushio script. The target script runs in the same process of the "parent"
 script and inherits its Gushio settings (folder, verbose mode, ...).
 ```javascript
@@ -176,8 +191,8 @@ module.exports = {
 #### Dependencies
 
 You can use NPM packages in your Gushio script. All dependencies are automatically downloaded by the Gushio runner and 
-**they are available for `require()` only inside the `run()` function**. Requiring a dependency outside such function 
-will lead to unknown results (probably an error will be thrown).
+**they are available for import using `await gushio.import()` only inside the `run()` function**. Importing a dependency
+outside such function will fail.
 
 To add a dependency to your script, you need to export a `deps` array like this:
 ```javascript
@@ -186,7 +201,7 @@ module.exports = {
         {name: 'my-dependecy'}
     ],
     run: async () => {
-        require('my-dependency')
+        await gushio.import('my-dependency')
         //...
     }
 }
@@ -203,8 +218,8 @@ module.exports = {
         {name: 'is-odd', version: '1.0.0', alias: 'old-odd'},
     ],
     run: async () => {
-        const isOdd = require('is-odd')
-        const old_isOdd = require('old-odd')
+        const {default: isOdd} = await gushio.import('is-odd')
+        const {default: old_isOdd} = await gushio.import('old-odd')
         console.log('15 is odd: ' + isOdd(15))
         console.log('15 was odd: ' + old_isOdd(15))
     }
@@ -222,7 +237,7 @@ When you provide an `alias`, the dependency is accessible via such string, other
 ##### Default dependencies
 
 By default, Gushio provides [`shelljs`](https://www.npmjs.com/package/shelljs), a portable implementation of unix shell 
-commands (it is available via `require('shelljs')`).
+commands (it is available via `await gushio.import('shelljs')`).
 
 #### Arguments
 
@@ -364,8 +379,7 @@ should give it a try:
 ### How is `gushio` different from `zx`?
 
 There are two main differences between [`zx`](https://github.com/google/zx) and `gushio`:
-1. `zx` uses ESM while `gushio` uses CJS. This choice has some major implications in how you can write a script and how 
-   you import/require dependencies.
+1. Both `zx` and `gushio` use ESM, but `gushio` allows the scripts to be written in both ESM and CJS. 
 2. `zx` doesn't provide a way to use NPM libraries in the scripts.
 
 Apart from that, there are some other minor differences in the functionalities provided out of the box. For example,
