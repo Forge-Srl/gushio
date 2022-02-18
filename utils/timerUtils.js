@@ -1,3 +1,5 @@
+import 'abort-controller/polyfill.js'
+
 const PENDING = Symbol('Pending promise')
 const alwaysResolved = Promise.resolve(PENDING)
 const isPromisePending = promise => Promise.race([promise, alwaysResolved]).then(v => v === PENDING, _ => false)
