@@ -2,8 +2,8 @@ import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect
 
 describe('Runner', () => {
     let Runner, LoadingError, RunningError, parseSyntaxError, ScriptChecker, dependenciesUtils,
-        patchedStringWrapper, patchedConsoleWrapper, fetchWrapper, YAMLWrapper, fileSystemWrapper, gushioWrapper,
-        FunctionWrapper, Command, Argument, Option, mockedPath
+        patchedStringWrapper, patchedConsoleWrapper, fetchWrapper, YAMLWrapper, fileSystemWrapper, timerWrapper,
+        gushioWrapper, FunctionWrapper, Command, Argument, Option, mockedPath
 
     beforeEach(async () => {
         mockedPath = jest.fn()
@@ -32,6 +32,8 @@ describe('Runner', () => {
         jest.unstable_mockModule('../../runner/patches/YAMLWrapper.js', () => ({YAMLWrapper}))
         fileSystemWrapper = jest.fn()
         jest.unstable_mockModule('../../runner/patches/fileSystemWrapper.js', () => ({fileSystemWrapper}))
+        timerWrapper = jest.fn()
+        jest.unstable_mockModule('../../runner/patches/timerWrapper.js', () => ({timerWrapper}))
         gushioWrapper = jest.fn()
         jest.unstable_mockModule('../../runner/patches/gushioWrapper.js', () => ({gushioWrapper}))
 
@@ -324,6 +326,7 @@ describe('Runner', () => {
             expect(isVerbose).toBe(runner.console.isVerbose)
             return 'fileSystemWrapper'
         })
+        timerWrapper.mockImplementationOnce(() => 'timerWrapper')
         gushioWrapper.mockImplementationOnce((buildRunner) => {
             runner.similarRunnerFromPath = jest.fn()
             buildRunner('script', 'directory')
@@ -333,7 +336,7 @@ describe('Runner', () => {
         FunctionWrapper.combine = (...runners) => {
             expect(runners).toStrictEqual([
                 'patchedStringWrapper', 'patchedConsoleWrapper', 'fetchWrapper',
-                'YAMLWrapper', 'fileSystemWrapper', 'gushioWrapper'
+                'YAMLWrapper', 'fileSystemWrapper', 'timerWrapper', 'gushioWrapper'
             ])
             return 'combined'
         }

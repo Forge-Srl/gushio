@@ -160,6 +160,15 @@ describe('Gushio', () => {
         })
     })
 
+    test.each([
+        'acceptance_sample_global_timer.cjs',
+        'acceptance_sample_global_timer.mjs'
+    ])('global fetch %s', async (file) => {
+        const result = runScript(tmpDir, absoluteScript(file))
+        expectCommandCode(result, 0)
+        expect(result.stdout).toBe('Processing second\nthe winner is: third\n')
+    })
+
     describe.each([
         'acceptance_sample_directories.cjs',
         'acceptance_sample_directories.mjs'

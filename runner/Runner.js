@@ -19,6 +19,7 @@ import {patchedStringWrapper} from './patches/patchedStringWrapper.js'
 import {fetchWrapper} from './patches/fetchWrapper.js'
 import {YAMLWrapper} from './patches/YAMLWrapper.js'
 import {fileSystemWrapper} from './patches/fileSystemWrapper.js'
+import {timerWrapper} from './patches/timerWrapper.js'
 import {gushioWrapper} from './patches/gushioWrapper.js'
 
 export class Runner {
@@ -149,6 +150,7 @@ export class Runner {
             fetchWrapper(),
             YAMLWrapper(),
             fileSystemWrapper(scriptPath, this.console.isVerbose),
+            timerWrapper(),
             gushioWrapper(buildSimilarRunner, patchedImport),
         )
     }
