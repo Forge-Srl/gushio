@@ -33,6 +33,19 @@ export default function Home() {
       description="Gushio is a runner for shell scripts written in JavaScript">
       <HomepageHeader />
       <main>
+        <section>
+          <div className="container">
+            <div className="row padding--md">
+              <p>Gushio* is the tool to execute automation scripts written in JavaScript.</p>
+              <p>Gushio is built on top of battle-tested libraries
+                  like <a href="https://www.npmjs.com/package/commander" rel="nofollow">commander</a> and <a href="https://www.npmjs.com/package/shelljs" rel="nofollow">shelljs</a> and
+                  allows you to write a multiplatform shell script in a single JavaScript file without having to worry
+                  about <code>package.json</code> and dependencies installation.
+              </p>
+              <sub><em>* Gushio is pronounced like the italian word "guscio" (IPA: /'guʃʃo/) which means "shell".</em></sub>
+            </div>
+          </div>
+        </section>
         <HomepageFeatures />
       </main>
     </Layout>
