@@ -1,0 +1,34 @@
+name: Build Site
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'documentation/**'
+
+  workflow_dispatch:
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - name: Cache NPM packages
+        uses: actions/cache@v2
+        with:
+          path: /documentation/node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('documentation/package.json') }}
+          restore-keys: ${{ runner.os }}-npm
+      - name: Build
+        run: |
+          cd documentation
+          npm ci
+          npm run build
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./documentation/build
