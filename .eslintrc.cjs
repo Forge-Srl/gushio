@@ -58,5 +58,6 @@ module.exports = {
         'dist',
         'examples',
         'tests',
+        'documentation',
     ],
 }
