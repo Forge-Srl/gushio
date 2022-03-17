@@ -88,7 +88,7 @@ describe('cliProgram', () => {
         expect(commandObj.name).toHaveBeenCalledWith(packageInfo.name)
         expect(commandObj.description).toHaveBeenCalledWith(packageInfo.description)
         expect(commandObj.enablePositionalOptions).toHaveBeenCalled()
-        expect(commandObj.addHelpText).toHaveBeenNthCalledWith(1, 'after', '\ngushio is provided under MIT license.\nFor more info see: https://github.com/Forge-Srl/gushio#readme')
+        expect(commandObj.addHelpText).toHaveBeenNthCalledWith(1, 'after', '\ngushio is provided under MIT license.\nFor more info see: https://forge-srl.github.io/gushio')
         expect(commandObj.passThroughOptions).toHaveBeenCalled()
         expect(commandObj.argument).toHaveBeenNthCalledWith(1, '<script>', 'path to the script')
         expect(commandObj.addOption).toHaveBeenCalledTimes(3)
