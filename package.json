@@ -45,12 +45,12 @@
     "test": "node --trace-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
     "lint": "eslint .",
     "prerelease": "npm test && npm run lint",
-    "release": "standard-version",
+    "release": "standard-version --commit-all",
     "postrelease": "git push --follow-tags",
-    "sample:sample1": "node cli/cli.js -c tests/samples/sample1.js someQuix --baz boom",
-    "sample:http-cat": "node cli/cli.js -c examples/http-cat.js",
-    "sample:word-sort:cjs": "node cli/cli.js -c examples/word-sort.cjs --file package.json",
-    "sample:word-sort:esm": "node cli/cli.js -c examples/word-sort.mjs --file package.json"
+    "sample:sample1": "npm exec -- gushio -c tests/samples/sample1.js someQuix --baz boom",
+    "sample:http-cat": "npm exec -- gushio -c examples/http-cat.js",
+    "sample:word-sort:cjs": "npm exec -- gushio -c examples/word-sort.cjs --file package.json",
+    "sample:word-sort:esm": "npm exec -- gushio -c examples/word-sort.mjs --file package.json"
   },
   "files": [
     "/cli",
@@ -112,6 +112,9 @@
   },
   "standard-version": {
     "header": "Gushio - CHANGELOG\n---",
-    "tag-prefix": "release/"
+    "tag-prefix": "release/",
+    "scripts": {
+      "postchangelog": "npm exec -- gushio create-docs-release.gushio.js"
+    }
   }
 }

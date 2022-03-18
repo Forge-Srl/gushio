@@ -59,5 +59,6 @@ module.exports = {
         'examples',
         'tests',
         'documentation',
+        '*.gushio.js'
     ],
 }
