@@ -99,7 +99,8 @@
       "!**/tests/**",
       "!**/coverage/**",
       "!**/documentation/**",
-      "!**/.eslintrc.js"
+      "!**/.eslintrc.js",
+      "!**/*.gushio.js"
     ],
     "coverageThreshold": {
       "global": {
