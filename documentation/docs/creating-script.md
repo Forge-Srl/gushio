@@ -27,14 +27,12 @@ outside such function will fail.
 
 To add a dependency to your script, you need to export a `deps` array like this:
 ```javascript
-module.exports = {
-    deps: [
-        {name: 'my-dependecy'}
-    ],
-    run: async () => {
-        await gushio.import('my-dependency')
-        //...
-    }
+export const deps = [
+    {name: 'my-dependecy'}
+]
+export const run = async () => {
+    await gushio.import('my-dependency')
+    //...
 }
 ```
 
@@ -74,18 +72,16 @@ commands (it is available via `await gushio.import('shelljs')`).
 
 If your script needs some arguments, you can specify them in the `cli` object:
 ```javascript
-module.exports = {
-    cli: {
-        arguments: [
-            {name: '<quix>', description: 'the first argument'},
-            {name: '<layout>', choices: ['qwerty', 'dvorak']},
-            {name: '[quak]', description: 'the third (and optional) argument', default: 69420}
-        ]
-    },
-    run: async (args, options) => {
-        const [quix, quak] = args
-        //...
-    }
+export const cli = {
+    arguments: [
+        {name: '<quix>', description: 'the first argument'},
+        {name: '<layout>', choices: ['qwerty', 'dvorak']},
+        {name: '[quak]', description: 'the third (and optional) argument', default: 69420}
+    ]
+}
+export const run = async (args, options) => {
+    const [quix, quak] = args
+    //...
 }
 ```
 
@@ -112,18 +108,16 @@ The values of the arguments are provided as an array in the first parameter of t
 
 If your script needs some flags, you can specify them in the `cli` object:
 ```javascript
-module.exports = {
-    cli: {
-        options: [
-            {flags: '-f, --foo', description: 'the foo flag (boolean)'},
-            {flags: '-b, --bar [broom]', description: 'the bar flag (optional)', default: 'no_broom', env: 'MY_BAR'},
-            {flags: '-B, --baz <baam>', description: 'the baz flag', choices: ['swish', 'swoosh']},
-        ],
-    },
-    run: async (args, options) => {
-        const {foo, bar, baz} = options
-        //...
-    }
+export const cli = {
+    options: [
+        {flags: '-f, --foo', description: 'the foo flag (boolean)'},
+        {flags: '-b, --bar [broom]', description: 'the bar flag (optional)', default: 'no_broom', env: 'MY_BAR'},
+        {flags: '-B, --baz <baam>', description: 'the baz flag', choices: ['swish', 'swoosh']},
+    ],
+}
+export const run = async (args, options) => {
+    const {foo, bar, baz} = options
+    //...
 }
 ```
 
