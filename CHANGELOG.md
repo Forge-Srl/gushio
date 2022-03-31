@@ -1,5 +1,28 @@
 Gushio - CHANGELOG
 ---
+## [0.7.0](https://github.com/Forge-Srl/gushio/compare/release/0.6.0...release/0.7.0) (2022-03-31)
+
+
+### ⚠ BREAKING CHANGES
+
+* dependencies `require()` has been replaced with `await gushio.import()`
+
+### Features
+
+* `gushio.version` ([0309d4f](https://github.com/Forge-Srl/gushio/commit/0309d4fe8337c4bb4f03e44abd5a444324d6d19e))
+* timer global object ([f121754](https://github.com/Forge-Srl/gushio/commit/f1217547880644fd226294e0d2aa44614882d31e))
+
+
+### Bug Fixes
+
+* link changed ([c9536b8](https://github.com/Forge-Srl/gushio/commit/c9536b81915319c942161b0a9b3c13cb8b935349))
+* package entry point resolution on linux ([3bf968f](https://github.com/Forge-Srl/gushio/commit/3bf968fce7ca6e6ca0bd536ca5a668b96e7cceeb))
+* polyfill AbortController ([b4e9460](https://github.com/Forge-Srl/gushio/commit/b4e94609a70f04ff6511ff1ac0677d7d83e170e5))
+* uniform behaviour in CJS and ESM ([6bd5c65](https://github.com/Forge-Srl/gushio/commit/6bd5c658f79a343d37d063168d80bf4303fc810f))
+
+
+* code is ESM ([e87c01b](https://github.com/Forge-Srl/gushio/commit/e87c01b0742ec22401d2bbb8d2fd6d5a1c4c6fe5))
+
 ## [0.6.0](https://github.com/Forge-Srl/gushio/compare/release/0.5.0...release/0.6.0) (2022-01-31)
 
 
