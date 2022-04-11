@@ -204,6 +204,13 @@ describe('Gushio', () => {
         // force clear run because inner script will run twice and has dependencies
         const result = runScript(tmpDir, absoluteScript(file), undefined, '-c')
         expectCommandCode(result, 0)
-        expect(result.stdout).toBe(`Global Don't try this at home!\nBefore script run\n[Gushio] Checking dependencies\n[Gushio] Installing dependency is-odd@latest\n[Gushio] Dependency is-odd@latest successfully installed\nInner script begin\nGlobal Don't try this at home!\nArguments [ 'first', \`second "with" 'spaces'\` ]\nOptions { asd: true, bsd: \`something "else" 'with' spaces\` }\nInner script end\nAfter script run\nGlobal changed\n`)
+        expect(result.stdout).toBe(`Global Don't try this at home!\n` +
+            colors.bold.red('Before script run') +
+            `\n[Gushio] Checking dependencies\n[Gushio] Installing dependency is-odd@latest\n[Gushio] Dependency is-odd@latest successfully installed\n` +
+            colors.blue.bold('Inner script begin') +
+            `\nGlobal Don't try this at home!\nArguments [ 'first', \`second "with" 'spaces'\` ]\nOptions { asd: true, bsd: \`something "else" 'with' spaces\` }\n`+
+            colors.bgGreen.italic('Inner script end') + `\n` +
+            colors.bold.red('After script run') +
+            `\nGlobal changed\n`)
     })
 })

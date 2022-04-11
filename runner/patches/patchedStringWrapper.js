@@ -5,8 +5,10 @@ export const patchedStringWrapper = () => {
     const excluded = ['theme', 'alias']
     const properties = Object.getOwnPropertyNames(c).filter(n => !excluded.includes(n))
 
+    const oldProperties = {}
     const before = () => {
         properties.forEach(prop => {
+            oldProperties[prop] = Object.getOwnPropertyDescriptor(String.prototype, prop)
             Object.defineProperty(String.prototype, prop, {
                 configurable: true,
                 get: function () {
@@ -17,7 +19,12 @@ export const patchedStringWrapper = () => {
     }
     const after = () => {
         properties.forEach(prop => {
-            delete String.prototype[prop]
+            const descriptor = oldProperties[prop]
+            if (descriptor) {
+                Object.defineProperty(String.prototype, prop, descriptor)
+            } else {
+                delete String.prototype[prop]
+            }
         })
     }
 

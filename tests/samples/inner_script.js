@@ -14,13 +14,13 @@ module.exports = {
         {name: 'is-odd'}
     ],
     run: async (args, options) => {
-        console.log(`Inner script begin`)
+        console.log(`Inner script begin`.bold.blue)
 
         console.log('Global', myWarning)
         global.myWarning = 'changed'
         console.log('Arguments', args)
         console.log('Options', options)
 
-        console.log(`Inner script end`)
+        console.log(`Inner script end`.italic.bgGreen)
     },
 }
