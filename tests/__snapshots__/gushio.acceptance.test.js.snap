@@ -1,0 +1,291 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Gushio arguments check acceptance_sample_arguments_check.cjs 1`] = `
+@code: 0
+@out
+These are the args: ["foo","bar a bar",["quis","quix","quiz"]]
+
+@err
+
+`;
+
+exports[`Gushio arguments check acceptance_sample_arguments_check.mjs 1`] = `
+@code: 0
+@out
+These are the args: ["foo","bar a bar",["quis","quix","quiz"]]
+
+@err
+
+`;
+
+exports[`Gushio dependency installation acceptance_sample_dependency_installation.cjs 1`] = `
+@code: 0
+@out
+[Gushio] Checking dependencies
+[Gushio] Installing dependency jimp@latest
+[Gushio] Dependency jimp@latest successfully installed
+[Gushio] Installing dependency check-odd@npm:is-odd@latest
+[Gushio] Dependency check-odd@npm:is-odd@latest successfully installed
+Written on console [33m[1mafter[22m[39m requiring deps
+
+@err
+
+`;
+
+exports[`Gushio dependency installation acceptance_sample_dependency_installation.mjs 1`] = `
+@code: 0
+@out
+[Gushio] Checking dependencies
+[Gushio] Installing dependency jimp@latest
+[Gushio] Dependency jimp@latest successfully installed
+[Gushio] Installing dependency check-odd@npm:is-odd@latest
+[Gushio] Dependency check-odd@npm:is-odd@latest successfully installed
+Written on console [33m[1mafter[22m[39m requiring deps
+
+@err
+
+`;
+
+exports[`Gushio directories acceptance_sample_directories.cjs local 1`] = `
+@code: 0
+@out
+__filename=[replace:SCRIPT_PATH]
+__dirname=[replace:SAMPLES_DIR]
+resolved=[replace:SCRIPT_PATH]
+$.pwd()=[replace:TMP_DIR]
+Glob "./*" [ './dummy_file1.txt', './dummy_file2.md', './other_dummy_file3.png' ]
+
+@err
+
+`;
+
+exports[`Gushio directories acceptance_sample_directories.cjs remote 1`] = `
+@code: 0
+@out
+__filename=
+__dirname=.
+resolved=[replace:TMP_DIR]
+$.pwd()=[replace:TMP_DIR]
+Glob "./*" [ './dummy_file1.txt', './dummy_file2.md', './other_dummy_file3.png' ]
+
+@err
+
+`;
+
+exports[`Gushio directories acceptance_sample_directories.mjs local 1`] = `
+@code: 0
+@out
+__filename=[replace:SCRIPT_PATH]
+__dirname=[replace:SAMPLES_DIR]
+resolved=[replace:SCRIPT_PATH]
+$.pwd()=[replace:TMP_DIR]
+Glob "./*" [ './dummy_file1.txt', './dummy_file2.md', './other_dummy_file3.png' ]
+
+@err
+
+`;
+
+exports[`Gushio directories acceptance_sample_directories.mjs remote 1`] = `
+@code: 0
+@out
+__filename=
+__dirname=.
+resolved=[replace:TMP_DIR]
+$.pwd()=[replace:TMP_DIR]
+Glob "./*" [ './dummy_file1.txt', './dummy_file2.md', './other_dummy_file3.png' ]
+
+@err
+
+`;
+
+exports[`Gushio flags check acceptance_sample_flags_check.cjs 1`] = `
+@code: 0
+@out
+These are the options: {"second":["123","456","789"],"third":true,"first":"foo foo"}
+
+@err
+
+`;
+
+exports[`Gushio flags check acceptance_sample_flags_check.mjs 1`] = `
+@code: 0
+@out
+These are the options: {"second":["123","456","789"],"third":true,"first":"foo foo"}
+
+@err
+
+`;
+
+exports[`Gushio get remote script "export const run = async () => {console.log("Requested file")}" 1`] = `
+@code: 0
+@out
+Requested file
+
+@err
+
+`;
+
+exports[`Gushio get remote script "module.exports = {run: async () => {console.log("Requested file")}}" 1`] = `
+@code: 0
+@out
+Requested file
+
+@err
+
+`;
+
+exports[`Gushio global fetch acceptance_sample_global_fetch.cjs 1`] = `
+@code: 0
+@out
+This is the remote resource: "this text comes from the server"
+
+@err
+
+`;
+
+exports[`Gushio global fetch acceptance_sample_global_fetch.mjs 1`] = `
+@code: 0
+@out
+This is the remote resource: "this text comes from the server"
+
+@err
+
+`;
+
+exports[`Gushio global timer acceptance_sample_global_timer.cjs 1`] = `
+@code: 0
+@out
+Processing second
+the winner is: third
+
+@err
+
+`;
+
+exports[`Gushio global timer acceptance_sample_global_timer.mjs 1`] = `
+@code: 0
+@out
+Processing second
+the winner is: third
+
+@err
+
+`;
+
+exports[`Gushio missing file local 1`] = `
+@code: 2
+@out
+
+@err
+[Gushio] Error while loading '[replace:SCRIPT_PATH]': ENOENT: no such file or directory, open '[replace:SCRIPT_PATH]'
+
+`;
+
+exports[`Gushio missing file remote 1`] = `
+@code: 2
+@out
+
+@err
+[Gushio] Error while loading '[replace:SCRIPT_PATH]': request to [replace:SCRIPT_PATH] failed, reason: getaddrinfo ENOTFOUND invalid.example.com
+
+`;
+
+exports[`Gushio run other script acceptance_sample_run_other_script.cjs 1`] = `
+@code: 0
+@out
+Global Don't try this at home!
+[1m[31mBefore script run[39m[22m
+[Gushio] Checking dependencies
+[Gushio] Installing dependency is-odd@latest
+[Gushio] Dependency is-odd@latest successfully installed
+[34m[1mInner script begin[22m[39m
+Global Don't try this at home!
+Arguments [ 'first', \`second "with" 'spaces'\` ]
+Options { asd: true, bsd: \`something "else" 'with' spaces\` }
+[42m[3mInner script end[23m[49m
+[1m[31mAfter script run[39m[22m
+Global changed
+
+@err
+
+`;
+
+exports[`Gushio run other script acceptance_sample_run_other_script.mjs 1`] = `
+@code: 0
+@out
+Global Don't try this at home!
+[1m[31mBefore script run[39m[22m
+[Gushio] Checking dependencies
+[Gushio] Installing dependency is-odd@latest
+[Gushio] Dependency is-odd@latest successfully installed
+[34m[1mInner script begin[22m[39m
+Global Don't try this at home!
+Arguments [ 'first', \`second "with" 'spaces'\` ]
+Options { asd: true, bsd: \`something "else" 'with' spaces\` }
+[42m[3mInner script end[23m[49m
+[1m[31mAfter script run[39m[22m
+Global changed
+
+@err
+
+`;
+
+exports[`Gushio shelljs acceptance_sample_shelljs.cjs 1`] = `
+@code: 0
+@out
+You have a message to read...
+Inside message.txt: "[replace:EXPECTED_MESSAGE]"
+
+@err
+
+`;
+
+exports[`Gushio shelljs acceptance_sample_shelljs.mjs 1`] = `
+@code: 0
+@out
+You have a message to read...
+Inside message.txt: "[replace:EXPECTED_MESSAGE]"
+
+@err
+
+`;
+
+exports[`Gushio syntax error acceptance_sample_syntax_error.cjs 1`] = `
+@code: 2
+@out
+
+@err
+[Gushio] Error while loading '[replace:SCRIPT_PATH]': "SyntaxError: Unexpected token 'this'" at line 7
+In this line there's JavaScript syntax error
+   ^^^^
+
+`;
+
+exports[`Gushio syntax error acceptance_sample_syntax_error.mjs 1`] = `
+@code: 2
+@out
+
+@err
+[Gushio] Error while loading '[replace:SCRIPT_PATH]': "SyntaxError: Unexpected token 'this'" at line 7
+In this line there's JavaScript syntax error
+   ^^^^
+
+`;
+
+exports[`Gushio throw error acceptance_sample_throw_error.cjs 1`] = `
+@code: 1
+@out
+
+@err
+[Gushio] Error while running '[replace:SCRIPT_PATH]': This script can fail badly
+
+`;
+
+exports[`Gushio throw error acceptance_sample_throw_error.mjs 1`] = `
+@code: 1
+@out
+
+@err
+[Gushio] Error while running '[replace:SCRIPT_PATH]': This script can fail badly
+
+`;

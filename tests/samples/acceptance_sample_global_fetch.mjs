@@ -6,5 +6,5 @@ export const cli = {
 }
 export const run = async (args, options) => {
     const result = await fetch(args[0])
-    console.log(`These is the remote resource: "${await result.text()}"`)
+    console.log(`This is the remote resource: "${await result.text()}"`)
 }
