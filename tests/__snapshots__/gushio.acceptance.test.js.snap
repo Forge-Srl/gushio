@@ -32,6 +32,20 @@ Written on console [33m[1mafter[22m[39m requiring deps
 
 `;
 
+exports[`Gushio dependency installation acceptance_sample_dependency_installation.cjs 2`] = `
+@code: 0
+@out
+[Gushio] Checking dependencies
+[Gushio] Installing dependency jimp@latest
+[Gushio] Dependency jimp@latest already installed
+[Gushio] Installing dependency check-odd@npm:is-odd@latest
+[Gushio] Dependency check-odd@npm:is-odd@latest already installed
+Written on console [33m[1mafter[22m[39m requiring deps
+
+@err
+
+`;
+
 exports[`Gushio dependency installation acceptance_sample_dependency_installation.mjs 1`] = `
 @code: 0
 @out
@@ -40,6 +54,20 @@ exports[`Gushio dependency installation acceptance_sample_dependency_installatio
 [Gushio] Dependency jimp@latest successfully installed
 [Gushio] Installing dependency check-odd@npm:is-odd@latest
 [Gushio] Dependency check-odd@npm:is-odd@latest successfully installed
+Written on console [33m[1mafter[22m[39m requiring deps
+
+@err
+
+`;
+
+exports[`Gushio dependency installation acceptance_sample_dependency_installation.mjs 2`] = `
+@code: 0
+@out
+[Gushio] Checking dependencies
+[Gushio] Installing dependency jimp@latest
+[Gushio] Dependency jimp@latest already installed
+[Gushio] Installing dependency check-odd@npm:is-odd@latest
+[Gushio] Dependency check-odd@npm:is-odd@latest already installed
 Written on console [33m[1mafter[22m[39m requiring deps
 
 @err

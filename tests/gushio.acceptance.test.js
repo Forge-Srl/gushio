@@ -158,17 +158,12 @@ describe('Gushio', () => {
         expect(installedDeps).toContain('check-odd')
         expect(installedDeps).toContain('jimp')
 
-        /* TODO: the second check fails on macOS with node >= 16
         // Now run again to check dependencies are already installed
-        const result2 = runScript(tmpDir, file)
-        expectCommandCode(result, 0)
-        expect(result2.stdout).toBe('[Gushio] Checking dependencies\n' +
-            '[Gushio] Installing dependency jimp@latest\n' +
-            '[Gushio] Dependency jimp@latest already installed\n' +
-            '[Gushio] Installing dependency check-odd@npm:is-odd@latest\n' +
-            '[Gushio] Dependency check-odd@npm:is-odd@latest already installed\n' +
-            'Written on console ' + colors.yellow.bold('after') + ' requiring deps\n')
-         */
+        const result2 = runScript(tmpDir, scriptPath)
+        expectToMatchCustomSnapshot(result2, [
+            [expectedTmpDir, 'TMP_DIR'],
+            [scriptPath, 'SCRIPT_PATH'],
+        ])
     }, 15000)
 
     test.each([
