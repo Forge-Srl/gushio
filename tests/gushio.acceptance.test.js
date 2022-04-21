@@ -159,7 +159,7 @@ describe('Gushio', () => {
         expect(installedDeps).toContain('jimp')
 
         // Now run again to check dependencies are already installed
-        const result2 = runScript(tmpDir, scriptPath)
+        const result2 = runScript(tmpDir, scriptPath, undefined, '--verbose')
         expectToMatchCustomSnapshot(result2, [
             [expectedTmpDir, 'TMP_DIR'],
             [scriptPath, 'SCRIPT_PATH'],
