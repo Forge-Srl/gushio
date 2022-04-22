@@ -5,6 +5,7 @@ import path from 'path'
 import crypto from 'crypto'
 import {createRequire} from 'module'
 import shelljs from 'shelljs'
+import tempDirectory from 'temp-dir'
 import {withServer} from './withServer.js'
 
 const require = createRequire(import.meta.url)
@@ -45,11 +46,10 @@ function expectToMatchCustomSnapshot(result, replacements) {
 }
 
 describe('Gushio', () => {
-    let tmpDir, expectedTmpDir
+    let tmpDir
 
     beforeAll(() => {
-        tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gushio-acceptance'))
-        expectedTmpDir = process.platform === 'darwin' ? `/private${tmpDir}` : tmpDir
+        tmpDir = fs.mkdtempSync(path.join(tempDirectory, 'gushio-acceptance'))
         shelljs.cd(tmpDir)
     })
 
@@ -62,7 +62,7 @@ describe('Gushio', () => {
             const scriptPath = absoluteScript('missing_file.js')
             const result = runScript(tmpDir, scriptPath)
             expectToMatchCustomSnapshot(result, [
-                [expectedTmpDir, 'TMP_DIR'],
+                [tmpDir, 'TMP_DIR'],
                 [scriptPath, 'SCRIPT_PATH'],
             ])
         })
@@ -71,7 +71,7 @@ describe('Gushio', () => {
             const scriptPath = 'http://invalid.example.com/fake/path/missing_remote_file.js'
             const result = runScript(tmpDir, scriptPath)
             expectToMatchCustomSnapshot(result, [
-                [expectedTmpDir, 'TMP_DIR'],
+                [tmpDir, 'TMP_DIR'],
                 [scriptPath, 'SCRIPT_PATH'],
             ])
         })
@@ -88,7 +88,7 @@ describe('Gushio', () => {
             const result = runScript(tmpDir, scriptPath)
 
             expectToMatchCustomSnapshot(result, [
-                [expectedTmpDir, 'TMP_DIR'],
+                [tmpDir, 'TMP_DIR'],
                 [scriptPath, 'SCRIPT_PATH'],
             ])
         })
@@ -101,7 +101,7 @@ describe('Gushio', () => {
         const scriptPath = absoluteScript(file)
         const result = runScript(tmpDir, scriptPath)
         expectToMatchCustomSnapshot(result, [
-            [expectedTmpDir, 'TMP_DIR'],
+            [tmpDir, 'TMP_DIR'],
             [scriptPath, 'SCRIPT_PATH'],
         ])
     })
@@ -113,7 +113,7 @@ describe('Gushio', () => {
         const scriptPath = absoluteScript(file)
         const result = runScript(tmpDir, scriptPath)
         expectToMatchCustomSnapshot(result, [
-            [expectedTmpDir, 'TMP_DIR'],
+            [tmpDir, 'TMP_DIR'],
             [scriptPath, 'SCRIPT_PATH'],
         ])
     })
@@ -125,7 +125,7 @@ describe('Gushio', () => {
         const scriptPath = absoluteScript(file)
         const result = runScript(tmpDir, scriptPath, 'foo "bar a bar" quis quix quiz')
         expectToMatchCustomSnapshot(result, [
-            [expectedTmpDir, 'TMP_DIR'],
+            [tmpDir, 'TMP_DIR'],
             [scriptPath, 'SCRIPT_PATH'],
         ])
     })
@@ -137,7 +137,7 @@ describe('Gushio', () => {
         const scriptPath = absoluteScript(file)
         const result = runScript(tmpDir, scriptPath, '-s 123 -s 456 789 -t --first "foo foo"')
         expectToMatchCustomSnapshot(result, [
-            [expectedTmpDir, 'TMP_DIR'],
+            [tmpDir, 'TMP_DIR'],
             [scriptPath, 'SCRIPT_PATH'],
         ])
     })
@@ -148,9 +148,9 @@ describe('Gushio', () => {
     ])('dependency installation %s', (file) => {
         const scriptPath = absoluteScript(file)
         const hash = crypto.createHash('md5').update(scriptPath).digest('hex').substring(0, 8)
-        const result = runScript(tmpDir, scriptPath, undefined, '--verbose')
+        const result = runScript(tmpDir, scriptPath)
         expectToMatchCustomSnapshot(result, [
-            [expectedTmpDir, 'TMP_DIR'],
+            [tmpDir, 'TMP_DIR'],
             [scriptPath, 'SCRIPT_PATH'],
             [hash, 'SCRIPT_HASH'],
         ])
@@ -160,9 +160,9 @@ describe('Gushio', () => {
         expect(installedDeps).toContain('jimp')
 
         // Now run again to check dependencies are already installed
-        const result2 = runScript(tmpDir, scriptPath, undefined, '--verbose')
+        const result2 = runScript(tmpDir, scriptPath)
         expectToMatchCustomSnapshot(result2, [
-            [expectedTmpDir, 'TMP_DIR'],
+            [tmpDir, 'TMP_DIR'],
             [scriptPath, 'SCRIPT_PATH'],
             [hash, 'SCRIPT_HASH'],
         ])
@@ -180,7 +180,7 @@ describe('Gushio', () => {
         const result = runScript(tmpDir, scriptPath)
         const expectedMessageTxt = `this is a message from acceptance_sample_1${os.EOL}`
         expectToMatchCustomSnapshot(result, [
-            [expectedTmpDir, 'TMP_DIR'],
+            [tmpDir, 'TMP_DIR'],
             [scriptPath, 'SCRIPT_PATH'],
             [expectedMessageTxt, 'EXPECTED_MESSAGE'],
         ])
@@ -198,7 +198,7 @@ describe('Gushio', () => {
             const scriptPath = absoluteScript(file)
             const result = runScript(tmpDir, scriptPath, `${await server.getBaseURL()}/remote_resource`)
             expectToMatchCustomSnapshot(result, [
-                [expectedTmpDir, 'TMP_DIR'],
+                [tmpDir, 'TMP_DIR'],
                 [scriptPath, 'SCRIPT_PATH'],
             ])
         })
@@ -211,7 +211,7 @@ describe('Gushio', () => {
         const scriptPath = absoluteScript(file)
         const result = runScript(tmpDir, scriptPath)
         expectToMatchCustomSnapshot(result, [
-            [expectedTmpDir, 'TMP_DIR'],
+            [tmpDir, 'TMP_DIR'],
             [scriptPath, 'SCRIPT_PATH'],
         ])
     })
@@ -238,7 +238,7 @@ describe('Gushio', () => {
         test('local', () => {
             const result = runScript(tmpDir, scriptPath)
             expectToMatchCustomSnapshot(result, [
-                [expectedTmpDir, 'TMP_DIR'],
+                [tmpDir, 'TMP_DIR'],
                 [scriptPath, 'SCRIPT_PATH'],
                 [samplesDir, 'SAMPLES_DIR'],
             ])
@@ -250,7 +250,7 @@ describe('Gushio', () => {
 
                 const result = runScript(tmpDir, `${await server.getBaseURL()}/remote_file.js`)
                 expectToMatchCustomSnapshot(result, [
-                    [expectedTmpDir, 'TMP_DIR'],
+                    [tmpDir, 'TMP_DIR'],
                     [scriptPath, 'SCRIPT_PATH'],
                     [samplesDir, 'SAMPLES_DIR'],
                 ])
@@ -266,7 +266,7 @@ describe('Gushio', () => {
         // force clear run because inner script will run twice and has dependencies
         const result = runScript(tmpDir, scriptPath, undefined, '-c')
         expectToMatchCustomSnapshot(result, [
-            [expectedTmpDir, 'TMP_DIR'],
+            [tmpDir, 'TMP_DIR'],
             [scriptPath, 'SCRIPT_PATH'],
         ])
     })
