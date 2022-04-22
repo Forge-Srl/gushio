@@ -147,14 +147,15 @@ describe('Gushio', () => {
         'acceptance_sample_dependency_installation.mjs'
     ])('dependency installation %s', (file) => {
         const scriptPath = absoluteScript(file)
-        const result = runScript(tmpDir, scriptPath)
+        const hash = crypto.createHash('md5').update(scriptPath).digest('hex').substring(0, 8)
+        const result = runScript(tmpDir, scriptPath, undefined, '--verbose')
         expectToMatchCustomSnapshot(result, [
             [expectedTmpDir, 'TMP_DIR'],
             [scriptPath, 'SCRIPT_PATH'],
+            [hash, 'SCRIPT_HASH'],
         ])
 
-        const hash = crypto.createHash('md5').update(path.resolve(samplesDir, file)).digest('hex').substring(0, 8)
-        const installedDeps = shelljs.ls(`${tmpDir}/.gushio/${hash}-sample_5/node_modules`)
+        let installedDeps = shelljs.ls(`${tmpDir}/.gushio/${hash}-sample_5/node_modules`)
         expect(installedDeps).toContain('check-odd')
         expect(installedDeps).toContain('jimp')
 
@@ -163,7 +164,12 @@ describe('Gushio', () => {
         expectToMatchCustomSnapshot(result2, [
             [expectedTmpDir, 'TMP_DIR'],
             [scriptPath, 'SCRIPT_PATH'],
+            [hash, 'SCRIPT_HASH'],
         ])
+
+        installedDeps = shelljs.ls(`${tmpDir}/.gushio/${hash}-sample_5/node_modules`)
+        expect(installedDeps).toContain('check-odd')
+        expect(installedDeps).toContain('jimp')
     }, 15000)
 
     test.each([

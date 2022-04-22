@@ -23,9 +23,32 @@ exports[`Gushio dependency installation acceptance_sample_dependency_installatio
 @out
 [Gushio] Checking dependencies
 [Gushio] Installing dependency jimp@latest
+[0m[replace:TMP_DIR]\\.gushio\\[replace:SCRIPT_HASH]-sample_5[0m
+[0m\`-- (empty)[0m
+[0m[0m
+
+added 73 packages, and audited 74 packages in 2s
+
+3 packages are looking for funding
+  run \`npm fund\` for details
+
+found [32m[1m0[22m[39m vulnerabilities
 [Gushio] Dependency jimp@latest successfully installed
 [Gushio] Installing dependency check-odd@npm:is-odd@latest
+[0m[replace:SCRIPT_HASH]-sample_5@ [replace:TMP_DIR]\\.gushio\\[replace:SCRIPT_HASH]-sample_5[0m
+[0m\`-- (empty)[0m
+[0m[0m
+
+added 2 packages, and audited 76 packages in 948ms
+
+3 packages are looking for funding
+  run \`npm fund\` for details
+
+found [32m[1m0[22m[39m vulnerabilities
 [Gushio] Dependency check-odd@npm:is-odd@latest successfully installed
+[Gushio] Running with arguments []
+[Gushio] Running with options {}
+[Gushio] Running with dependencies ["shelljs","jimp","check-odd"] in [replace:TMP_DIR]\\.gushio\\[replace:SCRIPT_HASH]-sample_5
 Written on console [33m[1mafter[22m[39m requiring deps
 
 @err
@@ -37,9 +60,18 @@ exports[`Gushio dependency installation acceptance_sample_dependency_installatio
 @out
 [Gushio] Checking dependencies
 [Gushio] Installing dependency jimp@latest
+[0m[replace:SCRIPT_HASH]-sample_5@ [replace:TMP_DIR]\\.gushio\\[replace:SCRIPT_HASH]-sample_5[0m
+[0m\`-- [33m[40mjimp@0.16.1[49m[39m[0m
+[0m[0m
 [Gushio] Dependency jimp@latest already installed
 [Gushio] Installing dependency check-odd@npm:is-odd@latest
+[0m[replace:SCRIPT_HASH]-sample_5@ [replace:TMP_DIR]\\.gushio\\[replace:SCRIPT_HASH]-sample_5[0m
+[0m\`-- [33m[40mcheck-odd@npm:is-odd@3.0.1[49m[39m[0m
+[0m[0m
 [Gushio] Dependency check-odd@npm:is-odd@latest already installed
+[Gushio] Running with arguments []
+[Gushio] Running with options {}
+[Gushio] Running with dependencies ["shelljs","jimp","check-odd"] in [replace:TMP_DIR]\\.gushio\\[replace:SCRIPT_HASH]-sample_5
 Written on console [33m[1mafter[22m[39m requiring deps
 
 @err
