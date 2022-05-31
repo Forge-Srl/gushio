@@ -2,7 +2,8 @@ import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect
 import {Readable, Writable} from 'stream'
 
 describe('GushioConsole', () => {
-    let superConsole, GushioConsole, GushioLogFormat, Enquirer, enquirer, ora, inStream, outStream, errStream, myConsole
+    let superConsole, GushioConsole, GushioLogFormat, GushioDepsLogFormat, GushioTraceLogFormat, traceSymbol,
+        Enquirer, enquirer, ora, inStream, outStream, errStream, myConsole
 
     // Keep this function global here!
     // If you inline it (where mocking `utils/ora`) tests will fail when run all together!
@@ -45,14 +46,27 @@ describe('GushioConsole', () => {
         }
         jest.unstable_mockModule('console', () => ({Console: MockConsole}))
 
-        GushioConsole = (await import('../../runner/GushioConsole')).GushioConsole
-        GushioLogFormat = (await import('../../runner/GushioConsole')).GushioLogFormat
+        const gc = await import('../../runner/GushioConsole')
+        GushioConsole = gc.GushioConsole
+        GushioLogFormat = gc.GushioLogFormat
+        GushioDepsLogFormat = gc.GushioDepsLogFormat
+        GushioTraceLogFormat = gc.GushioTraceLogFormat
         myConsole = new GushioConsole(inStream, outStream, errStream)
+        traceSymbol = Object.getOwnPropertySymbols(Object.getPrototypeOf(myConsole))[0]
         expect(myConsole.logLevel).toBe('info')
+        expect(myConsole.trace).toBe(false)
     })
 
     test('GushioLogFormat', () => {
         expect(GushioLogFormat).toBe('[Gushio] %s')
+    })
+
+    test('GushioDepsLogFormat', () => {
+        expect(GushioDepsLogFormat).toBe('[Gushio|Deps] %s')
+    })
+
+    test('GushioTraceLogFormat', () => {
+        expect(GushioTraceLogFormat).toBe( '[Gushio|Trace] %d:%d\t %s')
     })
 
     test.each([
@@ -134,6 +148,37 @@ describe('GushioConsole', () => {
         myConsole.error = jest.fn()
         myConsole.warn('some', 'thing')
         expect(myConsole.error).toHaveBeenLastCalledWith('some', 'thing')
+    })
+
+    describe('traceSymbol', () => {
+        beforeEach(() => {
+            myConsole.info = jest.fn()
+        })
+
+        test('no trace', () => {
+            myConsole.trace = false
+
+            myConsole[traceSymbol](1, 2, '', undefined)
+            expect(myConsole.info).not.toHaveBeenCalled()
+        })
+
+        test('trace line', () => {
+            myConsole.trace = true
+            myConsole[traceSymbol](10, 15, 'some code', undefined)
+            expect(myConsole.info).toHaveBeenCalledWith(GushioTraceLogFormat, 10, 15, 'some code')
+        })
+
+        test('trace conditional type', () => {
+            myConsole.trace = true
+            myConsole[traceSymbol](10, 15, 'some code', {conditionalType: 'xyz'})
+            expect(myConsole.info).toHaveBeenCalledWith(GushioTraceLogFormat, 10, 15, 'CONDITIONAL [xyz]: some code')
+        })
+
+        test('trace loop type', () => {
+            myConsole.trace = true
+            myConsole[traceSymbol](10, 15, 'some code', {loopType: 'xyz'})
+            expect(myConsole.info).toHaveBeenCalledWith(GushioTraceLogFormat, 10, 15, 'LOOP [xyz]: some code')
+        })
     })
 
     test('spinner', async () => {

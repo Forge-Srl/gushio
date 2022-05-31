@@ -10,7 +10,7 @@ import {
     installDependency,
     requireStrategy,
 } from '../utils/dependenciesUtils.js'
-import {GushioLogFormat} from './GushioConsole.js'
+import {GushioDepsLogFormat, GushioLogFormat} from './GushioConsole.js'
 import {ScriptChecker} from './ScriptChecker.js'
 import {LoadingError, parseSyntaxError, RunningError} from './errors.js'
 import {FunctionWrapper} from './patches/FunctionWrapper.js'
@@ -28,18 +28,18 @@ export class Runner {
         return string.startsWith('http://') || string.startsWith('https://')
     }
 
-    static async fromPath(application, scriptPath, workingDir, gushioGeneralPath) {
+    static async fromPath(application, scriptPath, workingDir, gushioGeneralPath, trace) {
         if (this.isUrlHTTP(scriptPath)) {
-            return await this.fromRequire(application, scriptPath, requireStrategy.remotePath, gushioGeneralPath)
+            return await this.fromRequire(application, scriptPath, requireStrategy.remotePath, gushioGeneralPath, trace)
         }
         return await this.fromRequire(application, path.resolve(workingDir, scriptPath), requireStrategy.localPath,
-            gushioGeneralPath)
+            gushioGeneralPath, trace)
     }
 
-    static async fromRequire(application, scriptPath, requireStrategy, gushioGeneralPath) {
+    static async fromRequire(application, scriptPath, requireStrategy, gushioGeneralPath, trace) {
         let scriptObject
         try {
-            scriptObject = await requireStrategy(scriptPath)
+            scriptObject = await requireStrategy(scriptPath, trace)
         } catch (e) {
             if (e instanceof SyntaxError) {
                 const parsed = parseSyntaxError(e)
@@ -106,19 +106,20 @@ export class Runner {
     }
 
     async similarRunnerFromPath(scriptPath, workingDir) {
-        return (await Runner.fromPath(this.application, scriptPath, workingDir, this.gushioGeneralPath))
+        return (await Runner
+            .fromPath(this.application, scriptPath, workingDir, this.gushioGeneralPath, this.options.trace))
             .setConsole(this.console)
             .setOptions(this.options)
     }
 
     async installDependency(path, npmInstallVersion) {
-        this.console.info(GushioLogFormat, `Installing dependency ${npmInstallVersion}`)
+        this.console.info(GushioDepsLogFormat, `Installing ${npmInstallVersion}`)
         try {
             await checkDependencyInstalled(path, npmInstallVersion, !this.console.isVerbose)
-            this.console.info(GushioLogFormat, `Dependency ${npmInstallVersion} already installed`)
+            this.console.info(GushioDepsLogFormat, `${npmInstallVersion} already installed`)
         } catch (e) {
             await installDependency(path, npmInstallVersion, !this.console.isVerbose)
-            this.console.info(GushioLogFormat, `Dependency ${npmInstallVersion} successfully installed`)
+            this.console.info(GushioDepsLogFormat, `${npmInstallVersion} successfully installed`)
         }
     }
 
@@ -128,7 +129,7 @@ export class Runner {
                 return
             }
 
-            this.console.info(GushioLogFormat, 'Checking dependencies')
+            this.console.info(GushioDepsLogFormat, 'Checking dependencies')
             const gushioFolder = this.gushioFolder
             await ensureNodeModulesExists(gushioFolder, this.options.cleanRun)
 
@@ -151,7 +152,7 @@ export class Runner {
             YAMLWrapper(),
             fileSystemWrapper(scriptPath, this.console.isVerbose),
             timerWrapper(),
-            gushioWrapper(buildSimilarRunner, patchedImport),
+            gushioWrapper(buildSimilarRunner, patchedImport, this.console),
         )
     }
 

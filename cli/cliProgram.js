@@ -18,19 +18,21 @@ export class Program {
         this.stderr = stderr
     }
 
-    buildConsole(logLevel) {
-        return new GushioConsole(this.stdin, this.stdout, this.stderr, logLevel)
+    buildConsole(logLevel, trace) {
+        return new GushioConsole(this.stdin, this.stdout, this.stderr, logLevel, trace)
     }
 
     commandAction(workingDir) {
         return async (scriptPath, options, command) => {
-            const console = this.buildConsole(options.verbose ? 'verbose' : 'info')
+            const console = this.buildConsole(options.verbose ? 'verbose' : 'info', options.trace)
 
             try {
-                const runner = (await Runner.fromPath(command.rawArgs[1], scriptPath, workingDir, options.gushioFolder))
+                const runner = (await Runner
+                    .fromPath(command.rawArgs[1], scriptPath, workingDir, options.gushioFolder, options.trace))
                     .setConsole(console)
                     .setOptions({
                         cleanRun: options.cleanRun,
+                        trace: options.trace,
                     })
                 const _removedScriptPathArg = command.args.shift()
 
@@ -49,6 +51,8 @@ export class Program {
     getCommand(workingDir) {
         const verboseOption = new Option('-v, --verbose', 'enable verbose logging')
             .env('GUSHIO_VERBOSE')
+        const traceOption = new Option('--trace', 'enable instructions tracing')
+            .env('GUSHIO_TRACE')
         const gushioFolderOption = new Option('-f, --gushio-folder <folder>', 'path to the gushio cache folder')
             .env('GUSHIO_FOLDER')
             .default(path.resolve(os.homedir(), GUSHIO_FOLDER_NAME))
@@ -66,6 +70,7 @@ export class Program {
             .passThroughOptions()
             .argument('<script>', 'path to the script')
             .addOption(verboseOption)
+            .addOption(traceOption)
             .addOption(gushioFolderOption)
             .addOption(cleanRunOption)
             .action(this.commandAction(workingDir))

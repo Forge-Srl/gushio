@@ -5,25 +5,27 @@ import shell from 'shelljs'
 import requireFromString from 'require-from-string'
 import fetch from 'node-fetch'
 import isString from 'is-string'
+import {transformCode} from './codeTransformationUtils.js'
 
 export const requireStrategy = {
-    inMemoryString: async (code, filename) => {
+    inMemoryString: async (code, filename, trace) => {
+        code = await transformCode(code, trace)
         try {
             return await import(`data:text/javascript;charset=utf-8,${encodeURIComponent(code)}`)
         } catch (e) {
             return requireFromString(code, filename)
         }
     },
-    localPath: async (path) => {
+    localPath: async (path, trace) => {
         const file = await fsExtra.readFile(path)
-        return requireStrategy.inMemoryString(file.toString(), path)
+        return requireStrategy.inMemoryString(file.toString(), path, trace)
     },
-    remotePath: async (path) => {
+    remotePath: async (path, trace) => {
         const response = await fetch(path)
         if (!response.ok) {
             throw new Error(`Request of "${path}" failed with status code ${response.status}`)
         }
-        return requireStrategy.inMemoryString(await response.text(), null)
+        return requireStrategy.inMemoryString(await response.text(), null, trace)
     },
 }
 

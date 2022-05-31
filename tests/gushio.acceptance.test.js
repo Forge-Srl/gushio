@@ -270,4 +270,16 @@ describe('Gushio', () => {
             [scriptPath, 'SCRIPT_PATH'],
         ])
     })
+
+    test.each([
+        'acceptance_sample_trace_flag.cjs',
+        'acceptance_sample_trace_flag.mjs'
+    ])('run script with trace %s', (file) => {
+        const scriptPath = absoluteScript(file)
+        const result = runScript(tmpDir, scriptPath, undefined, '--trace')
+        expectToMatchCustomSnapshot(result, [
+            [tmpDir, 'TMP_DIR'],
+            [scriptPath, 'SCRIPT_PATH'],
+        ])
+    })
 })

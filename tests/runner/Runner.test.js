@@ -258,20 +258,20 @@ describe('Runner', () => {
 
         test('already installed', async () => {
             await runner.installDependency('somePath', 'dep')
-            expect(runner.console.info).toHaveBeenNthCalledWith(1, '[Gushio] %s', 'Installing dependency dep')
+            expect(runner.console.info).toHaveBeenNthCalledWith(1, '[Gushio|Deps] %s', 'Installing dep')
             expect(dependenciesUtils.checkDependencyInstalled).toHaveBeenCalledWith('somePath', 'dep', false)
             expect(dependenciesUtils.installDependency).not.toHaveBeenCalled()
-            expect(runner.console.info).toHaveBeenNthCalledWith(2, '[Gushio] %s', 'Dependency dep already installed')
+            expect(runner.console.info).toHaveBeenNthCalledWith(2, '[Gushio|Deps] %s', 'dep already installed')
         })
 
         test('missing dependency', async () => {
             dependenciesUtils.checkDependencyInstalled.mockRejectedValueOnce(new Error('kaboom'))
 
             await runner.installDependency('somePath', 'dep')
-            expect(runner.console.info).toHaveBeenNthCalledWith(1, '[Gushio] %s', 'Installing dependency dep')
+            expect(runner.console.info).toHaveBeenNthCalledWith(1, '[Gushio|Deps] %s', 'Installing dep')
             expect(dependenciesUtils.checkDependencyInstalled).toHaveBeenCalledWith('somePath', 'dep', false)
             expect(dependenciesUtils.installDependency).toHaveBeenCalledWith('somePath', 'dep', false)
-            expect(runner.console.info).toHaveBeenNthCalledWith(2, '[Gushio] %s', 'Dependency dep successfully installed')
+            expect(runner.console.info).toHaveBeenNthCalledWith(2, '[Gushio|Deps] %s', 'dep successfully installed')
         })
     })
 
@@ -297,7 +297,7 @@ describe('Runner', () => {
             const hook = runner.getCommandPreActionHook(['dep1', 'dep2'])
             await hook()
 
-            expect(runner.console.info).toHaveBeenNthCalledWith(1, '[Gushio] %s', 'Checking dependencies')
+            expect(runner.console.info).toHaveBeenNthCalledWith(1, '[Gushio|Deps] %s', 'Checking dependencies')
             expect(dependenciesUtils.ensureNodeModulesExists).toHaveBeenCalledWith('gushioFolder', runner.options.cleanRun)
             expect(runner.installDependency).toHaveBeenNthCalledWith(1, 'gushioFolder', 'dep1')
             expect(runner.installDependency).toHaveBeenNthCalledWith(2, 'gushioFolder', 'dep2')
@@ -307,6 +307,7 @@ describe('Runner', () => {
     test('buildCombinedFunctionWrapper', () => {
         const runner = new Runner('appPath', 'scriptPath')
         runner.console = {verbose: jest.fn(), isVerbose: true}
+        runner.options = {trace: 'trace'}
         runner._gushioFolder = 'someFolder'
 
         dependenciesUtils.buildPatchedImport.mockImplementationOnce((path, allowedDeps) => {
@@ -327,7 +328,9 @@ describe('Runner', () => {
             return 'fileSystemWrapper'
         })
         timerWrapper.mockImplementationOnce(() => 'timerWrapper')
-        gushioWrapper.mockImplementationOnce((buildRunner) => {
+        gushioWrapper.mockImplementationOnce((buildRunner, patchedImport, console) => {
+            expect(patchedImport).toBe('patched')
+            expect(console).toBe(runner.console)
             runner.similarRunnerFromPath = jest.fn()
             buildRunner('script', 'directory')
             expect(runner.similarRunnerFromPath).toHaveBeenCalledWith('script', 'directory')

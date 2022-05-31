@@ -21,11 +21,11 @@ These are the args: ["foo","bar a bar",["quis","quix","quiz"]]
 exports[`Gushio dependency installation acceptance_sample_dependency_installation.cjs 1`] = `
 @code: 0
 @out
-[Gushio] Checking dependencies
-[Gushio] Installing dependency jimp@latest
-[Gushio] Dependency jimp@latest successfully installed
-[Gushio] Installing dependency check-odd@npm:is-odd@latest
-[Gushio] Dependency check-odd@npm:is-odd@latest successfully installed
+[Gushio|Deps] Checking dependencies
+[Gushio|Deps] Installing jimp@latest
+[Gushio|Deps] jimp@latest successfully installed
+[Gushio|Deps] Installing check-odd@npm:is-odd@latest
+[Gushio|Deps] check-odd@npm:is-odd@latest successfully installed
 Written on console [33m[1mafter[22m[39m requiring deps
 
 @err
@@ -35,11 +35,11 @@ Written on console [33m[1mafter[22m[39m requiring deps
 exports[`Gushio dependency installation acceptance_sample_dependency_installation.cjs 2`] = `
 @code: 0
 @out
-[Gushio] Checking dependencies
-[Gushio] Installing dependency jimp@latest
-[Gushio] Dependency jimp@latest already installed
-[Gushio] Installing dependency check-odd@npm:is-odd@latest
-[Gushio] Dependency check-odd@npm:is-odd@latest already installed
+[Gushio|Deps] Checking dependencies
+[Gushio|Deps] Installing jimp@latest
+[Gushio|Deps] jimp@latest already installed
+[Gushio|Deps] Installing check-odd@npm:is-odd@latest
+[Gushio|Deps] check-odd@npm:is-odd@latest already installed
 Written on console [33m[1mafter[22m[39m requiring deps
 
 @err
@@ -49,11 +49,11 @@ Written on console [33m[1mafter[22m[39m requiring deps
 exports[`Gushio dependency installation acceptance_sample_dependency_installation.mjs 1`] = `
 @code: 0
 @out
-[Gushio] Checking dependencies
-[Gushio] Installing dependency jimp@latest
-[Gushio] Dependency jimp@latest successfully installed
-[Gushio] Installing dependency check-odd@npm:is-odd@latest
-[Gushio] Dependency check-odd@npm:is-odd@latest successfully installed
+[Gushio|Deps] Checking dependencies
+[Gushio|Deps] Installing jimp@latest
+[Gushio|Deps] jimp@latest successfully installed
+[Gushio|Deps] Installing check-odd@npm:is-odd@latest
+[Gushio|Deps] check-odd@npm:is-odd@latest successfully installed
 Written on console [33m[1mafter[22m[39m requiring deps
 
 @err
@@ -63,11 +63,11 @@ Written on console [33m[1mafter[22m[39m requiring deps
 exports[`Gushio dependency installation acceptance_sample_dependency_installation.mjs 2`] = `
 @code: 0
 @out
-[Gushio] Checking dependencies
-[Gushio] Installing dependency jimp@latest
-[Gushio] Dependency jimp@latest already installed
-[Gushio] Installing dependency check-odd@npm:is-odd@latest
-[Gushio] Dependency check-odd@npm:is-odd@latest already installed
+[Gushio|Deps] Checking dependencies
+[Gushio|Deps] Installing jimp@latest
+[Gushio|Deps] jimp@latest already installed
+[Gushio|Deps] Installing check-odd@npm:is-odd@latest
+[Gushio|Deps] check-odd@npm:is-odd@latest already installed
 Written on console [33m[1mafter[22m[39m requiring deps
 
 @err
@@ -223,9 +223,9 @@ exports[`Gushio run other script acceptance_sample_run_other_script.cjs 1`] = `
 @out
 Global Don't try this at home!
 [1m[31mBefore script run[39m[22m
-[Gushio] Checking dependencies
-[Gushio] Installing dependency is-odd@latest
-[Gushio] Dependency is-odd@latest successfully installed
+[Gushio|Deps] Checking dependencies
+[Gushio|Deps] Installing is-odd@latest
+[Gushio|Deps] is-odd@latest successfully installed
 [34m[1mInner script begin[22m[39m
 Global Don't try this at home!
 Arguments [ 'first', \`second "with" 'spaces'\` ]
@@ -243,9 +243,9 @@ exports[`Gushio run other script acceptance_sample_run_other_script.mjs 1`] = `
 @out
 Global Don't try this at home!
 [1m[31mBefore script run[39m[22m
-[Gushio] Checking dependencies
-[Gushio] Installing dependency is-odd@latest
-[Gushio] Dependency is-odd@latest successfully installed
+[Gushio|Deps] Checking dependencies
+[Gushio|Deps] Installing is-odd@latest
+[Gushio|Deps] is-odd@latest successfully installed
 [34m[1mInner script begin[22m[39m
 Global Don't try this at home!
 Arguments [ 'first', \`second "with" 'spaces'\` ]
@@ -253,6 +253,506 @@ Options { asd: true, bsd: \`something "else" 'with' spaces\` }
 [42m[3mInner script end[23m[49m
 [1m[31mAfter script run[39m[22m
 Global changed
+
+@err
+
+`;
+
+exports[`Gushio run script with trace acceptance_sample_trace_flag.cjs 1`] = `
+@code: 0
+@out
+[Gushio|Trace] 4:8	 console.log('Simple line')
+Simple line
+[Gushio|Trace] 6:8	 const odd = []
+[Gushio|Trace] 7:8	 const even = []
+[Gushio|Trace] 8:8	 const others = []
+[Gushio|Trace] 9:8	 LOOP [for]: let i = 0
+[Gushio|Trace] 9:8	 LOOP [for]: i < 10
+[Gushio|Trace] 10:12	 let dummy
+[Gushio|Trace] 11:12	 CONDITIONAL [if]: i % 2
+[Gushio|Trace] 13:19	 CONDITIONAL [if]: dummy = (i % 3 === 0)
+[Gushio|Trace] 14:16	 others.push(i)
+[Gushio|Trace] 18:12	 console.log(dummy)
+true
+[Gushio|Trace] 9:8	 LOOP [for]: i++
+[Gushio|Trace] 9:8	 LOOP [for]: i < 10
+[Gushio|Trace] 10:12	 let dummy
+[Gushio|Trace] 11:12	 CONDITIONAL [if]: i % 2
+[Gushio|Trace] 12:16	 odd.push(i)
+[Gushio|Trace] 18:12	 console.log(dummy)
+undefined
+[Gushio|Trace] 9:8	 LOOP [for]: i++
+[Gushio|Trace] 9:8	 LOOP [for]: i < 10
+[Gushio|Trace] 10:12	 let dummy
+[Gushio|Trace] 11:12	 CONDITIONAL [if]: i % 2
+[Gushio|Trace] 13:19	 CONDITIONAL [if]: dummy = (i % 3 === 0)
+[Gushio|Trace] 15:19	 LOOP [for]: let j = 0
+[Gushio|Trace] 15:19	 LOOP [for]: j < 2
+[Gushio|Trace] 16:16	 even.push(i)
+[Gushio|Trace] 15:19	 LOOP [for]: j++
+[Gushio|Trace] 15:19	 LOOP [for]: j < 2
+[Gushio|Trace] 16:16	 even.push(i)
+[Gushio|Trace] 15:19	 LOOP [for]: j++
+[Gushio|Trace] 15:19	 LOOP [for]: j < 2
+[Gushio|Trace] 18:12	 console.log(dummy)
+false
+[Gushio|Trace] 9:8	 LOOP [for]: i++
+[Gushio|Trace] 9:8	 LOOP [for]: i < 10
+[Gushio|Trace] 10:12	 let dummy
+[Gushio|Trace] 11:12	 CONDITIONAL [if]: i % 2
+[Gushio|Trace] 12:16	 odd.push(i)
+[Gushio|Trace] 18:12	 console.log(dummy)
+undefined
+[Gushio|Trace] 9:8	 LOOP [for]: i++
+[Gushio|Trace] 9:8	 LOOP [for]: i < 10
+[Gushio|Trace] 10:12	 let dummy
+[Gushio|Trace] 11:12	 CONDITIONAL [if]: i % 2
+[Gushio|Trace] 13:19	 CONDITIONAL [if]: dummy = (i % 3 === 0)
+[Gushio|Trace] 15:19	 LOOP [for]: let j = 0
+[Gushio|Trace] 15:19	 LOOP [for]: j < 2
+[Gushio|Trace] 16:16	 even.push(i)
+[Gushio|Trace] 15:19	 LOOP [for]: j++
+[Gushio|Trace] 15:19	 LOOP [for]: j < 2
+[Gushio|Trace] 16:16	 even.push(i)
+[Gushio|Trace] 15:19	 LOOP [for]: j++
+[Gushio|Trace] 15:19	 LOOP [for]: j < 2
+[Gushio|Trace] 18:12	 console.log(dummy)
+false
+[Gushio|Trace] 9:8	 LOOP [for]: i++
+[Gushio|Trace] 9:8	 LOOP [for]: i < 10
+[Gushio|Trace] 10:12	 let dummy
+[Gushio|Trace] 11:12	 CONDITIONAL [if]: i % 2
+[Gushio|Trace] 12:16	 odd.push(i)
+[Gushio|Trace] 18:12	 console.log(dummy)
+undefined
+[Gushio|Trace] 9:8	 LOOP [for]: i++
+[Gushio|Trace] 9:8	 LOOP [for]: i < 10
+[Gushio|Trace] 10:12	 let dummy
+[Gushio|Trace] 11:12	 CONDITIONAL [if]: i % 2
+[Gushio|Trace] 13:19	 CONDITIONAL [if]: dummy = (i % 3 === 0)
+[Gushio|Trace] 14:16	 others.push(i)
+[Gushio|Trace] 18:12	 console.log(dummy)
+true
+[Gushio|Trace] 9:8	 LOOP [for]: i++
+[Gushio|Trace] 9:8	 LOOP [for]: i < 10
+[Gushio|Trace] 10:12	 let dummy
+[Gushio|Trace] 11:12	 CONDITIONAL [if]: i % 2
+[Gushio|Trace] 12:16	 odd.push(i)
+[Gushio|Trace] 18:12	 console.log(dummy)
+undefined
+[Gushio|Trace] 9:8	 LOOP [for]: i++
+[Gushio|Trace] 9:8	 LOOP [for]: i < 10
+[Gushio|Trace] 10:12	 let dummy
+[Gushio|Trace] 11:12	 CONDITIONAL [if]: i % 2
+[Gushio|Trace] 13:19	 CONDITIONAL [if]: dummy = (i % 3 === 0)
+[Gushio|Trace] 15:19	 LOOP [for]: let j = 0
+[Gushio|Trace] 15:19	 LOOP [for]: j < 2
+[Gushio|Trace] 16:16	 even.push(i)
+[Gushio|Trace] 15:19	 LOOP [for]: j++
+[Gushio|Trace] 15:19	 LOOP [for]: j < 2
+[Gushio|Trace] 16:16	 even.push(i)
+[Gushio|Trace] 15:19	 LOOP [for]: j++
+[Gushio|Trace] 15:19	 LOOP [for]: j < 2
+[Gushio|Trace] 18:12	 console.log(dummy)
+false
+[Gushio|Trace] 9:8	 LOOP [for]: i++
+[Gushio|Trace] 9:8	 LOOP [for]: i < 10
+[Gushio|Trace] 10:12	 let dummy
+[Gushio|Trace] 11:12	 CONDITIONAL [if]: i % 2
+[Gushio|Trace] 12:16	 odd.push(i)
+[Gushio|Trace] 18:12	 console.log(dummy)
+undefined
+[Gushio|Trace] 9:8	 LOOP [for]: i++
+[Gushio|Trace] 9:8	 LOOP [for]: i < 10
+[Gushio|Trace] 21:8	 LOOP [for-of]: let oddElement of odd
+[Gushio|Trace] 22:12	 console.log(\`\${oddElement} is odd\`)
+1 is odd
+[Gushio|Trace] 21:8	 LOOP [for-of]: let oddElement of odd
+[Gushio|Trace] 22:12	 console.log(\`\${oddElement} is odd\`)
+3 is odd
+[Gushio|Trace] 21:8	 LOOP [for-of]: let oddElement of odd
+[Gushio|Trace] 22:12	 console.log(\`\${oddElement} is odd\`)
+5 is odd
+[Gushio|Trace] 21:8	 LOOP [for-of]: let oddElement of odd
+[Gushio|Trace] 22:12	 console.log(\`\${oddElement} is odd\`)
+7 is odd
+[Gushio|Trace] 21:8	 LOOP [for-of]: let oddElement of odd
+[Gushio|Trace] 22:12	 console.log(\`\${oddElement} is odd\`)
+9 is odd
+[Gushio|Trace] 21:8	 LOOP [for-of]: let oddElement of odd
+[Gushio|Trace] 25:8	 LOOP [for-of]: let otherElement of others
+[Gushio|Trace] 26:12	 console.log(\`\${otherElement} is other\`)
+0 is other
+[Gushio|Trace] 25:8	 LOOP [for-of]: let otherElement of others
+[Gushio|Trace] 26:12	 console.log(\`\${otherElement} is other\`)
+6 is other
+[Gushio|Trace] 25:8	 LOOP [for-of]: let otherElement of others
+[Gushio|Trace] 28:8	 let doWhileCounter = 0
+[Gushio|Trace] 30:12	 console.log(\`\${even[doWhileCounter]} is even\`)
+2 is even
+[Gushio|Trace] 31:12	 doWhileCounter++
+[Gushio|Trace] 29:8	 LOOP [do-while]: doWhileCounter < even.length
+[Gushio|Trace] 30:12	 console.log(\`\${even[doWhileCounter]} is even\`)
+2 is even
+[Gushio|Trace] 31:12	 doWhileCounter++
+[Gushio|Trace] 29:8	 LOOP [do-while]: doWhileCounter < even.length
+[Gushio|Trace] 30:12	 console.log(\`\${even[doWhileCounter]} is even\`)
+4 is even
+[Gushio|Trace] 31:12	 doWhileCounter++
+[Gushio|Trace] 29:8	 LOOP [do-while]: doWhileCounter < even.length
+[Gushio|Trace] 30:12	 console.log(\`\${even[doWhileCounter]} is even\`)
+4 is even
+[Gushio|Trace] 31:12	 doWhileCounter++
+[Gushio|Trace] 29:8	 LOOP [do-while]: doWhileCounter < even.length
+[Gushio|Trace] 30:12	 console.log(\`\${even[doWhileCounter]} is even\`)
+8 is even
+[Gushio|Trace] 31:12	 doWhileCounter++
+[Gushio|Trace] 29:8	 LOOP [do-while]: doWhileCounter < even.length
+[Gushio|Trace] 30:12	 console.log(\`\${even[doWhileCounter]} is even\`)
+8 is even
+[Gushio|Trace] 31:12	 doWhileCounter++
+[Gushio|Trace] 29:8	 LOOP [do-while]: doWhileCounter < even.length
+[Gushio|Trace] 34:8	 const obj = Object.assign({}, ...even.map((value, index) => ({[\`key_\${value}\`]: odd[index]})))
+[Gushio|Trace] 36:8	 LOOP [for-in]: let objKey in obj
+[Gushio|Trace] 37:12	 console.log(\`\${objKey} -> \${obj[objKey]}\`)
+key_2 -> 3
+[Gushio|Trace] 36:8	 LOOP [for-in]: let objKey in obj
+[Gushio|Trace] 37:12	 console.log(\`\${objKey} -> \${obj[objKey]}\`)
+key_4 -> 7
+[Gushio|Trace] 36:8	 LOOP [for-in]: let objKey in obj
+[Gushio|Trace] 37:12	 console.log(\`\${objKey} -> \${obj[objKey]}\`)
+key_8 -> undefined
+[Gushio|Trace] 36:8	 LOOP [for-in]: let objKey in obj
+[Gushio|Trace] 40:8	 let whileCounter = 0
+[Gushio|Trace] 41:8	 let dummy2
+[Gushio|Trace] 42:12	 LOOP [while]: true || (dummy2 = 3) > 2
+[Gushio|Trace] 43:12	 CONDITIONAL [switch]: whileCounter
+[Gushio|Trace] 54:20	 console.log('Ops!')
+Ops!
+[Gushio|Trace] 57:12	 whileCounter++
+[Gushio|Trace] 58:12	 console.log(dummy2)
+undefined
+[Gushio|Trace] 42:12	 LOOP [while]: true || (dummy2 = 3) > 2
+[Gushio|Trace] 43:12	 CONDITIONAL [switch]: whileCounter
+[Gushio|Trace] 49:20	 console.log(\`value is \${whileCounter}\`)
+value is 1
+[Gushio|Trace] 50:20	 break
+[Gushio|Trace] 57:12	 whileCounter++
+[Gushio|Trace] 58:12	 console.log(dummy2)
+undefined
+[Gushio|Trace] 42:12	 LOOP [while]: true || (dummy2 = 3) > 2
+[Gushio|Trace] 43:12	 CONDITIONAL [switch]: whileCounter
+[Gushio|Trace] 49:20	 console.log(\`value is \${whileCounter}\`)
+value is 2
+[Gushio|Trace] 50:20	 break
+[Gushio|Trace] 57:12	 whileCounter++
+[Gushio|Trace] 58:12	 console.log(dummy2)
+undefined
+[Gushio|Trace] 42:12	 LOOP [while]: true || (dummy2 = 3) > 2
+[Gushio|Trace] 43:12	 CONDITIONAL [switch]: whileCounter
+[Gushio|Trace] 45:20	 console.log('trinity!')
+trinity!
+[Gushio|Trace] 49:20	 console.log(\`value is \${whileCounter}\`)
+value is 3
+[Gushio|Trace] 50:20	 break
+[Gushio|Trace] 57:12	 whileCounter++
+[Gushio|Trace] 58:12	 console.log(dummy2)
+undefined
+[Gushio|Trace] 42:12	 LOOP [while]: true || (dummy2 = 3) > 2
+[Gushio|Trace] 43:12	 CONDITIONAL [switch]: whileCounter
+[Gushio|Trace] 49:20	 console.log(\`value is \${whileCounter}\`)
+value is 4
+[Gushio|Trace] 50:20	 break
+[Gushio|Trace] 57:12	 whileCounter++
+[Gushio|Trace] 58:12	 console.log(dummy2)
+undefined
+[Gushio|Trace] 42:12	 LOOP [while]: true || (dummy2 = 3) > 2
+[Gushio|Trace] 43:12	 CONDITIONAL [switch]: whileCounter
+[Gushio|Trace] 54:20	 console.log('Ops!')
+Ops!
+[Gushio|Trace] 57:12	 whileCounter++
+[Gushio|Trace] 58:12	 console.log(dummy2)
+undefined
+[Gushio|Trace] 42:12	 LOOP [while]: true || (dummy2 = 3) > 2
+[Gushio|Trace] 43:12	 CONDITIONAL [switch]: whileCounter
+[Gushio|Trace] 54:20	 console.log('Ops!')
+Ops!
+[Gushio|Trace] 57:12	 whileCounter++
+[Gushio|Trace] 58:12	 console.log(dummy2)
+undefined
+[Gushio|Trace] 42:12	 LOOP [while]: true || (dummy2 = 3) > 2
+[Gushio|Trace] 43:12	 CONDITIONAL [switch]: whileCounter
+[Gushio|Trace] 52:20	 break wh
+[Gushio|Trace] 68:8	 LOOP [for-await-of]: let generatorElement of generator()
+[Gushio|Trace] 62:12	 yield 0
+[Gushio|Trace] 69:12	 console.log(\`generator -> \${generatorElement}\`)
+generator -> 0
+[Gushio|Trace] 68:8	 LOOP [for-await-of]: let generatorElement of generator()
+[Gushio|Trace] 63:12	 yield 1
+[Gushio|Trace] 69:12	 console.log(\`generator -> \${generatorElement}\`)
+generator -> 1
+[Gushio|Trace] 68:8	 LOOP [for-await-of]: let generatorElement of generator()
+[Gushio|Trace] 64:12	 yield await new Promise(resolve => setTimeout(() => resolve(2), 500))
+[Gushio|Trace] 69:12	 console.log(\`generator -> \${generatorElement}\`)
+generator -> 2
+[Gushio|Trace] 68:8	 LOOP [for-await-of]: let generatorElement of generator()
+[Gushio|Trace] 65:12	 yield* others
+[Gushio|Trace] 69:12	 console.log(\`generator -> \${generatorElement}\`)
+generator -> 0
+[Gushio|Trace] 68:8	 LOOP [for-await-of]: let generatorElement of generator()
+[Gushio|Trace] 69:12	 console.log(\`generator -> \${generatorElement}\`)
+generator -> 6
+[Gushio|Trace] 68:8	 LOOP [for-await-of]: let generatorElement of generator()
+
+@err
+
+`;
+
+exports[`Gushio run script with trace acceptance_sample_trace_flag.mjs 1`] = `
+@code: 0
+@out
+[Gushio|Trace] 3:4	 console.log('Simple line')
+Simple line
+[Gushio|Trace] 5:4	 const odd = []
+[Gushio|Trace] 6:4	 const even = []
+[Gushio|Trace] 7:4	 const others = []
+[Gushio|Trace] 8:4	 LOOP [for]: let i = 0
+[Gushio|Trace] 8:4	 LOOP [for]: i < 10
+[Gushio|Trace] 9:8	 let dummy
+[Gushio|Trace] 10:8	 CONDITIONAL [if]: i % 2
+[Gushio|Trace] 12:15	 CONDITIONAL [if]: dummy = (i % 3 === 0)
+[Gushio|Trace] 13:12	 others.push(i)
+[Gushio|Trace] 17:8	 console.log(dummy)
+true
+[Gushio|Trace] 8:4	 LOOP [for]: i++
+[Gushio|Trace] 8:4	 LOOP [for]: i < 10
+[Gushio|Trace] 9:8	 let dummy
+[Gushio|Trace] 10:8	 CONDITIONAL [if]: i % 2
+[Gushio|Trace] 11:12	 odd.push(i)
+[Gushio|Trace] 17:8	 console.log(dummy)
+undefined
+[Gushio|Trace] 8:4	 LOOP [for]: i++
+[Gushio|Trace] 8:4	 LOOP [for]: i < 10
+[Gushio|Trace] 9:8	 let dummy
+[Gushio|Trace] 10:8	 CONDITIONAL [if]: i % 2
+[Gushio|Trace] 12:15	 CONDITIONAL [if]: dummy = (i % 3 === 0)
+[Gushio|Trace] 14:15	 LOOP [for]: let j = 0
+[Gushio|Trace] 14:15	 LOOP [for]: j < 2
+[Gushio|Trace] 15:12	 even.push(i)
+[Gushio|Trace] 14:15	 LOOP [for]: j++
+[Gushio|Trace] 14:15	 LOOP [for]: j < 2
+[Gushio|Trace] 15:12	 even.push(i)
+[Gushio|Trace] 14:15	 LOOP [for]: j++
+[Gushio|Trace] 14:15	 LOOP [for]: j < 2
+[Gushio|Trace] 17:8	 console.log(dummy)
+false
+[Gushio|Trace] 8:4	 LOOP [for]: i++
+[Gushio|Trace] 8:4	 LOOP [for]: i < 10
+[Gushio|Trace] 9:8	 let dummy
+[Gushio|Trace] 10:8	 CONDITIONAL [if]: i % 2
+[Gushio|Trace] 11:12	 odd.push(i)
+[Gushio|Trace] 17:8	 console.log(dummy)
+undefined
+[Gushio|Trace] 8:4	 LOOP [for]: i++
+[Gushio|Trace] 8:4	 LOOP [for]: i < 10
+[Gushio|Trace] 9:8	 let dummy
+[Gushio|Trace] 10:8	 CONDITIONAL [if]: i % 2
+[Gushio|Trace] 12:15	 CONDITIONAL [if]: dummy = (i % 3 === 0)
+[Gushio|Trace] 14:15	 LOOP [for]: let j = 0
+[Gushio|Trace] 14:15	 LOOP [for]: j < 2
+[Gushio|Trace] 15:12	 even.push(i)
+[Gushio|Trace] 14:15	 LOOP [for]: j++
+[Gushio|Trace] 14:15	 LOOP [for]: j < 2
+[Gushio|Trace] 15:12	 even.push(i)
+[Gushio|Trace] 14:15	 LOOP [for]: j++
+[Gushio|Trace] 14:15	 LOOP [for]: j < 2
+[Gushio|Trace] 17:8	 console.log(dummy)
+false
+[Gushio|Trace] 8:4	 LOOP [for]: i++
+[Gushio|Trace] 8:4	 LOOP [for]: i < 10
+[Gushio|Trace] 9:8	 let dummy
+[Gushio|Trace] 10:8	 CONDITIONAL [if]: i % 2
+[Gushio|Trace] 11:12	 odd.push(i)
+[Gushio|Trace] 17:8	 console.log(dummy)
+undefined
+[Gushio|Trace] 8:4	 LOOP [for]: i++
+[Gushio|Trace] 8:4	 LOOP [for]: i < 10
+[Gushio|Trace] 9:8	 let dummy
+[Gushio|Trace] 10:8	 CONDITIONAL [if]: i % 2
+[Gushio|Trace] 12:15	 CONDITIONAL [if]: dummy = (i % 3 === 0)
+[Gushio|Trace] 13:12	 others.push(i)
+[Gushio|Trace] 17:8	 console.log(dummy)
+true
+[Gushio|Trace] 8:4	 LOOP [for]: i++
+[Gushio|Trace] 8:4	 LOOP [for]: i < 10
+[Gushio|Trace] 9:8	 let dummy
+[Gushio|Trace] 10:8	 CONDITIONAL [if]: i % 2
+[Gushio|Trace] 11:12	 odd.push(i)
+[Gushio|Trace] 17:8	 console.log(dummy)
+undefined
+[Gushio|Trace] 8:4	 LOOP [for]: i++
+[Gushio|Trace] 8:4	 LOOP [for]: i < 10
+[Gushio|Trace] 9:8	 let dummy
+[Gushio|Trace] 10:8	 CONDITIONAL [if]: i % 2
+[Gushio|Trace] 12:15	 CONDITIONAL [if]: dummy = (i % 3 === 0)
+[Gushio|Trace] 14:15	 LOOP [for]: let j = 0
+[Gushio|Trace] 14:15	 LOOP [for]: j < 2
+[Gushio|Trace] 15:12	 even.push(i)
+[Gushio|Trace] 14:15	 LOOP [for]: j++
+[Gushio|Trace] 14:15	 LOOP [for]: j < 2
+[Gushio|Trace] 15:12	 even.push(i)
+[Gushio|Trace] 14:15	 LOOP [for]: j++
+[Gushio|Trace] 14:15	 LOOP [for]: j < 2
+[Gushio|Trace] 17:8	 console.log(dummy)
+false
+[Gushio|Trace] 8:4	 LOOP [for]: i++
+[Gushio|Trace] 8:4	 LOOP [for]: i < 10
+[Gushio|Trace] 9:8	 let dummy
+[Gushio|Trace] 10:8	 CONDITIONAL [if]: i % 2
+[Gushio|Trace] 11:12	 odd.push(i)
+[Gushio|Trace] 17:8	 console.log(dummy)
+undefined
+[Gushio|Trace] 8:4	 LOOP [for]: i++
+[Gushio|Trace] 8:4	 LOOP [for]: i < 10
+[Gushio|Trace] 20:4	 LOOP [for-of]: let oddElement of odd
+[Gushio|Trace] 21:8	 console.log(\`\${oddElement} is odd\`)
+1 is odd
+[Gushio|Trace] 20:4	 LOOP [for-of]: let oddElement of odd
+[Gushio|Trace] 21:8	 console.log(\`\${oddElement} is odd\`)
+3 is odd
+[Gushio|Trace] 20:4	 LOOP [for-of]: let oddElement of odd
+[Gushio|Trace] 21:8	 console.log(\`\${oddElement} is odd\`)
+5 is odd
+[Gushio|Trace] 20:4	 LOOP [for-of]: let oddElement of odd
+[Gushio|Trace] 21:8	 console.log(\`\${oddElement} is odd\`)
+7 is odd
+[Gushio|Trace] 20:4	 LOOP [for-of]: let oddElement of odd
+[Gushio|Trace] 21:8	 console.log(\`\${oddElement} is odd\`)
+9 is odd
+[Gushio|Trace] 20:4	 LOOP [for-of]: let oddElement of odd
+[Gushio|Trace] 24:4	 LOOP [for-of]: let otherElement of others
+[Gushio|Trace] 25:8	 console.log(\`\${otherElement} is other\`)
+0 is other
+[Gushio|Trace] 24:4	 LOOP [for-of]: let otherElement of others
+[Gushio|Trace] 25:8	 console.log(\`\${otherElement} is other\`)
+6 is other
+[Gushio|Trace] 24:4	 LOOP [for-of]: let otherElement of others
+[Gushio|Trace] 27:4	 let doWhileCounter = 0
+[Gushio|Trace] 29:8	 console.log(\`\${even[doWhileCounter]} is even\`)
+2 is even
+[Gushio|Trace] 30:8	 doWhileCounter++
+[Gushio|Trace] 28:4	 LOOP [do-while]: doWhileCounter < even.length
+[Gushio|Trace] 29:8	 console.log(\`\${even[doWhileCounter]} is even\`)
+2 is even
+[Gushio|Trace] 30:8	 doWhileCounter++
+[Gushio|Trace] 28:4	 LOOP [do-while]: doWhileCounter < even.length
+[Gushio|Trace] 29:8	 console.log(\`\${even[doWhileCounter]} is even\`)
+4 is even
+[Gushio|Trace] 30:8	 doWhileCounter++
+[Gushio|Trace] 28:4	 LOOP [do-while]: doWhileCounter < even.length
+[Gushio|Trace] 29:8	 console.log(\`\${even[doWhileCounter]} is even\`)
+4 is even
+[Gushio|Trace] 30:8	 doWhileCounter++
+[Gushio|Trace] 28:4	 LOOP [do-while]: doWhileCounter < even.length
+[Gushio|Trace] 29:8	 console.log(\`\${even[doWhileCounter]} is even\`)
+8 is even
+[Gushio|Trace] 30:8	 doWhileCounter++
+[Gushio|Trace] 28:4	 LOOP [do-while]: doWhileCounter < even.length
+[Gushio|Trace] 29:8	 console.log(\`\${even[doWhileCounter]} is even\`)
+8 is even
+[Gushio|Trace] 30:8	 doWhileCounter++
+[Gushio|Trace] 28:4	 LOOP [do-while]: doWhileCounter < even.length
+[Gushio|Trace] 33:4	 const obj = Object.assign({}, ...even.map((value, index) => ({[\`key_\${value}\`]: odd[index]})))
+[Gushio|Trace] 35:4	 LOOP [for-in]: let objKey in obj
+[Gushio|Trace] 36:8	 console.log(\`\${objKey} -> \${obj[objKey]}\`)
+key_2 -> 3
+[Gushio|Trace] 35:4	 LOOP [for-in]: let objKey in obj
+[Gushio|Trace] 36:8	 console.log(\`\${objKey} -> \${obj[objKey]}\`)
+key_4 -> 7
+[Gushio|Trace] 35:4	 LOOP [for-in]: let objKey in obj
+[Gushio|Trace] 36:8	 console.log(\`\${objKey} -> \${obj[objKey]}\`)
+key_8 -> undefined
+[Gushio|Trace] 35:4	 LOOP [for-in]: let objKey in obj
+[Gushio|Trace] 39:4	 let whileCounter = 0
+[Gushio|Trace] 40:4	 let dummy2
+[Gushio|Trace] 41:8	 LOOP [while]: true || (dummy2 = 3) > 2
+[Gushio|Trace] 42:8	 CONDITIONAL [switch]: whileCounter
+[Gushio|Trace] 53:16	 console.log('Ops!')
+Ops!
+[Gushio|Trace] 56:8	 whileCounter++
+[Gushio|Trace] 57:8	 console.log(dummy2)
+undefined
+[Gushio|Trace] 41:8	 LOOP [while]: true || (dummy2 = 3) > 2
+[Gushio|Trace] 42:8	 CONDITIONAL [switch]: whileCounter
+[Gushio|Trace] 48:16	 console.log(\`value is \${whileCounter}\`)
+value is 1
+[Gushio|Trace] 49:16	 break
+[Gushio|Trace] 56:8	 whileCounter++
+[Gushio|Trace] 57:8	 console.log(dummy2)
+undefined
+[Gushio|Trace] 41:8	 LOOP [while]: true || (dummy2 = 3) > 2
+[Gushio|Trace] 42:8	 CONDITIONAL [switch]: whileCounter
+[Gushio|Trace] 48:16	 console.log(\`value is \${whileCounter}\`)
+value is 2
+[Gushio|Trace] 49:16	 break
+[Gushio|Trace] 56:8	 whileCounter++
+[Gushio|Trace] 57:8	 console.log(dummy2)
+undefined
+[Gushio|Trace] 41:8	 LOOP [while]: true || (dummy2 = 3) > 2
+[Gushio|Trace] 42:8	 CONDITIONAL [switch]: whileCounter
+[Gushio|Trace] 44:16	 console.log('trinity!')
+trinity!
+[Gushio|Trace] 48:16	 console.log(\`value is \${whileCounter}\`)
+value is 3
+[Gushio|Trace] 49:16	 break
+[Gushio|Trace] 56:8	 whileCounter++
+[Gushio|Trace] 57:8	 console.log(dummy2)
+undefined
+[Gushio|Trace] 41:8	 LOOP [while]: true || (dummy2 = 3) > 2
+[Gushio|Trace] 42:8	 CONDITIONAL [switch]: whileCounter
+[Gushio|Trace] 48:16	 console.log(\`value is \${whileCounter}\`)
+value is 4
+[Gushio|Trace] 49:16	 break
+[Gushio|Trace] 56:8	 whileCounter++
+[Gushio|Trace] 57:8	 console.log(dummy2)
+undefined
+[Gushio|Trace] 41:8	 LOOP [while]: true || (dummy2 = 3) > 2
+[Gushio|Trace] 42:8	 CONDITIONAL [switch]: whileCounter
+[Gushio|Trace] 53:16	 console.log('Ops!')
+Ops!
+[Gushio|Trace] 56:8	 whileCounter++
+[Gushio|Trace] 57:8	 console.log(dummy2)
+undefined
+[Gushio|Trace] 41:8	 LOOP [while]: true || (dummy2 = 3) > 2
+[Gushio|Trace] 42:8	 CONDITIONAL [switch]: whileCounter
+[Gushio|Trace] 53:16	 console.log('Ops!')
+Ops!
+[Gushio|Trace] 56:8	 whileCounter++
+[Gushio|Trace] 57:8	 console.log(dummy2)
+undefined
+[Gushio|Trace] 41:8	 LOOP [while]: true || (dummy2 = 3) > 2
+[Gushio|Trace] 42:8	 CONDITIONAL [switch]: whileCounter
+[Gushio|Trace] 51:16	 break wh
+[Gushio|Trace] 67:4	 LOOP [for-await-of]: let generatorElement of generator()
+[Gushio|Trace] 61:8	 yield 0
+[Gushio|Trace] 68:8	 console.log(\`generator -> \${generatorElement}\`)
+generator -> 0
+[Gushio|Trace] 67:4	 LOOP [for-await-of]: let generatorElement of generator()
+[Gushio|Trace] 62:8	 yield 1
+[Gushio|Trace] 68:8	 console.log(\`generator -> \${generatorElement}\`)
+generator -> 1
+[Gushio|Trace] 67:4	 LOOP [for-await-of]: let generatorElement of generator()
+[Gushio|Trace] 63:8	 yield await new Promise(resolve => setTimeout(() => resolve(2), 500))
+[Gushio|Trace] 68:8	 console.log(\`generator -> \${generatorElement}\`)
+generator -> 2
+[Gushio|Trace] 67:4	 LOOP [for-await-of]: let generatorElement of generator()
+[Gushio|Trace] 64:8	 yield* others
+[Gushio|Trace] 68:8	 console.log(\`generator -> \${generatorElement}\`)
+generator -> 0
+[Gushio|Trace] 67:4	 LOOP [for-await-of]: let generatorElement of generator()
+[Gushio|Trace] 68:8	 console.log(\`generator -> \${generatorElement}\`)
+generator -> 6
+[Gushio|Trace] 67:4	 LOOP [for-await-of]: let generatorElement of generator()
 
 @err
 

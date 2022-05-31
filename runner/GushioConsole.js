@@ -10,13 +10,17 @@ const LOG_LEVELS = {
     silent: 0
 }
 
-export const GushioLogFormat = '[Gushio] %s'
+export const GushioLogFormat = '[Gushio] %s' // TODO: remove generic format?
+export const GushioDepsLogFormat = '[Gushio|Deps] %s'
+export const GushioTraceLogFormat = '[Gushio|Trace] %d:%d\t %s'
+export const traceSymbol = Symbol('trace')
 
 export class GushioConsole extends Console {
 
-    constructor(stdin, stdout, stderr, logLevel = 'info') {
+    constructor(stdin, stdout, stderr, logLevel = 'info', trace = false) {
         super({stdout, stderr, groupIndentation: 4})
         this.logLevel = logLevel
+        this.trace = trace
         /* TODO: uncomment following line when next enquirer version is released solving a bug in custom IO streams
          *       see: https://github.com/enquirer/enquirer/issues/308, https://github.com/enquirer/enquirer/issues/338
          */
@@ -59,6 +63,20 @@ export class GushioConsole extends Console {
     error(...args) {
         if (this.isError) {
             super.error(...args)
+        }
+    }
+
+    [traceSymbol](line, column, code, additionalContext = {}) {
+        if (!this.trace) {
+            return
+        }
+
+        if (additionalContext.loopType) {
+            this.info(GushioTraceLogFormat, line, column, `LOOP [${additionalContext.loopType}]: ${code}`)
+        } else if (additionalContext.conditionalType) {
+            this.info(GushioTraceLogFormat, line, column, `CONDITIONAL [${additionalContext.conditionalType}]: ${code}`)
+        } else {
+            this.info(GushioTraceLogFormat, line, column, code)
         }
     }
 

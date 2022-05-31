@@ -30,8 +30,8 @@ describe('cliProgram', () => {
     test('buildConsole', () => {
         const console = {my: 'console'}
         GushioConsole.mockImplementationOnce(() => console)
-        expect(program.buildConsole('logLevel')).toBe(console)
-        expect(GushioConsole).toHaveBeenCalledWith(program.stdin, program.stdout, program.stderr, 'logLevel')
+        expect(program.buildConsole('logLevel', 'trace')).toBe(console)
+        expect(GushioConsole).toHaveBeenCalledWith(program.stdin, program.stdout, program.stderr, 'logLevel', 'trace')
     })
 
     test('getCommand', () => {
@@ -55,6 +55,16 @@ describe('cliProgram', () => {
                     env: env => {
                         expect(env).toBe('GUSHIO_VERBOSE')
                         return {opt: 'verboseOption'}
+                    }
+                }
+            })
+            .mockImplementationOnce((flag, description) => {
+                expect(flag).toBe('--trace')
+                expect(description).toBe('enable instructions tracing')
+                return {
+                    env: env => {
+                        expect(env).toBe('GUSHIO_TRACE')
+                        return {opt: 'traceOption'}
                     }
                 }
             })
@@ -91,10 +101,11 @@ describe('cliProgram', () => {
         expect(commandObj.addHelpText).toHaveBeenNthCalledWith(1, 'after', '\ngushio is provided under MIT license.\nFor more info see: https://forge-srl.github.io/gushio')
         expect(commandObj.passThroughOptions).toHaveBeenCalled()
         expect(commandObj.argument).toHaveBeenNthCalledWith(1, '<script>', 'path to the script')
-        expect(commandObj.addOption).toHaveBeenCalledTimes(3)
+        expect(commandObj.addOption).toHaveBeenCalledTimes(4)
         expect(commandObj.addOption).toHaveBeenNthCalledWith(1, {opt: 'verboseOption'})
-        expect(commandObj.addOption).toHaveBeenNthCalledWith(2, {opt: 'gushioFolderOption'})
-        expect(commandObj.addOption).toHaveBeenNthCalledWith(3, {opt: 'cleanRunOption'})
+        expect(commandObj.addOption).toHaveBeenNthCalledWith(2, {opt: 'traceOption'})
+        expect(commandObj.addOption).toHaveBeenNthCalledWith(3, {opt: 'gushioFolderOption'})
+        expect(commandObj.addOption).toHaveBeenNthCalledWith(4, {opt: 'cleanRunOption'})
         expect(commandObj.action).toHaveBeenCalledWith('action')
     })
 
@@ -110,11 +121,12 @@ describe('cliProgram', () => {
                 return console
             }
 
-            Runner.fromPath = (app, script, workingDir, gushioFolder) => {
+            Runner.fromPath = (app, script, workingDir, gushioFolder, trace) => {
                 expect(app).toBe('gushioApp')
                 expect(script).toBe('someScript')
                 expect(workingDir).toBe('workingDir')
                 expect(gushioFolder).toBe('gushio')
+                expect(trace).toBe('trace')
                 const runner = {
                     run,
                     setConsole: console1 => {
@@ -122,7 +134,7 @@ describe('cliProgram', () => {
                         return runner
                     },
                     setOptions: options => {
-                        expect(options).toStrictEqual({cleanRun: 'cleanRun'})
+                        expect(options).toStrictEqual({cleanRun: 'cleanRun', trace: 'trace'})
                         return runner
                     }
                 }
@@ -131,7 +143,7 @@ describe('cliProgram', () => {
         })
 
         test('success', async () => {
-            await action('someScript', {verbose: 'verbose', cleanRun: 'cleanRun', gushioFolder: 'gushio'}, {
+            await action('someScript', {verbose: 'verbose', cleanRun: 'cleanRun', trace: 'trace', gushioFolder: 'gushio'}, {
                 rawArgs: ['nodeApp', 'gushioApp', 'otherArgs'],
                 args: ['someScript', 'someArgs']
             })
@@ -143,7 +155,7 @@ describe('cliProgram', () => {
             run.mockImplementationOnce(() => {throw error})
             console.error = jest.fn()
             try {
-                await action('someScript', {verbose: 'verbose', cleanRun: 'cleanRun', gushioFolder: 'gushio'}, {
+                await action('someScript', {verbose: 'verbose', cleanRun: 'cleanRun', trace: 'trace', gushioFolder: 'gushio'}, {
                     rawArgs: ['nodeApp', 'gushioApp', 'otherArgs'],
                     args: ['someScript', 'someArgs']
                 })
@@ -160,7 +172,7 @@ describe('cliProgram', () => {
             run.mockImplementationOnce(() => {throw error})
             console.error = jest.fn()
             try {
-                await action('someScript', {verbose: 'verbose', cleanRun: 'cleanRun', gushioFolder: 'gushio'}, {
+                await action('someScript', {verbose: 'verbose', cleanRun: 'cleanRun', trace: 'trace', gushioFolder: 'gushio'}, {
                     rawArgs: ['nodeApp', 'gushioApp', 'otherArgs'],
                     args: ['someScript', 'someArgs']
                 })
@@ -177,7 +189,7 @@ describe('cliProgram', () => {
             run.mockImplementationOnce(() => {throw error})
             console.error = jest.fn()
             try {
-                await action('someScript', {verbose: 'verbose', cleanRun: 'cleanRun', gushioFolder: 'gushio'}, {
+                await action('someScript', {verbose: 'verbose', cleanRun: 'cleanRun', trace: 'trace', gushioFolder: 'gushio'}, {
                     rawArgs: ['nodeApp', 'gushioApp', 'otherArgs'],
                     args: ['someScript', 'someArgs']
                 })
