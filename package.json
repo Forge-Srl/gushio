@@ -78,8 +78,8 @@
   },
   "devDependencies": {
     "eslint": "^8.16.0",
-    "jest": "^27.5.1",
-    "jest-worker": "^27.5.1",
+    "jest": "^28.1.0",
+    "jest-worker": "^28.1.0",
     "mock-http-server": "^1.4.5",
     "standard-version": "^9.5.0",
     "temp-dir": "^2.0.0"
@@ -91,9 +91,10 @@
     "transform": {},
     "resetMocks": true,
     "resetModules": true,
+    "reporters": ["default", "github-actions"],
     "moduleNameMapper": {
-      "#ansi-styles": "chalk/source/vendor/ansi-styles/index.js",
-      "#supports-color": "chalk/source/vendor/supports-color/index.js"
+      "#ansi-styles": "<rootDir>/node_modules/ora/node_modules/chalk/source/vendor/ansi-styles/index.js",
+      "#supports-color": "<rootDir>/node_modules/ora/node_modules/chalk/source/vendor/supports-color/index.js"
     },
     "collectCoverageFrom": [
       "**/*.{js,cjs,mjs}",

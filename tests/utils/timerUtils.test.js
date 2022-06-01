@@ -11,7 +11,7 @@ describe('runUtils', () => {
 
     describe('sleep', () => {
         beforeEach(() => {
-            jest.useFakeTimers('modern')
+            jest.useFakeTimers()
         })
 
         afterEach(() => {

@@ -3,8 +3,8 @@ import * as URL from 'url'
 import os from 'os'
 
 describe('dependenciesUtils', () => {
-    let shelljs, fsExtra, fetch, mockRequireFromString, requireStrategy, buildPatchedImport, dependencyDescriptor,
-        ensureNodeModulesExists, checkDependencyInstalled, installDependency
+    let shelljs, fsExtra, fetch, mockRequireFromString, transformCode, requireStrategy, buildPatchedImport,
+        dependencyDescriptor, ensureNodeModulesExists, checkDependencyInstalled, installDependency
 
     beforeEach(async () => {
         shelljs = {dummy: 'dummy'}
@@ -15,6 +15,8 @@ describe('dependenciesUtils', () => {
         jest.unstable_mockModule('fs-extra', () => ({default: fsExtra}))
         fetch = jest.fn()
         jest.unstable_mockModule('node-fetch', () => ({default: fetch}))
+        transformCode = jest.fn()
+        jest.unstable_mockModule('../../utils/codeTransformationUtils.js', () => ({transformCode}))
 
         requireStrategy = (await import('../../utils/dependenciesUtils')).requireStrategy
         buildPatchedImport = (await import('../../utils/dependenciesUtils')).buildPatchedImport
@@ -26,52 +28,59 @@ describe('dependenciesUtils', () => {
 
     describe('requireStrategy', () => {
         describe('inMemoryString', () => {
-            const obj = {something: 123}
+            const obj = {something: 'some value'}
+
+            beforeEach(() => {
+                transformCode.mockImplementationOnce((code, trace) => {
+                    expect(trace).toBe('trace')
+                    return code
+                })
+            })
 
             test('CJS', async () => {
                 const codeAsCJS = 'module.exports = {something: "some value"}'
                 mockRequireFromString.mockImplementationOnce(() => obj)
 
-                expect(JSON.stringify(await requireStrategy.inMemoryString(codeAsCJS, 'filename'))).toEqual(JSON.stringify(obj))
+                expect(JSON.stringify(await requireStrategy.inMemoryString(codeAsCJS, 'filename', 'trace'))).toEqual(JSON.stringify(obj))
                 expect(mockRequireFromString).toHaveBeenCalledWith(codeAsCJS, 'filename')
             })
 
             test('ESM', async () => {
                 const codeAsESM = 'export const something = "some value"'
-                const moduleName = `data:text/javascript;charset=utf-8,${encodeURIComponent(codeAsESM)}`
-                jest.mock(moduleName, () => null, {virtual: true})
-                jest.unstable_mockModule(moduleName, () => obj, {virtual: true})
-
-                expect(JSON.stringify(await requireStrategy.inMemoryString(codeAsESM, 'filename'))).toEqual(JSON.stringify(obj))
+                expect(JSON.stringify(await requireStrategy.inMemoryString(codeAsESM, 'filename', 'trace')))
+                    .toEqual(JSON.stringify(obj))
                 expect(mockRequireFromString).not.toHaveBeenCalled()
             })
         })
 
         test('localPath', async () => {
             fsExtra.readFile = jest.fn().mockImplementationOnce(file => ({toString: () => 'someCode'}))
-            requireStrategy.inMemoryString = (code, filename) => {
+            requireStrategy.inMemoryString = (code, filename, trace) => {
                 expect(code).toBe('someCode')
                 expect(filename).toBe('someFile')
+                expect(trace).toBe('trace')
                 return 'required'
             }
-            expect(await requireStrategy.localPath('someFile')).toBe('required')
+            expect(await requireStrategy.localPath('someFile', 'trace')).toBe('required')
             expect(fsExtra.readFile).toHaveBeenCalledWith('someFile')
         })
 
         describe('remotePath', () => {
             test('OK', async () => {
                 fetch.mockImplementationOnce(() => ({text: () => 'someCode', ok: true}))
-                requireStrategy.inMemoryString = (code, filename) => {
+                requireStrategy.inMemoryString = (code, filename, trace) => {
                     expect(code).toBe('someCode')
                     expect(filename).toBeNull()
+                    expect(trace).toBe('trace')
                     return 'required'
                 }
-                expect(await requireStrategy.remotePath('remotePath')).toBe('required')
+                expect(await requireStrategy.remotePath('remotePath', 'trace')).toBe('required')
                 expect(fetch).toHaveBeenCalledWith('remotePath')
             })
             test('NOT FOUND', async () => {
                 fetch.mockImplementationOnce(() => ({text: () => 'someCode', ok: false, status: 404}))
-                await expect(() => requireStrategy.remotePath('remotePath')).rejects.toThrow('Request of "remotePath" failed with status code 404')
+                await expect(() => requireStrategy.remotePath('remotePath', 'trace')).rejects
+                    .toThrow('Request of "remotePath" failed with status code 404')
                 expect(fetch).toHaveBeenCalledWith('remotePath')
             })
         })
