@@ -1,6 +1,6 @@
 {
   "name": "gushio",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Like bash scripts, but in JavaScript",
   "keywords": [
     "cli",
@@ -91,7 +91,10 @@
     "transform": {},
     "resetMocks": true,
     "resetModules": true,
-    "reporters": ["default", "github-actions"],
+    "reporters": [
+      "default",
+      "github-actions"
+    ],
     "moduleNameMapper": {
       "#ansi-styles": "<rootDir>/node_modules/ora/node_modules/chalk/source/vendor/ansi-styles/index.js",
       "#supports-color": "<rootDir>/node_modules/ora/node_modules/chalk/source/vendor/supports-color/index.js"

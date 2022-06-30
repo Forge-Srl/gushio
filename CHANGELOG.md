@@ -1,5 +1,20 @@
 Gushio - CHANGELOG
 ---
+### [0.7.1](https://github.com/Forge-Srl/gushio/compare/release/0.7.0...release/0.7.1) (2022-06-30)
+
+
+### Features
+
+* `--trace` flag ([34570d1](https://github.com/Forge-Srl/gushio/commit/34570d15b3e9e612c9a14ba60b05ad7c2a10446f))
+
+
+### Bug Fixes
+
+* fetchWrapper again ([f0aa977](https://github.com/Forge-Srl/gushio/commit/f0aa9778e01d758b1723ba3bbbf9886816faaf81))
+* fetchWrapper on Node 18 ([e6043b2](https://github.com/Forge-Srl/gushio/commit/e6043b21bde9e4d5505cc06572e3f8c0d380736c))
+* files with test coverage ([7c3f3ed](https://github.com/Forge-Srl/gushio/commit/7c3f3edbccefef66d0ce8e27210b62963ff4cf83))
+* string patches after sub-script execution ends ([0a16638](https://github.com/Forge-Srl/gushio/commit/0a16638e79f8804f74e4a376a1554d92a86e5e22))
+
 ## [0.7.0](https://github.com/Forge-Srl/gushio/compare/release/0.6.0...release/0.7.0) (2022-03-31)
 
 
