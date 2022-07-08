@@ -37,7 +37,13 @@ export class ScriptChecker {
                 }
 
                 if (argument.choices && !Array.isArray(argument.choices)) {
+                    // TODO: add argument name to message for better debug
                     throw new LoadingError(this.scriptPath, 'argument choices must be an Array of strings')
+                }
+
+                if (argument.parser && !(argument.parser instanceof Function)) {
+                    // TODO: add argument name to message for better debug
+                    throw new LoadingError(this.scriptPath, 'argument parser must be a Function')
                 }
             }
         }
@@ -53,7 +59,13 @@ export class ScriptChecker {
                 }
 
                 if (option.choices && !Array.isArray(option.choices)) {
+                    // TODO: add option name to message for better debug
                     throw new LoadingError(this.scriptPath, 'option choices must be an Array of strings')
+                }
+
+                if (option.parser && !(option.parser instanceof Function)) {
+                    // TODO: add option name to message for better debug
+                    throw new LoadingError(this.scriptPath, 'option parser must be a Function')
                 }
             }
         }

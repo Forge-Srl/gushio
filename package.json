@@ -47,7 +47,7 @@
     "prerelease": "npm test && npm run lint",
     "release": "standard-version --commit-all",
     "postrelease": "git push --follow-tags",
-    "sample:sample1": "npm exec -- gushio -c tests/samples/sample1.js someQuix --baz boom",
+    "sample:sample1": "npm exec -- gushio -c --verbose tests/samples/sample1.js someQuix 165 320 541 --baz boom --bar qwerty --bar sc --bar sdcsdvsv",
     "sample:http-cat": "npm exec -- gushio -c examples/http-cat.js",
     "sample:word-sort:cjs": "npm exec -- gushio -c examples/word-sort.cjs --file package.json",
     "sample:word-sort:esm": "npm exec -- gushio -c examples/word-sort.mjs --file package.json"

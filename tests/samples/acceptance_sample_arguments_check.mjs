@@ -2,8 +2,8 @@
 export const cli = {
     arguments: [
         {name: '<first_argument>'},
-        {name: '<second_argument>'},
-        {name: '<third_argument...>'},
+        {name: '<second_argument>', parser: async ([value]) => value.toUpperCase()},
+        {name: '<third_argument...>', default: 'def', parser: async (values, defaultValue) => `${values.join('--')}##${defaultValue}`},
     ],
 }
 

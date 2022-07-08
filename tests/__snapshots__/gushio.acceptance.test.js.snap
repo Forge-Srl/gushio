@@ -3,7 +3,7 @@
 exports[`Gushio arguments check acceptance_sample_arguments_check.cjs 1`] = `
 @code: 0
 @out
-These are the args: ["foo","bar a bar",["quis","quix","quiz"]]
+These are the args: ["foo","BAR A BAR","quis--quix--quiz##def"]
 
 @err
 
@@ -12,7 +12,7 @@ These are the args: ["foo","bar a bar",["quis","quix","quiz"]]
 exports[`Gushio arguments check acceptance_sample_arguments_check.mjs 1`] = `
 @code: 0
 @out
-These are the args: ["foo","bar a bar",["quis","quix","quiz"]]
+These are the args: ["foo","BAR A BAR","quis--quix--quiz##def"]
 
 @err
 
@@ -129,7 +129,7 @@ Glob "./*" [ './dummy_file1.txt', './dummy_file2.md', './other_dummy_file3.png' 
 exports[`Gushio flags check acceptance_sample_flags_check.cjs 1`] = `
 @code: 0
 @out
-These are the options: {"second":["123","456","789"],"third":true,"first":"foo foo"}
+These are the options: {"second":1373,"third":true,"first":"foo foo"}
 
 @err
 
@@ -138,7 +138,7 @@ These are the options: {"second":["123","456","789"],"third":true,"first":"foo f
 exports[`Gushio flags check acceptance_sample_flags_check.mjs 1`] = `
 @code: 0
 @out
-These are the options: {"second":["123","456","789"],"third":true,"first":"foo foo"}
+These are the options: {"second":1373,"third":true,"first":"foo foo"}
 
 @err
 

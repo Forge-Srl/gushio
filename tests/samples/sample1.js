@@ -6,12 +6,12 @@ module.exports = {
         version: 'NO VERSION',
         afterHelp: 'Some additional info',
         arguments: [
-            {name: '<quix>', description: 'the first argument'},
-            {name: '[quak]', description: 'the second (and optional) argument', default: 69420}
+            {name: '<quix>', description: 'the first argument', parser: async ([_]) => _.toUpperCase()},
+            {name: '[quak...]', description: 'the second (and optional) argument', default: 69420, parser: async ([..._], def) => _.map(x => Number.parseInt(x)).reduce((x, y) => x+y, 0) + def}
         ],
         options: [
             {flags: '-f, --foo', description: 'the foo flag'},
-            {flags: '-b, --bar [broom]', description: 'the bar flag (optional)', default: 'no_broom', env: 'GUSHIO_BAR'},
+            {flags: '-b, --bar [broom...]', description: 'the bar flag (optional)', default: 'no_broom', env: 'GUSHIO_BAR', parser: async ([..._]) => _.reduce((x, y) => x+y, '').toUpperCase()},
             {flags: '-B, --baz <baam>', description: 'the baz flag', choices: ['boom', 'beam']},
         ],
     },

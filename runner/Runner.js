@@ -21,6 +21,7 @@ import {YAMLWrapper} from './patches/YAMLWrapper.js'
 import {fileSystemWrapper} from './patches/fileSystemWrapper.js'
 import {timerWrapper} from './patches/timerWrapper.js'
 import {gushioWrapper} from './patches/gushioWrapper.js'
+import {InputValueDelayedParser} from './InputValueDelayedParser.js'
 
 export class Runner {
 
@@ -95,11 +96,13 @@ export class Runner {
         }
     }
 
+    // TODO: rename to gushioOptions
     setOptions(options) {
         this.options = options
         return this
     }
 
+    // TODO: rename to gushioConsole
     setConsole(console) {
         this.console = console
         return this
@@ -164,13 +167,46 @@ export class Runner {
             const _command = args.pop()
             const cliOptions = args.pop()
 
-            this.console.verbose(GushioLogFormat, `Running with arguments ${JSON.stringify(args)}`)
-            this.console.verbose(GushioLogFormat, `Running with options ${JSON.stringify(cliOptions)}`)
+            const rawArguments = []
+            const parsedArgumentsFunc = []
+            const rawOptions = {}
+            const parsedOptionsFunc = {}
+            args.forEach(arg => {
+                if (arg instanceof InputValueDelayedParser) {
+                    rawArguments.push(...arg.rawValues())
+                    parsedArgumentsFunc.push(() => arg.parsedValue())
+                } else {
+                    rawArguments.push(arg)
+                    parsedArgumentsFunc.push(() => arg)
+                }
+            })
+            Object.entries(cliOptions).forEach(([key, opt]) => {
+                if (opt instanceof InputValueDelayedParser) {
+                    rawOptions[key] = opt.rawValues()
+                    parsedOptionsFunc[key] = () => opt.parsedValue()
+                } else {
+                    rawOptions[key] = opt
+                    parsedOptionsFunc[key] = () => opt
+                }
+            })
+
             this.console.verbose(GushioLogFormat, `Running with dependencies ${JSON.stringify(dependencies)} in ${(this.gushioFolder)}`)
+            this.console.verbose(GushioLogFormat, `Running with raw arguments ${JSON.stringify(rawArguments)}`)
+            this.console.verbose(GushioLogFormat, `Running with raw options ${JSON.stringify(rawOptions)}`)
 
             await combinedWrapper.run(async () => {
                 try {
-                    await this.func(args, cliOptions)
+                    const parsedArguments = await Promise.all(parsedArgumentsFunc.map(async cb => await cb()))
+                    this.console.verbose(GushioLogFormat, `Running with parsed arguments ${JSON.stringify(parsedArguments)}`)
+                    const parsedOptions = Object.assign(
+                        {},
+                        ...await Promise.all(
+                            Object.entries(parsedOptionsFunc).map(async ([key, cb]) => ({[key]: await cb()}))
+                        )
+                    )
+                    this.console.verbose(GushioLogFormat, `Running with parsed options ${JSON.stringify(parsedOptions)}`)
+
+                    await this.func(parsedArguments, parsedOptions)
                 } catch (e) {
                     const message = isString(e) ? e : e.message
                     throw new RunningError(this.scriptPath, message)
@@ -198,7 +234,18 @@ export class Runner {
             if (argument.choices) {
                 argumentObj.choices(argument.choices)
             }
-            // TODO(feature): add argumentObj.argParser?
+            if (argument.parser) {
+                argumentObj.argParser((value, defaultOrAggregator) => {
+                    let aggregator
+                    if (defaultOrAggregator instanceof InputValueDelayedParser) {
+                        aggregator = defaultOrAggregator
+                    } else {
+                        aggregator = new InputValueDelayedParser(argument.parser, defaultOrAggregator)
+                    }
+                    aggregator.pushRawValue(value)
+                    return aggregator
+                })
+            }
             command.addArgument(argumentObj)
         }
 
@@ -213,7 +260,18 @@ export class Runner {
             if (option.choices) {
                 optionObj.choices(option.choices)
             }
-            // TODO(feature): add optionObj.argParser?
+            if (option.parser) {
+                optionObj.argParser((value, defaultOrAggregator) => {
+                    let aggregator
+                    if (defaultOrAggregator instanceof InputValueDelayedParser) {
+                        aggregator = defaultOrAggregator
+                    } else {
+                        aggregator = new InputValueDelayedParser(option.parser, defaultOrAggregator)
+                    }
+                    aggregator.pushRawValue(value)
+                    return aggregator
+                })
+            }
             command.addOption(optionObj)
         }
 

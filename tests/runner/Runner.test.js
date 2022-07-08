@@ -364,16 +364,20 @@ describe('Runner', () => {
         })
 
         test('function ok', async () => {
-            await action('arg1', 'arg2', 'arg3', 'cliOptions', 'command')
+            await action('arg1', 'arg2', 'arg3', {opt1: 'value1', opt2: 'value2'}, 'command')
 
             expect(runner.console.verbose)
-                .toHaveBeenNthCalledWith(1, '[Gushio] %s', 'Running with arguments ["arg1","arg2","arg3"]')
+                .toHaveBeenNthCalledWith(1, '[Gushio] %s', 'Running with dependencies ["shelljs","dep1","dep2"] in someFolder')
             expect(runner.console.verbose)
-                .toHaveBeenNthCalledWith(2, '[Gushio] %s', 'Running with options "cliOptions"')
+                .toHaveBeenNthCalledWith(2, '[Gushio] %s', 'Running with raw arguments ["arg1","arg2","arg3"]')
             expect(runner.console.verbose)
-                .toHaveBeenNthCalledWith(3, '[Gushio] %s', 'Running with dependencies ["shelljs","dep1","dep2"] in someFolder')
+                .toHaveBeenNthCalledWith(3, '[Gushio] %s', 'Running with raw options {"opt1":"value1","opt2":"value2"}')
+            expect(runner.console.verbose)
+                .toHaveBeenNthCalledWith(4, '[Gushio] %s', 'Running with parsed arguments ["arg1","arg2","arg3"]')
+            expect(runner.console.verbose)
+                .toHaveBeenNthCalledWith(5, '[Gushio] %s', 'Running with parsed options {"opt1":"value1","opt2":"value2"}')
 
-            expect(func).toHaveBeenCalledWith(['arg1', 'arg2', 'arg3'], 'cliOptions')
+            expect(func).toHaveBeenCalledWith(['arg1', 'arg2', 'arg3'], {opt1: 'value1', opt2: 'value2'})
         })
 
         test.each([
@@ -387,17 +391,21 @@ describe('Runner', () => {
                 expect(message).toBe(expected)
                 return new Error('boom')
             })
-            await expect(async () => await action('arg1', 'arg2', 'arg3', 'cliOptions', 'command')).rejects
+            await expect(async () => await action('arg1', 'arg2', 'arg3', {opt1: 'value1', opt2: 'value2'}, 'command')).rejects
                 .toThrow(new Error('boom'))
 
             expect(runner.console.verbose)
-                .toHaveBeenNthCalledWith(1, '[Gushio] %s', 'Running with arguments ["arg1","arg2","arg3"]')
+                .toHaveBeenNthCalledWith(1, '[Gushio] %s', 'Running with dependencies ["shelljs","dep1","dep2"] in someFolder')
             expect(runner.console.verbose)
-                .toHaveBeenNthCalledWith(2, '[Gushio] %s', 'Running with options "cliOptions"')
+                .toHaveBeenNthCalledWith(2, '[Gushio] %s', 'Running with raw arguments ["arg1","arg2","arg3"]')
             expect(runner.console.verbose)
-                .toHaveBeenNthCalledWith(3, '[Gushio] %s', 'Running with dependencies ["shelljs","dep1","dep2"] in someFolder')
+                .toHaveBeenNthCalledWith(3, '[Gushio] %s', 'Running with raw options {"opt1":"value1","opt2":"value2"}')
+            expect(runner.console.verbose)
+                .toHaveBeenNthCalledWith(4, '[Gushio] %s', 'Running with parsed arguments ["arg1","arg2","arg3"]')
+            expect(runner.console.verbose)
+                .toHaveBeenNthCalledWith(5, '[Gushio] %s', 'Running with parsed options {"opt1":"value1","opt2":"value2"}')
 
-            expect(func).toHaveBeenCalledWith(['arg1', 'arg2', 'arg3'], 'cliOptions')
+            expect(func).toHaveBeenCalledWith(['arg1', 'arg2', 'arg3'], {opt1: 'value1', opt2: 'value2'})
         })
     })
 
