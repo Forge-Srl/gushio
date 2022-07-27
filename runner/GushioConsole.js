@@ -10,8 +10,8 @@ const LOG_LEVELS = {
     silent: 0
 }
 
-export const GushioLogFormat = '[Gushio] %s' // TODO: remove generic format?
 export const GushioDepsLogFormat = '[Gushio|Deps] %s'
+export const GushioScriptLogFormat = '[Gushio|Script] %s'
 export const GushioTraceLogFormat = '[Gushio|Trace] %d:%d\t %s'
 export const traceSymbol = Symbol('trace')
 

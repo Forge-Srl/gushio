@@ -4,7 +4,7 @@ import {createRequire} from 'module'
 import {Command, Option} from 'commander'
 import {Runner} from '../runner/Runner.js'
 import {LoadingError, RunningError} from '../runner/errors.js'
-import {GushioConsole, GushioLogFormat} from '../runner/GushioConsole.js'
+import {GushioConsole, GushioScriptLogFormat} from '../runner/GushioConsole.js'
 
 const require = createRequire(import.meta.url)
 const packageInfo = require('../package.json')
@@ -29,8 +29,8 @@ export class Program {
             try {
                 const runner = (await Runner
                     .fromPath(command.rawArgs[1], scriptPath, workingDir, options.gushioFolder, options.trace))
-                    .setConsole(console)
-                    .setOptions({
+                    .setGushioConsole(console)
+                    .setGushioOptions({
                         cleanRun: options.cleanRun,
                         trace: options.trace,
                     })
@@ -39,9 +39,9 @@ export class Program {
                 await runner.run(command.args)
             } catch (error) {
                 if (error instanceof LoadingError || error instanceof RunningError) {
-                    console.error(GushioLogFormat, error.message)
+                    console.error(GushioScriptLogFormat, error.message)
                 } else {
-                    console.error(GushioLogFormat, error.stack)
+                    console.error(GushioScriptLogFormat, error.stack)
                 }
                 throw error
             }

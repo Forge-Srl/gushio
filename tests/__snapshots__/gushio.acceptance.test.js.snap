@@ -21,7 +21,7 @@ These are the args: ["foo","BAR A BAR","quis--quix--quiz##def"]
 exports[`Gushio dependency installation acceptance_sample_dependency_installation.cjs 1`] = `
 @code: 0
 @out
-[Gushio|Deps] Checking dependencies
+[Gushio|Deps] Checking dependencies in [replace:TMP_DIR]\\.gushio\\[replace:SCRIPT_HASH]-sample_5
 [Gushio|Deps] Installing jimp@latest
 [Gushio|Deps] jimp@latest successfully installed
 [Gushio|Deps] Installing check-odd@npm:is-odd@latest
@@ -35,7 +35,7 @@ Written on console [33m[1mafter[22m[39m requiring deps
 exports[`Gushio dependency installation acceptance_sample_dependency_installation.cjs 2`] = `
 @code: 0
 @out
-[Gushio|Deps] Checking dependencies
+[Gushio|Deps] Checking dependencies in [replace:TMP_DIR]\\.gushio\\[replace:SCRIPT_HASH]-sample_5
 [Gushio|Deps] Installing jimp@latest
 [Gushio|Deps] jimp@latest already installed
 [Gushio|Deps] Installing check-odd@npm:is-odd@latest
@@ -49,7 +49,7 @@ Written on console [33m[1mafter[22m[39m requiring deps
 exports[`Gushio dependency installation acceptance_sample_dependency_installation.mjs 1`] = `
 @code: 0
 @out
-[Gushio|Deps] Checking dependencies
+[Gushio|Deps] Checking dependencies in [replace:TMP_DIR]\\.gushio\\[replace:SCRIPT_HASH]-sample_5
 [Gushio|Deps] Installing jimp@latest
 [Gushio|Deps] jimp@latest successfully installed
 [Gushio|Deps] Installing check-odd@npm:is-odd@latest
@@ -63,7 +63,7 @@ Written on console [33m[1mafter[22m[39m requiring deps
 exports[`Gushio dependency installation acceptance_sample_dependency_installation.mjs 2`] = `
 @code: 0
 @out
-[Gushio|Deps] Checking dependencies
+[Gushio|Deps] Checking dependencies in [replace:TMP_DIR]\\.gushio\\[replace:SCRIPT_HASH]-sample_5
 [Gushio|Deps] Installing jimp@latest
 [Gushio|Deps] jimp@latest already installed
 [Gushio|Deps] Installing check-odd@npm:is-odd@latest
@@ -205,7 +205,7 @@ exports[`Gushio missing file local 1`] = `
 @out
 
 @err
-[Gushio] Error while loading '[replace:SCRIPT_PATH]': ENOENT: no such file or directory, open '[replace:SCRIPT_PATH]'
+[Gushio|Script] Error while loading '[replace:SCRIPT_PATH]': ENOENT: no such file or directory, open '[replace:SCRIPT_PATH]'
 
 `;
 
@@ -214,7 +214,7 @@ exports[`Gushio missing file remote 1`] = `
 @out
 
 @err
-[Gushio] Error while loading '[replace:SCRIPT_PATH]': request to [replace:SCRIPT_PATH] failed, reason: getaddrinfo ENOTFOUND invalid.example.com
+[Gushio|Script] Error while loading '[replace:SCRIPT_PATH]': request to [replace:SCRIPT_PATH] failed, reason: getaddrinfo ENOTFOUND invalid.example.com
 
 `;
 
@@ -223,7 +223,7 @@ exports[`Gushio run other script acceptance_sample_run_other_script.cjs 1`] = `
 @out
 Global Don't try this at home!
 [1m[31mBefore script run[39m[22m
-[Gushio|Deps] Checking dependencies
+[Gushio|Deps] Checking dependencies in [replace:TMP_DIR]\\.gushio\\[replace:INNER_SCRIPT_HASH]
 [Gushio|Deps] Installing is-odd@latest
 [Gushio|Deps] is-odd@latest successfully installed
 [34m[1mInner script begin[22m[39m
@@ -243,7 +243,7 @@ exports[`Gushio run other script acceptance_sample_run_other_script.mjs 1`] = `
 @out
 Global Don't try this at home!
 [1m[31mBefore script run[39m[22m
-[Gushio|Deps] Checking dependencies
+[Gushio|Deps] Checking dependencies in [replace:TMP_DIR]\\.gushio\\[replace:INNER_SCRIPT_HASH]
 [Gushio|Deps] Installing is-odd@latest
 [Gushio|Deps] is-odd@latest successfully installed
 [34m[1mInner script begin[22m[39m
@@ -783,7 +783,7 @@ exports[`Gushio syntax error acceptance_sample_syntax_error.cjs 1`] = `
 @out
 
 @err
-[Gushio] Error while loading '[replace:SCRIPT_PATH]': "SyntaxError: Unexpected token 'this'" at line 7
+[Gushio|Script] Error while loading '[replace:SCRIPT_PATH]': "SyntaxError: Unexpected token 'this'" at line 7
 In this line there's JavaScript syntax error
    ^^^^
 
@@ -794,7 +794,7 @@ exports[`Gushio syntax error acceptance_sample_syntax_error.mjs 1`] = `
 @out
 
 @err
-[Gushio] Error while loading '[replace:SCRIPT_PATH]': "SyntaxError: Unexpected token 'this'" at line 7
+[Gushio|Script] Error while loading '[replace:SCRIPT_PATH]': "SyntaxError: Unexpected token 'this'" at line 7
 In this line there's JavaScript syntax error
    ^^^^
 
@@ -805,7 +805,7 @@ exports[`Gushio throw error acceptance_sample_throw_error.cjs 1`] = `
 @out
 
 @err
-[Gushio] Error while running '[replace:SCRIPT_PATH]': This script can fail badly
+[Gushio|Script] Error while running '[replace:SCRIPT_PATH]': This script can fail badly
 
 `;
 
@@ -814,6 +814,6 @@ exports[`Gushio throw error acceptance_sample_throw_error.mjs 1`] = `
 @out
 
 @err
-[Gushio] Error while running '[replace:SCRIPT_PATH]': This script can fail badly
+[Gushio|Script] Error while running '[replace:SCRIPT_PATH]': This script can fail badly
 
 `;

@@ -2,10 +2,11 @@ import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect
 import path from 'path'
 import os from 'os'
 import {createRequire} from 'module'
+import {GushioScriptLogFormat} from '../../runner/GushioConsole.js'
 const require = createRequire(import.meta.url)
 
 describe('cliProgram', () => {
-    let program, Program, Command, Option, Runner, GushioConsole, GushioLogFormat, packageInfo,
+    let program, Program, Command, Option, Runner, GushioConsole, GushioScriptLogFormat, packageInfo,
         RunningError, LoadingError
 
     beforeEach(async () => {
@@ -15,8 +16,8 @@ describe('cliProgram', () => {
         Runner = jest.fn()
         jest.unstable_mockModule('../../runner/Runner.js', () => ({Runner}))
         GushioConsole = jest.fn()
-        GushioLogFormat = 'GUSHIO_FORMAT'
-        jest.unstable_mockModule('../../runner/GushioConsole.js', () => ({GushioConsole, GushioLogFormat}))
+        GushioScriptLogFormat = 'GUSHIO_FORMAT'
+        jest.unstable_mockModule('../../runner/GushioConsole.js', () => ({GushioConsole, GushioScriptLogFormat}))
 
         RunningError = (await import('../../runner/errors.js')).RunningError
         LoadingError = (await import('../../runner/errors.js')).LoadingError
@@ -129,11 +130,11 @@ describe('cliProgram', () => {
                 expect(trace).toBe('trace')
                 const runner = {
                     run,
-                    setConsole: console1 => {
+                    setGushioConsole: console1 => {
                         expect(console1).toBe(console)
                         return runner
                     },
-                    setOptions: options => {
+                    setGushioOptions: options => {
                         expect(options).toStrictEqual({cleanRun: 'cleanRun', trace: 'trace'})
                         return runner
                     }
@@ -164,7 +165,7 @@ describe('cliProgram', () => {
             }
 
             expect(run).toHaveBeenCalledWith(['someArgs'])
-            expect(console.error).toHaveBeenCalledWith(GushioLogFormat, error.message)
+            expect(console.error).toHaveBeenCalledWith(GushioScriptLogFormat, error.message)
         })
 
         test('failure LoadingError', async () => {
@@ -181,7 +182,7 @@ describe('cliProgram', () => {
             }
 
             expect(run).toHaveBeenCalledWith(['someArgs'])
-            expect(console.error).toHaveBeenCalledWith(GushioLogFormat, error.message)
+            expect(console.error).toHaveBeenCalledWith(GushioScriptLogFormat, error.message)
         })
 
         test('failure generic Error', async () => {
@@ -198,7 +199,7 @@ describe('cliProgram', () => {
             }
 
             expect(run).toHaveBeenCalledWith(['someArgs'])
-            expect(console.error).toHaveBeenCalledWith(GushioLogFormat, error.stack)
+            expect(console.error).toHaveBeenCalledWith(GushioScriptLogFormat, error.stack)
         })
     })
 

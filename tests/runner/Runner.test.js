@@ -1,7 +1,7 @@
 import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect} from '@jest/globals'
 
 describe('Runner', () => {
-    let Runner, LoadingError, RunningError, parseSyntaxError, ScriptChecker, dependenciesUtils,
+    let Runner, LoadingError, RunningError, parseSyntaxError, ScriptHandler, dependenciesUtils,
         patchedStringWrapper, patchedConsoleWrapper, fetchWrapper, YAMLWrapper, fileSystemWrapper, timerWrapper,
         gushioWrapper, FunctionWrapper, Command, Argument, Option, mockedPath
 
@@ -9,8 +9,8 @@ describe('Runner', () => {
         mockedPath = jest.fn()
         jest.unstable_mockModule('path', () => ({default: mockedPath}))
 
-        ScriptChecker = jest.fn()
-        jest.unstable_mockModule('../../runner/ScriptChecker.js', () => ({ScriptChecker}))
+        ScriptHandler = jest.fn()
+        jest.unstable_mockModule('../../runner/ScriptHandler.js', () => ({ScriptHandler}))
 
         dependenciesUtils = {
             buildPatchedImport: jest.fn(),
@@ -145,78 +145,39 @@ describe('Runner', () => {
 
     test('fromJsonObject', () => {
         const scriptPath = 'somePath'
-        const scriptObject = {
-            cli: {
-                arguments: ['arg1', 'arg2'],
-                options: ['opt1', 'opt2'],
-            },
-            run: 'run',
-            deps: ['dep1', 'dep2']
-        }
-        const checkScriptObject = jest.fn()
-        ScriptChecker.mockImplementationOnce(path => {
+        const scriptObject = 'scriptObject'
+        ScriptHandler.mockImplementationOnce((path, scriptObj) => {
             expect(path).toBe(scriptPath)
-            return {checkScriptObject}
+            expect(scriptObj).toBe(scriptObject)
+            return {handler: 123}
         })
 
-        expect(Runner.fromJsonObject('appPath', scriptPath, scriptObject))
-            .toStrictEqual(new Runner('appPath', scriptPath, scriptObject.run, scriptObject.cli, scriptObject.deps))
-        expect(checkScriptObject).toHaveBeenCalledWith(scriptObject)
-    })
-
-    test('constructor', () => {
-        expect(new Runner('app', 'script', 'func'))
-            .toStrictEqual(new Runner('app', 'script', 'func', {arguments: [], options: []}, []))
-        expect(new Runner('app', 'script', 'func', undefined, ['dep1']))
-            .toStrictEqual(new Runner('app', 'script', 'func', {arguments: [], options: []}, ['dep1']))
-        expect(new Runner('app', 'script', 'func', {}))
-            .toStrictEqual(new Runner('app', 'script', 'func', {arguments: [], options: []}, []))
-        expect(new Runner('app', 'script', 'func', {arguments: ['arg']}))
-            .toStrictEqual(new Runner('app', 'script', 'func', {arguments: ['arg'], options: []}, []))
-        expect(new Runner('app', 'script', 'func', {options: ['opt']}))
-            .toStrictEqual(new Runner('app', 'script', 'func', {arguments: [], options: ['opt']}, []))
-        expect(new Runner('app', 'script', 'func', {arguments: ['arg'], options: ['opt']}))
-            .toStrictEqual(new Runner('app', 'script', 'func', {arguments: ['arg'], options: ['opt']}, []))
-    })
-
-    test('getDependenciesVersionsAndNames', () => {
-        dependenciesUtils.dependencyDescriptor
-            .mockImplementation((name, version, alias) => ({name, npmInstallVersion: version + alias}))
-
-        const runner = new Runner('appPath', 'scriptPath', 'run', undefined, [
-            {name: 'name1', version: 'version1', alias: 'alias1'},
-            {name: 'name2', version: 'version2', alias: 'alias2'},
-            {name: 'name3', version: 'version3', alias: 'alias3'},
-        ])
-
-        expect(runner.getDependenciesVersionsAndNames()).toStrictEqual({
-            names: ['name1', 'name2', 'name3'],
-            versions: ['version1alias1', 'version2alias2', 'version3alias3']
-        })
+        expect(Runner.fromJsonObject('appPath', scriptPath, scriptObject, 'generalPath'))
+            .toStrictEqual(new Runner('appPath', scriptPath, {handler: 123}, 'generalPath'))
     })
 
     test('setOptions', () => {
         const runner = new Runner('appPath', 'scriptPath', 'run')
         expect(runner.options).toBeUndefined()
-        expect(runner.setOptions('options')).toBe(runner)
+        expect(runner.setGushioOptions('options')).toBe(runner)
         expect(runner.options).toBe('options')
     })
 
     test('setConsole', () => {
         const runner = new Runner('appPath', 'scriptPath', 'run')
         expect(runner.console).toBeUndefined()
-        expect(runner.setConsole('console')).toBe(runner)
+        expect(runner.setGushioConsole('console')).toBe(runner)
         expect(runner.console).toBe('console')
     })
 
     test('similarRunnerFromPath', async () => {
-        const runner = new Runner('appPath', 'scriptPath', 'run', undefined, undefined, 'gushioPath')
+        const runner = new Runner('appPath', 'scriptPath', undefined, 'gushioPath')
         runner.console = 'console'
         runner.options = 'options'
 
         const fakeRunner = {
-            setConsole: jest.fn().mockImplementationOnce(() => fakeRunner),
-            setOptions: jest.fn().mockImplementationOnce(() => fakeRunner),
+            setGushioConsole: jest.fn().mockImplementationOnce(() => fakeRunner),
+            setGushioOptions: jest.fn().mockImplementationOnce(() => fakeRunner),
         }
 
         Runner.fromPath = (application, scriptPath, workingDir, gushioGeneralPath) => {
@@ -228,31 +189,15 @@ describe('Runner', () => {
         }
 
         expect(await runner.similarRunnerFromPath('newPath', 'newDir')).toBe(fakeRunner)
-        expect(fakeRunner.setConsole).toHaveBeenCalledWith(runner.console)
-        expect(fakeRunner.setOptions).toHaveBeenCalledWith(runner.options)
-    })
-
-    test.each([
-        [{name: 'script name', version: 'my super   duper\tversion'}, '0d858590-script_name-my_super_duper_version'],
-        [{version: 'my super   duper\tversion'}, '0d858590-my_super_duper_version'],
-        [{name: 'script name'}, '0d858590-script_name'],
-        [{}, '0d858590'],
-    ])('gushioFolder', async (cli, expected) => {
-        mockedPath.resolve = jest.fn().mockImplementationOnce(() => 'resolved_folder')
-        const runner = new Runner('appPath', 'scriptPath', 'run', cli, undefined, 'fake_folder')
-
-        expect(runner.gushioFolder).toBe('resolved_folder')
-        expect(mockedPath.resolve).toHaveBeenCalledWith('fake_folder', expected)
-        // Call again to check caching
-        expect(runner.gushioFolder).toBe('resolved_folder')
-        expect(mockedPath.resolve).toHaveBeenCalledTimes(1)
+        expect(fakeRunner.setGushioConsole).toHaveBeenCalledWith(runner.console)
+        expect(fakeRunner.setGushioOptions).toHaveBeenCalledWith(runner.options)
     })
 
     describe('installDependency', () => {
         let runner
 
         beforeEach(() => {
-            runner = new Runner('appPath', 'scriptPath', 'run')
+            runner = new Runner('appPath', 'scriptPath')
             runner.console = {info: jest.fn(), isVerbose: true}
         })
 
@@ -275,7 +220,7 @@ describe('Runner', () => {
         })
     })
 
-    describe('getCommandPreActionHook', () => {
+    describe('onPreActionHook', () => {
         let runner
         beforeEach(() => {
             runner = new Runner('appPath', 'scriptPath', 'run')
@@ -285,19 +230,16 @@ describe('Runner', () => {
         })
 
         test('no dependencies', async () => {
-            const hook = runner.getCommandPreActionHook([])
-            await hook()
+            await runner.onPreActionHook([])
 
             expect(runner.console.info).not.toHaveBeenCalled()
             expect(dependenciesUtils.ensureNodeModulesExists).not.toHaveBeenCalled()
         })
 
         test('with dependencies', async () => {
-            runner._gushioFolder = 'gushioFolder'
-            const hook = runner.getCommandPreActionHook(['dep1', 'dep2'])
-            await hook()
+            await runner.onPreActionHook(['dep1', 'dep2'], 'gushioFolder')
 
-            expect(runner.console.info).toHaveBeenNthCalledWith(1, '[Gushio|Deps] %s', 'Checking dependencies')
+            expect(runner.console.info).toHaveBeenNthCalledWith(1, '[Gushio|Deps] %s', 'Checking dependencies in gushioFolder')
             expect(dependenciesUtils.ensureNodeModulesExists).toHaveBeenCalledWith('gushioFolder', runner.options.cleanRun)
             expect(runner.installDependency).toHaveBeenNthCalledWith(1, 'gushioFolder', 'dep1')
             expect(runner.installDependency).toHaveBeenNthCalledWith(2, 'gushioFolder', 'dep2')
@@ -308,10 +250,9 @@ describe('Runner', () => {
         const runner = new Runner('appPath', 'scriptPath')
         runner.console = {verbose: jest.fn(), isVerbose: true}
         runner.options = {trace: 'trace'}
-        runner._gushioFolder = 'someFolder'
 
         dependenciesUtils.buildPatchedImport.mockImplementationOnce((path, allowedDeps) => {
-            expect(path).toBe('someFolder')
+            expect(path).toBe('gushioFolder')
             expect(allowedDeps).toStrictEqual(['dep1', 'dep2'])
             return 'patched'
         })
@@ -344,40 +285,47 @@ describe('Runner', () => {
             return 'combined'
         }
 
-        expect(runner.buildCombinedFunctionWrapper(['dep1', 'dep2'])).toBe('combined')
+        expect(runner.buildCombinedFunctionWrapper(['dep1', 'dep2'], 'gushioFolder')).toBe('combined')
     })
 
-    describe('getCommandAction', () => {
-        let func, runner, action
+    describe('onCommandAction', () => {
+        let func, runner, settings
         beforeEach(() => {
             func = jest.fn()
-            runner = new Runner('appPath', 'scriptPath', func)
+            runner = new Runner('appPath', 'scriptPath')
             runner.console = {verbose: jest.fn(), isVerbose: true}
-            runner._gushioFolder = 'someFolder'
             runner.buildCombinedFunctionWrapper = (dependencies) => {
                 expect(dependencies).toStrictEqual(['shelljs', 'dep1', 'dep2'])
                 return {
                     run: async (func) => await func()
                 }
             }
-            action = runner.getCommandAction(['dep1', 'dep2'])
+            settings = {
+                dependencies: ['dep1', 'dep2'],
+                gushioFolder: 'someFolder',
+                rawArguments: ['arg1', 'arg2', 'arg3'],
+                getArguments: async () => [1,2,3],
+                rawOptions: {opt1: 'value1', opt2: 'value2'},
+                getOptions: async () => ({opt1: 1, opt2: 2}),
+                runFunction: func
+            }
         })
 
         test('function ok', async () => {
-            await action('arg1', 'arg2', 'arg3', {opt1: 'value1', opt2: 'value2'}, 'command')
+            await runner.onCommandAction(settings)
 
             expect(runner.console.verbose)
-                .toHaveBeenNthCalledWith(1, '[Gushio] %s', 'Running with dependencies ["shelljs","dep1","dep2"] in someFolder')
+                .toHaveBeenNthCalledWith(1, '[Gushio|Script] %s', 'Running with dependencies ["shelljs","dep1","dep2"] in someFolder')
             expect(runner.console.verbose)
-                .toHaveBeenNthCalledWith(2, '[Gushio] %s', 'Running with raw arguments ["arg1","arg2","arg3"]')
+                .toHaveBeenNthCalledWith(2, '[Gushio|Script] %s', 'Running with raw arguments ["arg1","arg2","arg3"]')
             expect(runner.console.verbose)
-                .toHaveBeenNthCalledWith(3, '[Gushio] %s', 'Running with raw options {"opt1":"value1","opt2":"value2"}')
+                .toHaveBeenNthCalledWith(3, '[Gushio|Script] %s', 'Running with raw options {"opt1":"value1","opt2":"value2"}')
             expect(runner.console.verbose)
-                .toHaveBeenNthCalledWith(4, '[Gushio] %s', 'Running with parsed arguments ["arg1","arg2","arg3"]')
+                .toHaveBeenNthCalledWith(4, '[Gushio|Script] %s', 'Running with parsed arguments [1,2,3]')
             expect(runner.console.verbose)
-                .toHaveBeenNthCalledWith(5, '[Gushio] %s', 'Running with parsed options {"opt1":"value1","opt2":"value2"}')
+                .toHaveBeenNthCalledWith(5, '[Gushio|Script] %s', 'Running with parsed options {"opt1":1,"opt2":2}')
 
-            expect(func).toHaveBeenCalledWith(['arg1', 'arg2', 'arg3'], {opt1: 'value1', opt2: 'value2'})
+            expect(func).toHaveBeenCalledWith([1,2,3], {opt1: 1, opt2: 2})
         })
 
         test.each([
@@ -391,140 +339,56 @@ describe('Runner', () => {
                 expect(message).toBe(expected)
                 return new Error('boom')
             })
-            await expect(async () => await action('arg1', 'arg2', 'arg3', {opt1: 'value1', opt2: 'value2'}, 'command')).rejects
+            await expect(runner.onCommandAction(settings)).rejects
                 .toThrow(new Error('boom'))
 
             expect(runner.console.verbose)
-                .toHaveBeenNthCalledWith(1, '[Gushio] %s', 'Running with dependencies ["shelljs","dep1","dep2"] in someFolder')
+                .toHaveBeenNthCalledWith(1, '[Gushio|Script] %s', 'Running with dependencies ["shelljs","dep1","dep2"] in someFolder')
             expect(runner.console.verbose)
-                .toHaveBeenNthCalledWith(2, '[Gushio] %s', 'Running with raw arguments ["arg1","arg2","arg3"]')
+                .toHaveBeenNthCalledWith(2, '[Gushio|Script] %s', 'Running with raw arguments ["arg1","arg2","arg3"]')
             expect(runner.console.verbose)
-                .toHaveBeenNthCalledWith(3, '[Gushio] %s', 'Running with raw options {"opt1":"value1","opt2":"value2"}')
+                .toHaveBeenNthCalledWith(3, '[Gushio|Script] %s', 'Running with raw options {"opt1":"value1","opt2":"value2"}')
             expect(runner.console.verbose)
-                .toHaveBeenNthCalledWith(4, '[Gushio] %s', 'Running with parsed arguments ["arg1","arg2","arg3"]')
+                .toHaveBeenNthCalledWith(4, '[Gushio|Script] %s', 'Running with parsed arguments [1,2,3]')
             expect(runner.console.verbose)
-                .toHaveBeenNthCalledWith(5, '[Gushio] %s', 'Running with parsed options {"opt1":"value1","opt2":"value2"}')
+                .toHaveBeenNthCalledWith(5, '[Gushio|Script] %s', 'Running with parsed options {"opt1":1,"opt2":2}')
 
-            expect(func).toHaveBeenCalledWith(['arg1', 'arg2', 'arg3'], {opt1: 'value1', opt2: 'value2'})
+            expect(func).toHaveBeenCalledWith([1, 2, 3], {opt1: 1, opt2: 2})
         })
-    })
-
-    test('makeCommand', () => {
-        const runner = new Runner('appPath', 'scriptPath', 'run', {
-            description: 'appDesc',
-            version: 'version',
-            afterHelp: 'Custom after help',
-            arguments: [
-                {name: 'name1', description: 'desc1', default: 'def1'},
-                {name: 'name2', description: 'desc2', choices: ['c1', 'c2']},
-            ],
-            options: [
-                {flags: 'flag1', description: 'desc_flag1', default: 'def_flag1', env: 'SOME_ENV_VAR'},
-                {flags: 'flag2', description: 'desc_flag2', choices: ['f1', 'f2', 'f3']},
-            ]
-        })
-        runner.getDependenciesVersionsAndNames = () => ({versions: 'versions', names: 'names'})
-        runner.getCommandPreActionHook = (versions) => {
-            expect(versions).toBe('versions')
-            return 'hook'
-        }
-        runner.getCommandAction = (names) => {
-            expect(names).toBe('names')
-            return 'action'
-        }
-
-        const command = {
-            name: name => {
-                expect(name).toBe('scriptPath')
-                return command
-            },
-            description: description => {
-                expect(description).toBe('appDesc')
-                return command
-            },
-            version: version => {
-                expect(version).toBe('version')
-                return command
-            },
-            showSuggestionAfterError: jest.fn().mockImplementationOnce(() => command),
-            addArgument: jest.fn(),
-            addOption: jest.fn(),
-            addHelpText: jest.fn(),
-            hook: (event, hook) => {
-                expect(event).toBe('preAction')
-                expect(hook).toBe('hook')
-                return command
-            },
-            action: (action) => {
-                expect(action).toBe('action')
-                return command
-            }
-        }
-
-        const argCapture = class {
-            constructor(value = {}) {
-                this.value = value
-            }
-
-            default(def) {
-                this.value.default = def
-                return this
-            }
-
-            choices(choices) {
-                this.value.choices = choices
-                return this
-            }
-        }
-        const optCapture = class {
-            constructor(value = {}) {
-                this.value = value
-            }
-
-            default(def) {
-                this.value.default = def
-                return this
-            }
-
-            choices(choices) {
-                this.value.choices = choices
-                return this
-            }
-
-            env(env) {
-                this.value.env = env
-                return this
-            }
-        }
-
-        Command.mockImplementationOnce(() => command)
-        Argument.mockImplementation((name, description) => new argCapture({name, description}))
-        Option.mockImplementation((flags, description) => new optCapture({flags, description}))
-
-        expect(runner.makeCommand('somePath')).toBe(command)
-        expect(command.showSuggestionAfterError).toHaveBeenCalled()
-        expect(command.addHelpText).toHaveBeenCalledWith('after', '\nCustom after help')
-        expect(command.addArgument).toHaveBeenNthCalledWith(1, new argCapture({name: 'name1', description: 'desc1', default: 'def1'}))
-        expect(command.addArgument).toHaveBeenNthCalledWith(2, new argCapture({name: 'name2', description: 'desc2', choices: ['c1', 'c2']}))
-        expect(command.addOption).toHaveBeenNthCalledWith(1, new optCapture({flags: 'flag1', description: 'desc_flag1', default: 'def_flag1', env: 'SOME_ENV_VAR'}))
-        expect(command.addOption).toHaveBeenNthCalledWith(2, new optCapture({flags: 'flag2', description: 'desc_flag2', choices: ['f1', 'f2', 'f3']}))
     })
 
     describe('run', () => {
+        let command, runner
+        beforeEach(() => {
+            command = {
+                parseAsync: jest.fn()
+            }
+            const handler = {
+                toCommand: (path, preAction, action) => {
+                    expect(path).toBe('general')
+                    preAction('deps', 'folder')
+                    action('settings')
+                    return command
+                }
+            }
+            runner = new Runner('appPath', 'scriptPath', handler, 'general')
+            runner.onPreActionHook = jest.fn()
+            runner.onCommandAction = jest.fn()
+        })
+
         test('failure', async () => {
-            const runner = new Runner('appPath', 'scriptPath', 'run')
-            runner.makeCommand = () => ({
-                parseAsync: jest.fn().mockRejectedValueOnce(new Error('kaboom!!!'))
-            })
+            command.parseAsync.mockRejectedValueOnce(new Error('kaboom!!!'))
             await expect(async () => await runner.run(['arg1', 'arg2'])).rejects.toThrow(new Error('kaboom!!!'))
+            expect(runner.onPreActionHook).toHaveBeenCalledWith('deps', 'folder')
+            expect(runner.onCommandAction).toHaveBeenCalledWith('settings')
         })
 
         test('success', async () => {
-            const runner = new Runner('appPath', 'scriptPath', 'run')
-            const command = {parseAsync: jest.fn().mockResolvedValueOnce(undefined)}
-            runner.makeCommand = () => command
+            command.parseAsync.mockResolvedValueOnce(undefined)
             await runner.run(['arg1', 'arg2'])
             expect(command.parseAsync).toHaveBeenCalledWith(['appPath', 'scriptPath', 'arg1', 'arg2'])
+            expect(runner.onPreActionHook).toHaveBeenCalledWith('deps', 'folder')
+            expect(runner.onCommandAction).toHaveBeenCalledWith('settings')
         })
     })
 })

@@ -2,7 +2,7 @@ import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect
 import {Readable, Writable} from 'stream'
 
 describe('GushioConsole', () => {
-    let superConsole, GushioConsole, GushioLogFormat, GushioDepsLogFormat, GushioTraceLogFormat, traceSymbol,
+    let superConsole, GushioConsole, GushioScriptLogFormat, GushioDepsLogFormat, GushioTraceLogFormat, traceSymbol,
         Enquirer, enquirer, ora, inStream, outStream, errStream, myConsole
 
     // Keep this function global here!
@@ -48,7 +48,7 @@ describe('GushioConsole', () => {
 
         const gc = await import('../../runner/GushioConsole')
         GushioConsole = gc.GushioConsole
-        GushioLogFormat = gc.GushioLogFormat
+        GushioScriptLogFormat = gc.GushioScriptLogFormat
         GushioDepsLogFormat = gc.GushioDepsLogFormat
         GushioTraceLogFormat = gc.GushioTraceLogFormat
         myConsole = new GushioConsole(inStream, outStream, errStream)
@@ -57,8 +57,8 @@ describe('GushioConsole', () => {
         expect(myConsole.trace).toBe(false)
     })
 
-    test('GushioLogFormat', () => {
-        expect(GushioLogFormat).toBe('[Gushio] %s')
+    test('GushioScriptLogFormat', () => {
+        expect(GushioScriptLogFormat).toBe('[Gushio|Script] %s')
     })
 
     test('GushioDepsLogFormat', () => {

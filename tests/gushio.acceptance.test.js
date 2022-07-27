@@ -19,6 +19,9 @@ function absoluteScript(scriptName) {
 function runScript(tmpDir, scriptPathOrUrl, argsAndOpts = '', gushioOpts = '') {
     return shelljs.exec(`node ${executablePath} -f ${tmpDir}/.gushio ${gushioOpts} ${scriptPathOrUrl} ${argsAndOpts}`)
 }
+function scriptHash(scriptPath) {
+    return crypto.createHash('md5').update(scriptPath).digest('hex').substring(0, 8)
+}
 
 function setupCustomSnapshotSerializer(replacements) {
     const replaceValues = (str) => {
@@ -147,7 +150,7 @@ describe('Gushio', () => {
         'acceptance_sample_dependency_installation.mjs'
     ])('dependency installation %s', (file) => {
         const scriptPath = absoluteScript(file)
-        const hash = crypto.createHash('md5').update(scriptPath).digest('hex').substring(0, 8)
+        const hash = scriptHash(scriptPath)
         const result = runScript(tmpDir, scriptPath)
         expectToMatchCustomSnapshot(result, [
             [tmpDir, 'TMP_DIR'],
@@ -263,11 +266,13 @@ describe('Gushio', () => {
         'acceptance_sample_run_other_script.mjs'
     ])('run other script %s', (file) => {
         const scriptPath = absoluteScript(file)
+        const innerScriptHash = scriptHash(absoluteScript('inner_script.js'))
         // force clear run because inner script will run twice and has dependencies
         const result = runScript(tmpDir, scriptPath, undefined, '-c')
         expectToMatchCustomSnapshot(result, [
             [tmpDir, 'TMP_DIR'],
             [scriptPath, 'SCRIPT_PATH'],
+            [innerScriptHash, 'INNER_SCRIPT_HASH'],
         ])
     })
 
