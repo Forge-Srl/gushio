@@ -154,8 +154,8 @@ describe('Gushio', () => {
         const result = runScript(tmpDir, scriptPath)
         expectToMatchCustomSnapshot(result, [
             [tmpDir, 'TMP_DIR'],
+            [`${path.sep}.gushio${path.sep}${hash}`, 'gushio_SCRIPT_HASH'],
             [scriptPath, 'SCRIPT_PATH'],
-            [hash, 'SCRIPT_HASH'],
         ])
 
         let installedDeps = shelljs.ls(`${tmpDir}/.gushio/${hash}-sample_5/node_modules`)
@@ -166,8 +166,8 @@ describe('Gushio', () => {
         const result2 = runScript(tmpDir, scriptPath)
         expectToMatchCustomSnapshot(result2, [
             [tmpDir, 'TMP_DIR'],
+            [`${path.sep}.gushio${path.sep}${hash}`, 'gushio_SCRIPT_HASH'],
             [scriptPath, 'SCRIPT_PATH'],
-            [hash, 'SCRIPT_HASH'],
         ])
 
         installedDeps = shelljs.ls(`${tmpDir}/.gushio/${hash}-sample_5/node_modules`)
@@ -272,7 +272,7 @@ describe('Gushio', () => {
         expectToMatchCustomSnapshot(result, [
             [tmpDir, 'TMP_DIR'],
             [scriptPath, 'SCRIPT_PATH'],
-            [innerScriptHash, 'INNER_SCRIPT_HASH'],
+            [`${path.sep}.gushio${path.sep}${innerScriptHash}`, 'gushio_INNER_SCRIPT_HASH'],
         ])
     })
 
