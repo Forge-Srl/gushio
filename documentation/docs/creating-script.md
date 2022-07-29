@@ -142,6 +142,45 @@ module.exports = {
 
 The values of the flags are provided as an object in the second parameter of the `run` function.
 
+## Input parsing
+
+Both arguments and options support a `parser` option to allow input value parsing before the `run` is executed. This 
+option can be specified as follows:
+```javascript
+module.exports = {
+    cli: {
+        arguments: [
+            {name: '[quaks...]', parser: async (valuesArray, defaultIfAny) => { return 'parsed result'}}
+        ],
+        options: [
+            {flags: '-B, --baz [values...]', parser: async (valuesArray, defaultIfAny) => { return 'parsed result'}},
+        ],
+    }
+}
+```
+
+As you can see `parser` is an asynchronous function which takes in the input value (or values) as an array and the 
+default value (if set in the argument/option).
+
+The execution of the `parser` functions is delayed after dependencies are installed and the gushio context is set up; 
+thus you can use all the scripting utilities and access the dependencies if you need to.
+
+The return value of the parser can be anything, for example:
+```javascript
+module.exports = {
+    cli: {
+        arguments: [
+            {name: '[argNumber1]', parser: async ([value]) => Number.parseInt(value)},
+            {name: '[complex]', parser: async ([value]) => JSON.parse(value)},
+            {name: '[quaks...]', parser: async (valuesArray) => valuesArray.join('-')},
+        ],
+        options: [
+            {flags: '-C, --count', parser: async (valuesArray) => valuesArray.length},
+        ],
+    }
+}
+```
+
 ## Script metadata
 
 In the `cli` object you can also add some metadata which can be displayed in the script help:
