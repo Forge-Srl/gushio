@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Creating a script
 
-A Gushio script file is a standard JavaScript file which exports an asynchronous `run` function. You can use both ESM
+A Gushio script file is a standard JavaScript file which exports an asynchronous `run` function. You can use either ESM
 ```javascript
 export const run = async () => {
     console.log('Hello world!')
