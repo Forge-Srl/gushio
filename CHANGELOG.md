@@ -1,5 +1,12 @@
 Gushio - CHANGELOG
 ---
+### [0.7.2](https://github.com/Forge-Srl/gushio/compare/release/0.7.1...release/0.7.2) (2022-12-23)
+
+
+### Features
+
+* custom argument parser ([a3f5a59](https://github.com/Forge-Srl/gushio/commit/a3f5a591a894c77aae2e253eef8a07f8c25b1058))
+
 ### [0.7.1](https://github.com/Forge-Srl/gushio/compare/release/0.7.0...release/0.7.1) (2022-06-30)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "gushio",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Like bash scripts, but in JavaScript",
   "keywords": [
     "cli",
