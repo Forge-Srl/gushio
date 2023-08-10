@@ -57,7 +57,9 @@ describe('Gushio', () => {
     })
 
     afterAll(async () => {
-        await fs.rm(tmpDir, {recursive: true})
+        // Move out of temp dir to prevent `rmdir` EBUSY error on Windows
+        shelljs.cd(path.join(tmpDir, '..'))
+        await fs.rm(tmpDir, {recursive: true, force: true})
     })
 
     describe('missing file', () => {
