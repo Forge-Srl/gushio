@@ -1,6 +1,6 @@
 import path from 'path'
 import fsExtra from 'fs-extra'
-import glob from 'glob'
+import {glob} from 'glob'
 import shell from 'shelljs'
 import {FunctionWrapper} from './FunctionWrapper.js'
 
@@ -16,9 +16,7 @@ export const fileSystemWrapper = (scriptPath, isVerbose) => {
             const defaultGlobOptions = {fs: fsExtra, cwd: shell.pwd().toString(), debug: isVerbose}
             const globOptions = Object.assign({}, defaultGlobOptions, options)
 
-            return await new Promise((resolve, reject) => {
-                glob(pattern, globOptions, (err, files) => err === null ? resolve(files) : reject(err))
-            })
+            return await glob(pattern, globOptions)
         }
         global.fs.path = path
     }

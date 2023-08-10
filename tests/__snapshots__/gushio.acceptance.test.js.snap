@@ -81,7 +81,7 @@ __filename=[replace:SCRIPT_PATH]
 __dirname=[replace:SAMPLES_DIR]
 resolved=[replace:SCRIPT_PATH]
 $.pwd()=[replace:TMP_DIR]
-Glob "./*" [ './dummy_file1.txt', './dummy_file2.md', './other_dummy_file3.png' ]
+Glob "./*" [ 'other_dummy_file3.png', 'dummy_file2.md', 'dummy_file1.txt' ]
 
 @err
 
@@ -94,7 +94,7 @@ __filename=
 __dirname=.
 resolved=[replace:TMP_DIR]
 $.pwd()=[replace:TMP_DIR]
-Glob "./*" [ './dummy_file1.txt', './dummy_file2.md', './other_dummy_file3.png' ]
+Glob "./*" [ 'other_dummy_file3.png', 'dummy_file2.md', 'dummy_file1.txt' ]
 
 @err
 
@@ -107,7 +107,7 @@ __filename=[replace:SCRIPT_PATH]
 __dirname=[replace:SAMPLES_DIR]
 resolved=[replace:SCRIPT_PATH]
 $.pwd()=[replace:TMP_DIR]
-Glob "./*" [ './dummy_file1.txt', './dummy_file2.md', './other_dummy_file3.png' ]
+Glob "./*" [ 'other_dummy_file3.png', 'dummy_file2.md', 'dummy_file1.txt' ]
 
 @err
 
@@ -120,7 +120,7 @@ __filename=
 __dirname=.
 resolved=[replace:TMP_DIR]
 $.pwd()=[replace:TMP_DIR]
-Glob "./*" [ './dummy_file1.txt', './dummy_file2.md', './other_dummy_file3.png' ]
+Glob "./*" [ 'other_dummy_file3.png', 'dummy_file2.md', 'dummy_file1.txt' ]
 
 @err
 

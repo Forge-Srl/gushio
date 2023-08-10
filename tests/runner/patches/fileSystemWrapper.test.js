@@ -11,7 +11,7 @@ describe('fileSystemWrapper', () => {
         shelljs = jest.fn()
         jest.unstable_mockModule('shelljs', () => ({default: shelljs}))
         glob = jest.fn()
-        jest.unstable_mockModule('glob', () => ({default: glob}))
+        jest.unstable_mockModule('glob', () => ({glob: glob}))
 
         fileSystemWrapper = (await import('../../../runner/patches/fileSystemWrapper')).fileSystemWrapper
     })
@@ -22,7 +22,7 @@ describe('fileSystemWrapper', () => {
         path.dirname = jest.fn().mockImplementationOnce(() => 'scriptDir')
         fsExtra.readFile = jest.fn().mockImplementationOnce(() => 'fileContent')
         shelljs.pwd = jest.fn().mockImplementation(() => 'workingDir')
-        glob.mockImplementationOnce((pattern, options, callback) => {
+        glob.mockImplementationOnce((pattern, options) => {
             expect(pattern).toBe('pattern1')
             expect(options).toStrictEqual({
                 cwd: 'workingDir',
@@ -30,8 +30,8 @@ describe('fileSystemWrapper', () => {
                 fs: fsExtra,
                 some: 'options'
             })
-            callback(null, ['globResult1', 'globResult2'])
-        }).mockImplementationOnce((pattern, options, callback) => {
+            return ['globResult1', 'globResult2']
+        }).mockImplementationOnce((pattern, options) => {
             expect(pattern).toBe('pattern2')
             expect(options).toStrictEqual({
                 cwd: 'other',
@@ -39,15 +39,15 @@ describe('fileSystemWrapper', () => {
                 fs: fsExtra,
                 some: 'thing'
             })
-            callback(null, ['globResult1'])
-        }).mockImplementationOnce((pattern, options, callback) => {
+            return ['globResult1']
+        }).mockImplementationOnce((pattern, options) => {
             expect(pattern).toBe('pattern3')
             expect(options).toStrictEqual({
                 cwd: 'workingDir',
                 debug: isVerbose,
                 fs: fsExtra,
             })
-            callback(new Error('Glob Error'), null)
+            throw new Error('Glob Error')
         })
 
         const fn = async () => {
