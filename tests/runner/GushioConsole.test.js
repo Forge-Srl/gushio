@@ -22,8 +22,7 @@ describe('GushioConsole', () => {
         Enquirer = jest.fn()
         jest.unstable_mockModule('enquirer', () => ({default: Enquirer}))
         Enquirer.mockImplementationOnce((options) => {
-            //TODO: uncomment together with GushioConsole.js line 21
-            //expect(options).toStrictEqual({stdin: inStream, stdout: outStream})
+            expect(options).toStrictEqual({stdin: inStream, stdout: outStream})
             return enquirer
         })
 

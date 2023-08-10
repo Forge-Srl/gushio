@@ -21,11 +21,7 @@ export class GushioConsole extends Console {
         super({stdout, stderr, groupIndentation: 4})
         this.logLevel = logLevel
         this.trace = trace
-        /* TODO: uncomment following line when next enquirer version is released solving a bug in custom IO streams
-         *       see: https://github.com/enquirer/enquirer/issues/308, https://github.com/enquirer/enquirer/issues/338
-         */
-        // this.enquirer = new Enquirer({stdout, stdin})
-        this.enquirer = new Enquirer({})
+        this.enquirer = new Enquirer({stdout, stdin})
     }
 
     get isVerbose() {
