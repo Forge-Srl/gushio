@@ -1,5 +1,7 @@
 Gushio - CHANGELOG
 ---
+### [0.7.3](https://github.com/Forge-Srl/gushio/compare/release/0.7.2...release/0.7.3) (2023-08-10)
+
 ### [0.7.2](https://github.com/Forge-Srl/gushio/compare/release/0.7.1...release/0.7.2) (2022-12-23)
 
 
