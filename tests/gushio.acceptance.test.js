@@ -1,5 +1,5 @@
 import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect} from '@jest/globals'
-import fs from 'fs'
+import fs from 'fs/promises'
 import os from 'os'
 import path from 'path'
 import crypto from 'crypto'
@@ -51,13 +51,13 @@ function expectToMatchCustomSnapshot(result, replacements) {
 describe('Gushio', () => {
     let tmpDir
 
-    beforeAll(() => {
-        tmpDir = fs.mkdtempSync(path.join(tempDirectory, 'gushio-acceptance'))
+    beforeAll(async () => {
+        tmpDir = await fs.mkdtemp(path.join(tempDirectory, 'gushio-acceptance'))
         shelljs.cd(tmpDir)
     })
 
-    afterAll(() => {
-        fs.rmSync(tmpDir, {recursive: true})
+    afterAll(async () => {
+        await fs.rm(tmpDir, {recursive: true})
     })
 
     describe('missing file', () => {
@@ -248,8 +248,9 @@ describe('Gushio', () => {
         })
 
         test('remote', async () => {
+            const fileContent = (await fs.readFile(scriptPath)).toString()
             await withServer(async server => {
-                await server.on('GET', '/remote_file.js', 200, fs.readFileSync(scriptPath).toString())
+                await server.on('GET', '/remote_file.js', 200, fileContent)
 
                 const result = runScript(tmpDir, `${await server.getBaseURL()}/remote_file.js`)
                 expectToMatchCustomSnapshot(result, [
