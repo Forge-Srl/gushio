@@ -1,8 +1,7 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-const lightCodeTheme = require('prism-react-renderer/themes/github');
-const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+const prism = require('prism-react-renderer');
 const gushioRepository = 'https://github.com/forge-srl/gushio';
 
 /** @type {import('@docusaurus/types').Config} */
@@ -101,8 +100,8 @@ const config = {
         copyright: `Copyright © ${new Date().getFullYear()} Forge S.r.l. - Built with Docusaurus.`,
       },
       prism: {
-        theme: lightCodeTheme,
-        darkTheme: darkCodeTheme,
+        theme: prism.themes.github,
+        darkTheme: prism.themes.dracula,
       },
     }),
 };
