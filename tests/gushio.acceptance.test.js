@@ -57,7 +57,7 @@ describe('Gushio', () => {
     })
 
     afterAll(() => {
-        fs.rmdirSync(tmpDir, {recursive: true})
+        fs.rmSync(tmpDir, {recursive: true})
     })
 
     describe('missing file', () => {
