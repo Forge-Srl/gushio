@@ -95,10 +95,6 @@
       "default",
       "github-actions"
     ],
-    "moduleNameMapper": {
-      "#ansi-styles": "<rootDir>/node_modules/ora/node_modules/chalk/source/vendor/ansi-styles/index.js",
-      "#supports-color": "<rootDir>/node_modules/ora/node_modules/chalk/source/vendor/supports-color/index.js"
-    },
     "collectCoverageFrom": [
       "**/*.{js,cjs,mjs}",
       "!**/node_modules/**",
