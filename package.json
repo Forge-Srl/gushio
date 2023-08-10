@@ -60,7 +60,7 @@
     "/LICENSE.md"
   ],
   "dependencies": {
-    "commander": "9.4.1",
+    "commander": "11.0.0",
     "enquirer": "2.4.1",
     "shelljs": "0.8.5",
     "ansi-colors": "4.1.3",
@@ -85,7 +85,7 @@
     "temp-dir": "^3.0.0"
   },
   "engines": {
-    "node": "^14 || >=16"
+    "node": ">=16"
   },
   "jest": {
     "transform": {},
