@@ -6,6 +6,8 @@ import requireFromString from 'require-from-string'
 import fetch from 'node-fetch'
 import isString from 'is-string'
 import {transformCode} from './codeTransformationUtils.js'
+import {GushioDepsLogFormat} from '../runner/GushioConsole.js'
+import {Arborist} from '@npmcli/arborist'
 
 export const requireStrategy = {
     inMemoryString: async (code, filename, trace) => {
@@ -98,38 +100,36 @@ export const dependencyDescriptor = (name, version = 'latest', alias) => {
     return {name: name, npmInstallVersion: depString}
 }
 
-export const ensureNodeModulesExists = async (folder, clear) => new Promise((resolve, reject) => {
+export const ensureNodeModulesExists = async (folder, clear) => {
     if (clear) {
-        const exec = shell.rm('-rf', folder)
-        if (exec.code !== 0) {
-            reject(new Error(`Cannot clear "${folder}", rm failed with code ${exec.code}`))
-            return
+        await fsExtra.remove(folder)
+    }
+    await fsExtra.mkdirp(`${folder}/node_modules`)
+}
+
+export const installDependencies = async (folder, dependencies, console) => {
+    const listener = (level, ...args) => {
+        switch (level) {
+            case 'notice':
+            case 'warn':
+                console.warn(GushioDepsLogFormat, ...args)
+                break
+
+            case 'error':
+                console.error(GushioDepsLogFormat, ...args)
+                break
+
+            case 'info':
+                console.info(GushioDepsLogFormat, ...args)
+                break
+
+            default:
+                console.verbose(GushioDepsLogFormat, ...args)
+                break
         }
     }
-    const nodeModuleFolder = `${folder}/node_modules`
-    const exec = shell.mkdir('-p', nodeModuleFolder)
-    if (exec.code !== 0) {
-        reject(new Error(`Cannot create "${nodeModuleFolder}", mkdir failed with code ${exec.code}`))
-        return
-    }
-    resolve()
-})
-
-export const checkDependencyInstalled = async (folder, npmInstallVersion, silent = true) =>
-    new Promise((resolve, reject) => {
-        const exec = shell.exec(`npm list --depth=0 --prefix ${folder} ${npmInstallVersion}`, {silent})
-        if (exec.code !== 0) {
-            reject(new Error(`Cannot find "${npmInstallVersion}" in "${folder}"`))
-            return
-        }
-        resolve()
-    })
-
-export const installDependency = async (folder, npmInstallVersion, silent = true) => new Promise((resolve, reject) => {
-    const exec = shell.exec(`npm install --prefix ${folder} ${npmInstallVersion}`, {silent})
-    if (exec.code !== 0) {
-        reject(new Error(`Installation of "${npmInstallVersion}" failed with exit code ${exec.code}`))
-        return
-    }
-    resolve()
-})
+    process.on('log', listener)
+    const arborist = new Arborist({path: folder})
+    await arborist.reify({add: dependencies})
+    process.off('log', listener)
+}

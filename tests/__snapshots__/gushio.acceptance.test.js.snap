@@ -22,10 +22,6 @@ exports[`Gushio dependency installation acceptance_sample_dependency_installatio
 @code: 0
 @out
 [Gushio|Deps] Checking dependencies in [replace:TMP_DIR][replace:gushio_SCRIPT_HASH]-sample_5
-[Gushio|Deps] Installing jimp@latest
-[Gushio|Deps] jimp@latest successfully installed
-[Gushio|Deps] Installing check-odd@npm:is-odd@latest
-[Gushio|Deps] check-odd@npm:is-odd@latest successfully installed
 Written on console [33m[1mafter[22m[39m requiring deps
 
 @err
@@ -36,10 +32,6 @@ exports[`Gushio dependency installation acceptance_sample_dependency_installatio
 @code: 0
 @out
 [Gushio|Deps] Checking dependencies in [replace:TMP_DIR][replace:gushio_SCRIPT_HASH]-sample_5
-[Gushio|Deps] Installing jimp@latest
-[Gushio|Deps] jimp@latest already installed
-[Gushio|Deps] Installing check-odd@npm:is-odd@latest
-[Gushio|Deps] check-odd@npm:is-odd@latest already installed
 Written on console [33m[1mafter[22m[39m requiring deps
 
 @err
@@ -50,10 +42,6 @@ exports[`Gushio dependency installation acceptance_sample_dependency_installatio
 @code: 0
 @out
 [Gushio|Deps] Checking dependencies in [replace:TMP_DIR][replace:gushio_SCRIPT_HASH]-sample_5
-[Gushio|Deps] Installing jimp@latest
-[Gushio|Deps] jimp@latest successfully installed
-[Gushio|Deps] Installing check-odd@npm:is-odd@latest
-[Gushio|Deps] check-odd@npm:is-odd@latest successfully installed
 Written on console [33m[1mafter[22m[39m requiring deps
 
 @err
@@ -64,10 +52,6 @@ exports[`Gushio dependency installation acceptance_sample_dependency_installatio
 @code: 0
 @out
 [Gushio|Deps] Checking dependencies in [replace:TMP_DIR][replace:gushio_SCRIPT_HASH]-sample_5
-[Gushio|Deps] Installing jimp@latest
-[Gushio|Deps] jimp@latest already installed
-[Gushio|Deps] Installing check-odd@npm:is-odd@latest
-[Gushio|Deps] check-odd@npm:is-odd@latest already installed
 Written on console [33m[1mafter[22m[39m requiring deps
 
 @err
@@ -224,8 +208,6 @@ exports[`Gushio run other script acceptance_sample_run_other_script.cjs 1`] = `
 Global Don't try this at home!
 [1m[31mBefore script run[39m[22m
 [Gushio|Deps] Checking dependencies in [replace:TMP_DIR][replace:gushio_INNER_SCRIPT_HASH]
-[Gushio|Deps] Installing is-odd@latest
-[Gushio|Deps] is-odd@latest successfully installed
 [34m[1mInner script begin[22m[39m
 Global Don't try this at home!
 Arguments [ 'first', \`second "with" 'spaces'\` ]
@@ -244,8 +226,6 @@ exports[`Gushio run other script acceptance_sample_run_other_script.mjs 1`] = `
 Global Don't try this at home!
 [1m[31mBefore script run[39m[22m
 [Gushio|Deps] Checking dependencies in [replace:TMP_DIR][replace:gushio_INNER_SCRIPT_HASH]
-[Gushio|Deps] Installing is-odd@latest
-[Gushio|Deps] is-odd@latest successfully installed
 [34m[1mInner script begin[22m[39m
 Global Don't try this at home!
 Arguments [ 'first', \`second "with" 'spaces'\` ]

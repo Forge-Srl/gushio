@@ -3,8 +3,8 @@ import * as URL from 'url'
 import os from 'os'
 
 describe('dependenciesUtils', () => {
-    let shelljs, fsExtra, fetch, mockRequireFromString, transformCode, requireStrategy, buildPatchedImport,
-        dependencyDescriptor, ensureNodeModulesExists, checkDependencyInstalled, installDependency
+    let shelljs, fsExtra, fetch, Arborist, mockRequireFromString, transformCode, requireStrategy, buildPatchedImport,
+        dependencyDescriptor, ensureNodeModulesExists, installDependencies
 
     beforeEach(async () => {
         shelljs = {dummy: 'dummy'}
@@ -15,6 +15,8 @@ describe('dependenciesUtils', () => {
         jest.unstable_mockModule('fs-extra', () => ({default: fsExtra}))
         fetch = jest.fn()
         jest.unstable_mockModule('node-fetch', () => ({default: fetch}))
+        Arborist = jest.fn()
+        jest.unstable_mockModule('@npmcli/arborist', () => ({Arborist}))
         transformCode = jest.fn()
         jest.unstable_mockModule('../../utils/codeTransformationUtils.js', () => ({transformCode}))
 
@@ -22,8 +24,7 @@ describe('dependenciesUtils', () => {
         buildPatchedImport = (await import('../../utils/dependenciesUtils')).buildPatchedImport
         dependencyDescriptor = (await import('../../utils/dependenciesUtils')).dependencyDescriptor
         ensureNodeModulesExists = (await import('../../utils/dependenciesUtils')).ensureNodeModulesExists
-        checkDependencyInstalled = (await import('../../utils/dependenciesUtils')).checkDependencyInstalled
-        installDependency = (await import('../../utils/dependenciesUtils')).installDependency
+        installDependencies = (await import('../../utils/dependenciesUtils')).installDependencies
     })
 
     describe('requireStrategy', () => {
@@ -162,89 +163,49 @@ describe('dependenciesUtils', () => {
     })
 
     describe('ensureNodeModulesExists', () => {
-        test('clean success', async () => {
-            shelljs.rm = (flag, path) => {
-                expect(flag).toBe('-rf')
-                expect(path).toBe('somePath')
-                return {code: 0}
-            }
-            shelljs.mkdir = (flag, path) => {
-                expect(flag).toBe('-p')
-                expect(path).toBe('somePath/node_modules')
-                return {code: 0}
-            }
+        beforeEach(() => {
+            fsExtra.remove = jest.fn()
+            fsExtra.mkdirp = jest.fn()
+        })
+
+        test('clean', async () => {
             await expect(ensureNodeModulesExists('somePath', true)).resolves.toBeUndefined()
+            expect(fsExtra.remove).toHaveBeenCalledWith('somePath')
+            expect(fsExtra.mkdirp).toHaveBeenCalledWith('somePath/node_modules')
         })
 
-        test('no clear success', async () => {
-            shelljs.mkdir = (flag, path) => {
-                expect(flag).toBe('-p')
-                expect(path).toBe('somePath/node_modules')
-                return {code: 0}
-            }
+        test('no clean', async () => {
             await expect(ensureNodeModulesExists('somePath', false)).resolves.toBeUndefined()
-        })
-
-        test('clear failure', async () => {
-            shelljs.rm = (flag, path) => {
-                expect(flag).toBe('-rf')
-                expect(path).toBe('somePath')
-                return {code: 34}
-            }
-            await expect(ensureNodeModulesExists('somePath', true)).rejects
-                .toThrow('Cannot clear "somePath", rm failed with code 34')
-        })
-
-        test('no clear failure', async () => {
-            shelljs.mkdir = (flag, path) => {
-                expect(flag).toBe('-p')
-                expect(path).toBe('somePath/node_modules')
-                return {code: 34}
-            }
-            await expect(ensureNodeModulesExists('somePath', false)).rejects
-                .toThrow('Cannot create "somePath/node_modules", mkdir failed with code 34')
+            expect(fsExtra.remove).not.toHaveBeenCalledWith('somePath')
+            expect(fsExtra.mkdirp).toHaveBeenCalledWith('somePath/node_modules')
         })
     })
 
-    describe('checkDependencyInstalled', () => {
-        test('success', async () => {
-            shelljs.exec = (command, options) => {
-                expect(command).toBe('npm list --depth=0 --prefix somePath somePackage')
-                expect(options).toStrictEqual({silent: false})
-                return {code: 0}
-            }
-            await expect(checkDependencyInstalled('somePath', 'somePackage', false)).resolves.toBeUndefined()
-        })
+    test('installDependencies', async () => {
+        const arborist = {
+            reify: jest.fn().mockImplementationOnce(() => {
+                process.emit('log', 'notice', 'msg1', 'msg2')
+                process.emit('log', 'warn', 'msg3', 'msg4')
+                process.emit('log', 'error', 'msg5', 'msg6')
+                process.emit('log', 'info', 'msg7', 'msg8')
+                process.emit('log', 'other', 'msg9', 'msg10')
+            })
+        }
+        Arborist.mockReturnValueOnce(arborist)
+        const console = {
+            warn: jest.fn(),
+            error: jest.fn(),
+            info: jest.fn(),
+            verbose: jest.fn(),
+        }
 
-        test('failure', async () => {
-            shelljs.exec = (command, options) => {
-                expect(command).toBe('npm list --depth=0 --prefix somePath somePackage')
-                expect(options).toStrictEqual({silent: false})
-                return {code: 34}
-            }
-            await expect(checkDependencyInstalled('somePath', 'somePackage', false)).rejects
-                .toThrow('Cannot find "somePackage" in "somePath"')
-        })
-    })
-
-    describe('installDependency', () => {
-        test('success', async () => {
-            shelljs.exec = (command, options) => {
-                expect(command).toBe('npm install --prefix somePath somePackage')
-                expect(options).toStrictEqual({silent: false})
-                return {code: 0}
-            }
-            await expect(installDependency('somePath', 'somePackage', false)).resolves.toBeUndefined()
-        })
-
-        test('failure', async () => {
-            shelljs.exec = (command, options) => {
-                expect(command).toBe('npm install --prefix somePath somePackage')
-                expect(options).toStrictEqual({silent: false})
-                return {code: 34}
-            }
-            await expect(installDependency('somePath', 'somePackage', false)).rejects
-                .toThrow('Installation of "somePackage" failed with exit code 34')
-        })
+        await expect(installDependencies('somePath', ['pack1', 'pack2'], console)).resolves.toBeUndefined()
+        expect(Arborist).toHaveBeenCalledWith({path: 'somePath'})
+        expect(arborist.reify).toHaveBeenCalledWith({add: ['pack1', 'pack2']})
+        expect(console.warn).toHaveBeenNthCalledWith(1, '[Gushio|Deps] %s', 'msg1', 'msg2')
+        expect(console.warn).toHaveBeenNthCalledWith(2, '[Gushio|Deps] %s', 'msg3', 'msg4')
+        expect(console.error).toHaveBeenNthCalledWith(1, '[Gushio|Deps] %s', 'msg5', 'msg6')
+        expect(console.info).toHaveBeenNthCalledWith(1, '[Gushio|Deps] %s', 'msg7', 'msg8')
+        expect(console.verbose).toHaveBeenNthCalledWith(1, '[Gushio|Deps] %s', 'msg9', 'msg10')
     })
 })

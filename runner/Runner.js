@@ -2,9 +2,8 @@ import path from 'path'
 import isString from 'is-string'
 import {
     buildPatchedImport,
-    checkDependencyInstalled,
     ensureNodeModulesExists,
-    installDependency,
+    installDependencies,
     requireStrategy,
 } from '../utils/dependenciesUtils.js'
 import {GushioDepsLogFormat, GushioScriptLogFormat} from './GushioConsole.js'
@@ -76,17 +75,6 @@ export class Runner {
             .setGushioOptions(this.options)
     }
 
-    async installDependency(path, npmInstallVersion) {
-        this.console.info(GushioDepsLogFormat, `Installing ${npmInstallVersion}`)
-        try {
-            await checkDependencyInstalled(path, npmInstallVersion, !this.console.isVerbose)
-            this.console.info(GushioDepsLogFormat, `${npmInstallVersion} already installed`)
-        } catch (e) {
-            await installDependency(path, npmInstallVersion, !this.console.isVerbose)
-            this.console.info(GushioDepsLogFormat, `${npmInstallVersion} successfully installed`)
-        }
-    }
-
     async onPreActionHook(dependenciesVersions, gushioFolder) {
         if (dependenciesVersions.length === 0) {
             return
@@ -94,10 +82,7 @@ export class Runner {
 
         this.console.info(GushioDepsLogFormat, `Checking dependencies in ${gushioFolder}`)
         await ensureNodeModulesExists(gushioFolder, this.options.cleanRun)
-
-        for (const dependency of dependenciesVersions) {
-            await this.installDependency(gushioFolder, dependency)
-        }
+        await installDependencies(gushioFolder, dependenciesVersions, this.console)
     }
 
     buildCombinedFunctionWrapper(dependencies, gushioFolder) {

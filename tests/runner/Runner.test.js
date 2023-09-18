@@ -14,10 +14,9 @@ describe('Runner', () => {
 
         dependenciesUtils = {
             buildPatchedImport: jest.fn(),
-            checkDependencyInstalled: jest.fn(),
             dependencyDescriptor: jest.fn(),
             ensureNodeModulesExists: jest.fn(),
-            installDependency: jest.fn(),
+            installDependencies: jest.fn(),
             requireStrategy: jest.fn(),
         }
         jest.unstable_mockModule('../../utils/dependenciesUtils.js', () => dependenciesUtils)
@@ -193,40 +192,12 @@ describe('Runner', () => {
         expect(fakeRunner.setGushioOptions).toHaveBeenCalledWith(runner.options)
     })
 
-    describe('installDependency', () => {
-        let runner
-
-        beforeEach(() => {
-            runner = new Runner('appPath', 'scriptPath')
-            runner.console = {info: jest.fn(), isVerbose: true}
-        })
-
-        test('already installed', async () => {
-            await runner.installDependency('somePath', 'dep')
-            expect(runner.console.info).toHaveBeenNthCalledWith(1, '[Gushio|Deps] %s', 'Installing dep')
-            expect(dependenciesUtils.checkDependencyInstalled).toHaveBeenCalledWith('somePath', 'dep', false)
-            expect(dependenciesUtils.installDependency).not.toHaveBeenCalled()
-            expect(runner.console.info).toHaveBeenNthCalledWith(2, '[Gushio|Deps] %s', 'dep already installed')
-        })
-
-        test('missing dependency', async () => {
-            dependenciesUtils.checkDependencyInstalled.mockRejectedValueOnce(new Error('kaboom'))
-
-            await runner.installDependency('somePath', 'dep')
-            expect(runner.console.info).toHaveBeenNthCalledWith(1, '[Gushio|Deps] %s', 'Installing dep')
-            expect(dependenciesUtils.checkDependencyInstalled).toHaveBeenCalledWith('somePath', 'dep', false)
-            expect(dependenciesUtils.installDependency).toHaveBeenCalledWith('somePath', 'dep', false)
-            expect(runner.console.info).toHaveBeenNthCalledWith(2, '[Gushio|Deps] %s', 'dep successfully installed')
-        })
-    })
-
     describe('onPreActionHook', () => {
         let runner
         beforeEach(() => {
             runner = new Runner('appPath', 'scriptPath', 'run')
             runner.console = {info: jest.fn()}
             runner.options = {cleanRun: true}
-            runner.installDependency = jest.fn()
         })
 
         test('no dependencies', async () => {
@@ -241,8 +212,7 @@ describe('Runner', () => {
 
             expect(runner.console.info).toHaveBeenNthCalledWith(1, '[Gushio|Deps] %s', 'Checking dependencies in gushioFolder')
             expect(dependenciesUtils.ensureNodeModulesExists).toHaveBeenCalledWith('gushioFolder', runner.options.cleanRun)
-            expect(runner.installDependency).toHaveBeenNthCalledWith(1, 'gushioFolder', 'dep1')
-            expect(runner.installDependency).toHaveBeenNthCalledWith(2, 'gushioFolder', 'dep2')
+            expect(dependenciesUtils.installDependencies).toHaveBeenCalledWith('gushioFolder', ['dep1', 'dep2'], runner.console)
         })
     })
 
