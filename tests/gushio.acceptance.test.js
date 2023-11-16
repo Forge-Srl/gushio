@@ -17,7 +17,7 @@ function absoluteScript(scriptName) {
     return path.resolve(samplesDir, scriptName)
 }
 function runScript(tmpDir, scriptPathOrUrl, argsAndOpts = '', gushioOpts = '') {
-    return shelljs.exec(`node ${executablePath} -f ${tmpDir}/.gushio ${gushioOpts} ${scriptPathOrUrl} ${argsAndOpts}`)
+    return shelljs.exec(`node --no-deprecation ${executablePath} -f ${tmpDir}/.gushio ${gushioOpts} ${scriptPathOrUrl} ${argsAndOpts}`)
 }
 function scriptHash(scriptPath) {
     return crypto.createHash('md5').update(scriptPath).digest('hex').substring(0, 8)
