@@ -121,17 +121,33 @@ describe('dependenciesUtils', () => {
 
         test.each([
             {},
-            {main: 'index.js'},
-            {main: '/'},
             {exports: 'index.js'},
             {exports: '/'},
             {exports: {import: 'index.js'}},
             {exports: {import: '/'}},
+            {exports: {default: 'index.js'}},
+            {exports: {default: '/'}},
             {exports: {'.': 'index.js'}},
             {exports: {'.': '/'}},
             {exports: {'.': {import: 'index.js'}}},
             {exports: {'.': {import: '/'}}},
             {exports: {'.': {import: null}}},
+            {exports: {'.': {default: 'index.js'}}},
+            {exports: {'.': {default: '/'}}},
+            {exports: {'.': {default: null}}},
+            {exports: {'.': {require: 'index.js'}}},
+            {exports: {'.': {require: '/'}}},
+            {exports: {'.': {require: null}}},
+            {exports: 'index.js', module: 'other_ignored.js'},
+            {exports: 'index.js', main: 'other_ignored.js'},
+            {type: 'module', module: 'index.js'},
+            {type: 'module', module: 'index'},
+            {type: 'module', module: '/'},
+            {type: 'commonjs', main: 'index.js'},
+            {type: 'commonjs', main: 'index'},
+            {type: 'commonjs', main: '/'},
+            {type: 'commonjs', module: 'other_ignored.js', main: 'index.js'},
+            {main: 'index.js', module: 'other_ignored.js'},
         ])('found in local folder %p', async (pkgStructure) => {
             const moduleMock = {default: 'theModule'}
             const moduleMockName = URL.fileURLToPath(`file://${os.platform() === 'win32' ? '' : 'localhost/'}${folder}/node_modules/a-fake-module/index.js`)
@@ -145,6 +161,7 @@ describe('dependenciesUtils', () => {
                 expect(path).toBe(`${folder}/node_modules/a-fake-module/package.json`)
                 return pkgStructure
             })
+            fsExtra.pathExists = jest.fn().mockImplementation((path) => path.endsWith('.js'))
 
             expect(JSON.stringify(await patchedImport('a-fake-module'))).toStrictEqual(JSON.stringify(moduleMock))
             // call again to assert caching
@@ -188,7 +205,8 @@ describe('dependenciesUtils', () => {
                 process.emit('log', 'warn', 'msg3', 'msg4')
                 process.emit('log', 'error', 'msg5', 'msg6')
                 process.emit('log', 'info', 'msg7', 'msg8')
-                process.emit('log', 'other', 'msg9', 'msg10')
+                process.emit('log', 'info', 'msg9', 'postinstall')
+                process.emit('log', 'other', 'msg11', 'msg12')
             })
         }
         Arborist.mockReturnValueOnce(arborist)
@@ -206,6 +224,7 @@ describe('dependenciesUtils', () => {
         expect(console.warn).toHaveBeenNthCalledWith(2, '[Gushio|Deps] %s', 'msg3', 'msg4')
         expect(console.error).toHaveBeenNthCalledWith(1, '[Gushio|Deps] %s', 'msg5', 'msg6')
         expect(console.info).toHaveBeenNthCalledWith(1, '[Gushio|Deps] %s', 'msg7', 'msg8')
-        expect(console.verbose).toHaveBeenNthCalledWith(1, '[Gushio|Deps] %s', 'msg9', 'msg10')
+        expect(console.verbose).toHaveBeenNthCalledWith(1, '[Gushio|Deps] %s', 'msg9', 'postinstall')
+        expect(console.verbose).toHaveBeenNthCalledWith(2, '[Gushio|Deps] %s', 'msg11', 'msg12')
     })
 })

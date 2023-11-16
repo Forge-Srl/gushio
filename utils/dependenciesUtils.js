@@ -34,23 +34,53 @@ export const requireStrategy = {
 const packageEntryPoint = async (pathToPackageFolder) => {
     const pkg = await fsExtra.readJson(`${pathToPackageFolder}/package.json`)
 
-    let entryPoint = pkg.main
-    if (!entryPoint && pkg.exports) {
+    let entryPoint
+    if (pkg.exports) {
         if (isString(pkg.exports)) {
             entryPoint = pkg.exports
         } else if (isString(pkg.exports['import'])) {
             entryPoint = pkg.exports['import']
+        } else if (isString(pkg.exports['default'])) {
+            entryPoint = pkg.exports['default']
         } else if (isString(pkg.exports['.'])) {
             entryPoint = pkg.exports['.']
-        } else if (pkg.exports['.'] && isString(pkg.exports['.']['import'])) {
-            entryPoint = pkg.exports['.']['import']
+        } else if (pkg.exports['.']) {
+            if (isString(pkg.exports['.']['import'])) {
+                entryPoint = pkg.exports['.']['import']
+            } else if (isString(pkg.exports['.']['default'])) {
+                entryPoint = pkg.exports['.']['default']
+            } else if (isString(pkg.exports['.']['require'])) {
+                entryPoint = pkg.exports['.']['require']
+            }
         }
+    } else if (pkg.type === 'module' && pkg.module) {
+        entryPoint = pkg.module
+    } else if (pkg.type === 'commonjs' && pkg.main) {
+        entryPoint = pkg.main
+    } else {
+        entryPoint = pkg.main
     }
 
     if (!entryPoint) {
         entryPoint = 'index.js'
     } else if (entryPoint.endsWith('/')) {
         entryPoint += 'index.js'
+    } else if (!await fsExtra.pathExists(path.join(pathToPackageFolder, entryPoint))) {
+        if (await fsExtra.pathExists(path.join(pathToPackageFolder, `${entryPoint}.js`))) {
+            entryPoint += '.js'
+        } else if (await fsExtra.pathExists(path.join(pathToPackageFolder, `${entryPoint}.json`))) {
+            entryPoint += '.json'
+        } else if (await fsExtra.pathExists(path.join(pathToPackageFolder, `${entryPoint}.node`))) {
+            entryPoint += '.node'
+        }
+    } else {
+        try {
+            if ((await fsExtra.stat(path.join(pathToPackageFolder, entryPoint))).isDirectory()) {
+                entryPoint += '/index.js'
+            }
+        } catch (e) {
+            // suppressed
+        }
     }
 
     const completePath = path.join(pathToPackageFolder, entryPoint)
@@ -120,7 +150,11 @@ export const installDependencies = async (folder, dependencies, console) => {
                 break
 
             case 'info':
-                console.info(GushioDepsLogFormat, ...args)
+                if (args.includes('postinstall')) {
+                    console.verbose(GushioDepsLogFormat, ...args)
+                } else {
+                    console.info(GushioDepsLogFormat, ...args)
+                }
                 break
 
             default:
