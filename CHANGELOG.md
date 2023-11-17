@@ -1,5 +1,12 @@
 Gushio - CHANGELOG
 ---
+### [0.7.4](https://github.com/Forge-Srl/gushio/compare/release/0.7.3...release/0.7.4) (2023-11-17)
+
+
+### Bug Fixes
+
+* package entrypoint resolution ([a810cc1](https://github.com/Forge-Srl/gushio/commit/a810cc1c67d4bfbf3ee31d26c58ed568b6796e7a))
+
 ### [0.7.3](https://github.com/Forge-Srl/gushio/compare/release/0.7.2...release/0.7.3) (2023-08-10)
 
 ### [0.7.2](https://github.com/Forge-Srl/gushio/compare/release/0.7.1...release/0.7.2) (2022-12-23)
