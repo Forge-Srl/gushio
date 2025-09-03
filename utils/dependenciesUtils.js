@@ -53,12 +53,15 @@ const packageEntryPoint = async (pathToPackageFolder) => {
                 entryPoint = pkg.exports['.']['require']
             }
         }
-    } else if (pkg.type === 'module' && pkg.module) {
-        entryPoint = pkg.module
-    } else if (pkg.type === 'commonjs' && pkg.main) {
-        entryPoint = pkg.main
-    } else {
-        entryPoint = pkg.main
+    }
+    if (!entryPoint) {
+        if (pkg.type === 'module' && pkg.module) {
+            entryPoint = pkg.module
+        } else if (pkg.type === 'commonjs' && pkg.main) {
+            entryPoint = pkg.main
+        } else {
+            entryPoint = pkg.main
+        }
     }
 
     if (!entryPoint) {

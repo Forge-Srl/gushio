@@ -65,7 +65,7 @@ __filename=[replace:SCRIPT_PATH]
 __dirname=[replace:SAMPLES_DIR]
 resolved=[replace:SCRIPT_PATH]
 $.pwd()=[replace:TMP_DIR]
-Glob "./*" [ 'other_dummy_file3.png', 'dummy_file2.md', 'dummy_file1.txt' ]
+Glob "./*" [ [32m'other_dummy_file3.png'[39m, [32m'dummy_file2.md'[39m, [32m'dummy_file1.txt'[39m ]
 
 @err
 
@@ -78,7 +78,7 @@ __filename=
 __dirname=.
 resolved=[replace:TMP_DIR]
 $.pwd()=[replace:TMP_DIR]
-Glob "./*" [ 'other_dummy_file3.png', 'dummy_file2.md', 'dummy_file1.txt' ]
+Glob "./*" [ [32m'other_dummy_file3.png'[39m, [32m'dummy_file2.md'[39m, [32m'dummy_file1.txt'[39m ]
 
 @err
 
@@ -91,7 +91,7 @@ __filename=[replace:SCRIPT_PATH]
 __dirname=[replace:SAMPLES_DIR]
 resolved=[replace:SCRIPT_PATH]
 $.pwd()=[replace:TMP_DIR]
-Glob "./*" [ 'other_dummy_file3.png', 'dummy_file2.md', 'dummy_file1.txt' ]
+Glob "./*" [ [32m'other_dummy_file3.png'[39m, [32m'dummy_file2.md'[39m, [32m'dummy_file1.txt'[39m ]
 
 @err
 
@@ -104,7 +104,7 @@ __filename=
 __dirname=.
 resolved=[replace:TMP_DIR]
 $.pwd()=[replace:TMP_DIR]
-Glob "./*" [ 'other_dummy_file3.png', 'dummy_file2.md', 'dummy_file1.txt' ]
+Glob "./*" [ [32m'other_dummy_file3.png'[39m, [32m'dummy_file2.md'[39m, [32m'dummy_file1.txt'[39m ]
 
 @err
 
@@ -210,8 +210,8 @@ Global Don't try this at home!
 [Gushio|Deps] Checking dependencies in [replace:TMP_DIR][replace:gushio_INNER_SCRIPT_HASH]
 [34m[1mInner script begin[22m[39m
 Global Don't try this at home!
-Arguments [ 'first', \`second "with" 'spaces'\` ]
-Options { asd: true, bsd: \`something "else" 'with' spaces\` }
+Arguments [ [32m'first'[39m, [32m\`second "with" 'spaces'\`[39m ]
+Options { asd: [33mtrue[39m, bsd: [32m\`something "else" 'with' spaces\`[39m }
 [42m[3mInner script end[23m[49m
 [1m[31mAfter script run[39m[22m
 Global changed
@@ -228,8 +228,8 @@ Global Don't try this at home!
 [Gushio|Deps] Checking dependencies in [replace:TMP_DIR][replace:gushio_INNER_SCRIPT_HASH]
 [34m[1mInner script begin[22m[39m
 Global Don't try this at home!
-Arguments [ 'first', \`second "with" 'spaces'\` ]
-Options { asd: true, bsd: \`something "else" 'with' spaces\` }
+Arguments [ [32m'first'[39m, [32m\`second "with" 'spaces'\`[39m ]
+Options { asd: [33mtrue[39m, bsd: [32m\`something "else" 'with' spaces\`[39m }
 [42m[3mInner script end[23m[49m
 [1m[31mAfter script run[39m[22m
 Global changed
@@ -253,14 +253,14 @@ Simple line
 [Gushio|Trace] 13:19	 CONDITIONAL [if]: dummy = (i % 3 === 0)
 [Gushio|Trace] 14:16	 others.push(i)
 [Gushio|Trace] 18:12	 console.log(dummy)
-true
+[33mtrue[39m
 [Gushio|Trace] 9:8	 LOOP [for]: i++
 [Gushio|Trace] 9:8	 LOOP [for]: i < 10
 [Gushio|Trace] 10:12	 let dummy
 [Gushio|Trace] 11:12	 CONDITIONAL [if]: i % 2
 [Gushio|Trace] 12:16	 odd.push(i)
 [Gushio|Trace] 18:12	 console.log(dummy)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 9:8	 LOOP [for]: i++
 [Gushio|Trace] 9:8	 LOOP [for]: i < 10
 [Gushio|Trace] 10:12	 let dummy
@@ -275,14 +275,14 @@ undefined
 [Gushio|Trace] 15:19	 LOOP [for]: j++
 [Gushio|Trace] 15:19	 LOOP [for]: j < 2
 [Gushio|Trace] 18:12	 console.log(dummy)
-false
+[33mfalse[39m
 [Gushio|Trace] 9:8	 LOOP [for]: i++
 [Gushio|Trace] 9:8	 LOOP [for]: i < 10
 [Gushio|Trace] 10:12	 let dummy
 [Gushio|Trace] 11:12	 CONDITIONAL [if]: i % 2
 [Gushio|Trace] 12:16	 odd.push(i)
 [Gushio|Trace] 18:12	 console.log(dummy)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 9:8	 LOOP [for]: i++
 [Gushio|Trace] 9:8	 LOOP [for]: i < 10
 [Gushio|Trace] 10:12	 let dummy
@@ -297,14 +297,14 @@ undefined
 [Gushio|Trace] 15:19	 LOOP [for]: j++
 [Gushio|Trace] 15:19	 LOOP [for]: j < 2
 [Gushio|Trace] 18:12	 console.log(dummy)
-false
+[33mfalse[39m
 [Gushio|Trace] 9:8	 LOOP [for]: i++
 [Gushio|Trace] 9:8	 LOOP [for]: i < 10
 [Gushio|Trace] 10:12	 let dummy
 [Gushio|Trace] 11:12	 CONDITIONAL [if]: i % 2
 [Gushio|Trace] 12:16	 odd.push(i)
 [Gushio|Trace] 18:12	 console.log(dummy)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 9:8	 LOOP [for]: i++
 [Gushio|Trace] 9:8	 LOOP [for]: i < 10
 [Gushio|Trace] 10:12	 let dummy
@@ -312,14 +312,14 @@ undefined
 [Gushio|Trace] 13:19	 CONDITIONAL [if]: dummy = (i % 3 === 0)
 [Gushio|Trace] 14:16	 others.push(i)
 [Gushio|Trace] 18:12	 console.log(dummy)
-true
+[33mtrue[39m
 [Gushio|Trace] 9:8	 LOOP [for]: i++
 [Gushio|Trace] 9:8	 LOOP [for]: i < 10
 [Gushio|Trace] 10:12	 let dummy
 [Gushio|Trace] 11:12	 CONDITIONAL [if]: i % 2
 [Gushio|Trace] 12:16	 odd.push(i)
 [Gushio|Trace] 18:12	 console.log(dummy)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 9:8	 LOOP [for]: i++
 [Gushio|Trace] 9:8	 LOOP [for]: i < 10
 [Gushio|Trace] 10:12	 let dummy
@@ -334,14 +334,14 @@ undefined
 [Gushio|Trace] 15:19	 LOOP [for]: j++
 [Gushio|Trace] 15:19	 LOOP [for]: j < 2
 [Gushio|Trace] 18:12	 console.log(dummy)
-false
+[33mfalse[39m
 [Gushio|Trace] 9:8	 LOOP [for]: i++
 [Gushio|Trace] 9:8	 LOOP [for]: i < 10
 [Gushio|Trace] 10:12	 let dummy
 [Gushio|Trace] 11:12	 CONDITIONAL [if]: i % 2
 [Gushio|Trace] 12:16	 odd.push(i)
 [Gushio|Trace] 18:12	 console.log(dummy)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 9:8	 LOOP [for]: i++
 [Gushio|Trace] 9:8	 LOOP [for]: i < 10
 [Gushio|Trace] 21:8	 LOOP [for-of]: let oddElement of odd
@@ -411,7 +411,7 @@ key_8 -> undefined
 Ops!
 [Gushio|Trace] 57:12	 whileCounter++
 [Gushio|Trace] 58:12	 console.log(dummy2)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 42:12	 LOOP [while]: true || (dummy2 = 3) > 2
 [Gushio|Trace] 43:12	 CONDITIONAL [switch]: whileCounter
 [Gushio|Trace] 49:20	 console.log(\`value is \${whileCounter}\`)
@@ -419,7 +419,7 @@ value is 1
 [Gushio|Trace] 50:20	 break
 [Gushio|Trace] 57:12	 whileCounter++
 [Gushio|Trace] 58:12	 console.log(dummy2)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 42:12	 LOOP [while]: true || (dummy2 = 3) > 2
 [Gushio|Trace] 43:12	 CONDITIONAL [switch]: whileCounter
 [Gushio|Trace] 49:20	 console.log(\`value is \${whileCounter}\`)
@@ -427,7 +427,7 @@ value is 2
 [Gushio|Trace] 50:20	 break
 [Gushio|Trace] 57:12	 whileCounter++
 [Gushio|Trace] 58:12	 console.log(dummy2)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 42:12	 LOOP [while]: true || (dummy2 = 3) > 2
 [Gushio|Trace] 43:12	 CONDITIONAL [switch]: whileCounter
 [Gushio|Trace] 45:20	 console.log('trinity!')
@@ -437,7 +437,7 @@ value is 3
 [Gushio|Trace] 50:20	 break
 [Gushio|Trace] 57:12	 whileCounter++
 [Gushio|Trace] 58:12	 console.log(dummy2)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 42:12	 LOOP [while]: true || (dummy2 = 3) > 2
 [Gushio|Trace] 43:12	 CONDITIONAL [switch]: whileCounter
 [Gushio|Trace] 49:20	 console.log(\`value is \${whileCounter}\`)
@@ -445,21 +445,21 @@ value is 4
 [Gushio|Trace] 50:20	 break
 [Gushio|Trace] 57:12	 whileCounter++
 [Gushio|Trace] 58:12	 console.log(dummy2)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 42:12	 LOOP [while]: true || (dummy2 = 3) > 2
 [Gushio|Trace] 43:12	 CONDITIONAL [switch]: whileCounter
 [Gushio|Trace] 54:20	 console.log('Ops!')
 Ops!
 [Gushio|Trace] 57:12	 whileCounter++
 [Gushio|Trace] 58:12	 console.log(dummy2)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 42:12	 LOOP [while]: true || (dummy2 = 3) > 2
 [Gushio|Trace] 43:12	 CONDITIONAL [switch]: whileCounter
 [Gushio|Trace] 54:20	 console.log('Ops!')
 Ops!
 [Gushio|Trace] 57:12	 whileCounter++
 [Gushio|Trace] 58:12	 console.log(dummy2)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 42:12	 LOOP [while]: true || (dummy2 = 3) > 2
 [Gushio|Trace] 43:12	 CONDITIONAL [switch]: whileCounter
 [Gushio|Trace] 52:20	 break wh
@@ -503,14 +503,14 @@ Simple line
 [Gushio|Trace] 12:15	 CONDITIONAL [if]: dummy = (i % 3 === 0)
 [Gushio|Trace] 13:12	 others.push(i)
 [Gushio|Trace] 17:8	 console.log(dummy)
-true
+[33mtrue[39m
 [Gushio|Trace] 8:4	 LOOP [for]: i++
 [Gushio|Trace] 8:4	 LOOP [for]: i < 10
 [Gushio|Trace] 9:8	 let dummy
 [Gushio|Trace] 10:8	 CONDITIONAL [if]: i % 2
 [Gushio|Trace] 11:12	 odd.push(i)
 [Gushio|Trace] 17:8	 console.log(dummy)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 8:4	 LOOP [for]: i++
 [Gushio|Trace] 8:4	 LOOP [for]: i < 10
 [Gushio|Trace] 9:8	 let dummy
@@ -525,14 +525,14 @@ undefined
 [Gushio|Trace] 14:15	 LOOP [for]: j++
 [Gushio|Trace] 14:15	 LOOP [for]: j < 2
 [Gushio|Trace] 17:8	 console.log(dummy)
-false
+[33mfalse[39m
 [Gushio|Trace] 8:4	 LOOP [for]: i++
 [Gushio|Trace] 8:4	 LOOP [for]: i < 10
 [Gushio|Trace] 9:8	 let dummy
 [Gushio|Trace] 10:8	 CONDITIONAL [if]: i % 2
 [Gushio|Trace] 11:12	 odd.push(i)
 [Gushio|Trace] 17:8	 console.log(dummy)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 8:4	 LOOP [for]: i++
 [Gushio|Trace] 8:4	 LOOP [for]: i < 10
 [Gushio|Trace] 9:8	 let dummy
@@ -547,14 +547,14 @@ undefined
 [Gushio|Trace] 14:15	 LOOP [for]: j++
 [Gushio|Trace] 14:15	 LOOP [for]: j < 2
 [Gushio|Trace] 17:8	 console.log(dummy)
-false
+[33mfalse[39m
 [Gushio|Trace] 8:4	 LOOP [for]: i++
 [Gushio|Trace] 8:4	 LOOP [for]: i < 10
 [Gushio|Trace] 9:8	 let dummy
 [Gushio|Trace] 10:8	 CONDITIONAL [if]: i % 2
 [Gushio|Trace] 11:12	 odd.push(i)
 [Gushio|Trace] 17:8	 console.log(dummy)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 8:4	 LOOP [for]: i++
 [Gushio|Trace] 8:4	 LOOP [for]: i < 10
 [Gushio|Trace] 9:8	 let dummy
@@ -562,14 +562,14 @@ undefined
 [Gushio|Trace] 12:15	 CONDITIONAL [if]: dummy = (i % 3 === 0)
 [Gushio|Trace] 13:12	 others.push(i)
 [Gushio|Trace] 17:8	 console.log(dummy)
-true
+[33mtrue[39m
 [Gushio|Trace] 8:4	 LOOP [for]: i++
 [Gushio|Trace] 8:4	 LOOP [for]: i < 10
 [Gushio|Trace] 9:8	 let dummy
 [Gushio|Trace] 10:8	 CONDITIONAL [if]: i % 2
 [Gushio|Trace] 11:12	 odd.push(i)
 [Gushio|Trace] 17:8	 console.log(dummy)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 8:4	 LOOP [for]: i++
 [Gushio|Trace] 8:4	 LOOP [for]: i < 10
 [Gushio|Trace] 9:8	 let dummy
@@ -584,14 +584,14 @@ undefined
 [Gushio|Trace] 14:15	 LOOP [for]: j++
 [Gushio|Trace] 14:15	 LOOP [for]: j < 2
 [Gushio|Trace] 17:8	 console.log(dummy)
-false
+[33mfalse[39m
 [Gushio|Trace] 8:4	 LOOP [for]: i++
 [Gushio|Trace] 8:4	 LOOP [for]: i < 10
 [Gushio|Trace] 9:8	 let dummy
 [Gushio|Trace] 10:8	 CONDITIONAL [if]: i % 2
 [Gushio|Trace] 11:12	 odd.push(i)
 [Gushio|Trace] 17:8	 console.log(dummy)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 8:4	 LOOP [for]: i++
 [Gushio|Trace] 8:4	 LOOP [for]: i < 10
 [Gushio|Trace] 20:4	 LOOP [for-of]: let oddElement of odd
@@ -661,7 +661,7 @@ key_8 -> undefined
 Ops!
 [Gushio|Trace] 56:8	 whileCounter++
 [Gushio|Trace] 57:8	 console.log(dummy2)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 41:8	 LOOP [while]: true || (dummy2 = 3) > 2
 [Gushio|Trace] 42:8	 CONDITIONAL [switch]: whileCounter
 [Gushio|Trace] 48:16	 console.log(\`value is \${whileCounter}\`)
@@ -669,7 +669,7 @@ value is 1
 [Gushio|Trace] 49:16	 break
 [Gushio|Trace] 56:8	 whileCounter++
 [Gushio|Trace] 57:8	 console.log(dummy2)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 41:8	 LOOP [while]: true || (dummy2 = 3) > 2
 [Gushio|Trace] 42:8	 CONDITIONAL [switch]: whileCounter
 [Gushio|Trace] 48:16	 console.log(\`value is \${whileCounter}\`)
@@ -677,7 +677,7 @@ value is 2
 [Gushio|Trace] 49:16	 break
 [Gushio|Trace] 56:8	 whileCounter++
 [Gushio|Trace] 57:8	 console.log(dummy2)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 41:8	 LOOP [while]: true || (dummy2 = 3) > 2
 [Gushio|Trace] 42:8	 CONDITIONAL [switch]: whileCounter
 [Gushio|Trace] 44:16	 console.log('trinity!')
@@ -687,7 +687,7 @@ value is 3
 [Gushio|Trace] 49:16	 break
 [Gushio|Trace] 56:8	 whileCounter++
 [Gushio|Trace] 57:8	 console.log(dummy2)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 41:8	 LOOP [while]: true || (dummy2 = 3) > 2
 [Gushio|Trace] 42:8	 CONDITIONAL [switch]: whileCounter
 [Gushio|Trace] 48:16	 console.log(\`value is \${whileCounter}\`)
@@ -695,21 +695,21 @@ value is 4
 [Gushio|Trace] 49:16	 break
 [Gushio|Trace] 56:8	 whileCounter++
 [Gushio|Trace] 57:8	 console.log(dummy2)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 41:8	 LOOP [while]: true || (dummy2 = 3) > 2
 [Gushio|Trace] 42:8	 CONDITIONAL [switch]: whileCounter
 [Gushio|Trace] 53:16	 console.log('Ops!')
 Ops!
 [Gushio|Trace] 56:8	 whileCounter++
 [Gushio|Trace] 57:8	 console.log(dummy2)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 41:8	 LOOP [while]: true || (dummy2 = 3) > 2
 [Gushio|Trace] 42:8	 CONDITIONAL [switch]: whileCounter
 [Gushio|Trace] 53:16	 console.log('Ops!')
 Ops!
 [Gushio|Trace] 56:8	 whileCounter++
 [Gushio|Trace] 57:8	 console.log(dummy2)
-undefined
+[90mundefined[39m
 [Gushio|Trace] 41:8	 LOOP [while]: true || (dummy2 = 3) > 2
 [Gushio|Trace] 42:8	 CONDITIONAL [switch]: whileCounter
 [Gushio|Trace] 51:16	 break wh

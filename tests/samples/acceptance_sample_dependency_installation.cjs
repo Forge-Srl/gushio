@@ -7,7 +7,6 @@ module.exports = {
         {name: 'jimp'},
         {name: 'is-odd', alias: 'check-odd'},
         {name: 'knex'},
-        {name: '@aws-sdk/core'},
         {name: 'pg'},
         {name: 'esbuild'},
     ],
@@ -15,7 +14,6 @@ module.exports = {
         const _jimp = await gushio.import('jimp')
         const _checkOdd = await gushio.import('check-odd')
         const _knex = await gushio.import('knex')
-        const _awsSdkCore = await gushio.import('@aws-sdk/core')
         const _pg = await gushio.import('pg')
         const _esbuild = await gushio.import('esbuild')
 
