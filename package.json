@@ -86,7 +86,7 @@
     "temp-dir": "^3.0.0"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=20"
   },
   "jest": {
     "transform": {},
