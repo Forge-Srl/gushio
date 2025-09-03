@@ -18,7 +18,7 @@ export const traceSymbol = Symbol('trace')
 export class GushioConsole extends Console {
 
     constructor(stdin, stdout, stderr, logLevel = 'info', trace = false) {
-        super({stdout, stderr, groupIndentation: 4})
+        super({stdout, stderr, groupIndentation: 4, inspectOptions: {colors: true}})
         this.logLevel = logLevel
         this.trace = trace
         this.enquirer = new Enquirer({stdout, stdin})
