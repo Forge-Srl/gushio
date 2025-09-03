@@ -69,6 +69,7 @@ export class Program {
             .addHelpText('after', footerNote)
             .passThroughOptions()
             .argument('<script>', 'path to the script')
+            .allowExcessArguments()
             .addOption(verboseOption)
             .addOption(traceOption)
             .addOption(gushioFolderOption)

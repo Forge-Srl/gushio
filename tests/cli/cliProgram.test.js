@@ -47,6 +47,7 @@ describe('cliProgram', () => {
         commandObj.enablePositionalOptions = jest.fn().mockImplementationOnce(() => commandObj)
         commandObj.passThroughOptions = jest.fn().mockImplementationOnce(() => commandObj)
         commandObj.addHelpText = jest.fn().mockImplementationOnce(() => commandObj)
+        commandObj.allowExcessArguments = jest.fn().mockImplementationOnce(() => commandObj)
 
         Option
             .mockImplementationOnce((flag, description) => {
@@ -102,6 +103,7 @@ describe('cliProgram', () => {
         expect(commandObj.addHelpText).toHaveBeenNthCalledWith(1, 'after', '\ngushio is provided under MIT license.\nFor more info see: https://forge-srl.github.io/gushio')
         expect(commandObj.passThroughOptions).toHaveBeenCalled()
         expect(commandObj.argument).toHaveBeenNthCalledWith(1, '<script>', 'path to the script')
+        expect(commandObj.allowExcessArguments).toHaveBeenCalled()
         expect(commandObj.addOption).toHaveBeenCalledTimes(4)
         expect(commandObj.addOption).toHaveBeenNthCalledWith(1, {opt: 'verboseOption'})
         expect(commandObj.addOption).toHaveBeenNthCalledWith(2, {opt: 'traceOption'})
