@@ -202,6 +202,56 @@ exports[`Gushio missing file remote 1`] = `
 
 `;
 
+exports[`Gushio run other script acceptance_sample_import_dependency_file.cjs 1`] = `
+@code: 0
+@out
+[1m[31mBefore import[39m[22m
+[1m[31mAfter import[39m[22m
+value1 - 2
+value2 - 3
+value3 - 4
+[
+  [32m'[replace:TMP_DIR]'[39m,
+  [32m'value1'[39m,
+  [32m'value2'[39m,
+  [32m'value3'[39m
+]
+[
+  [32m'[replace:TMP_DIR]'[39m,
+  [32m'value1'[39m,
+  [32m'value2'[39m,
+  [32m'value3'[39m
+]
+
+@err
+
+`;
+
+exports[`Gushio run other script acceptance_sample_import_dependency_file.mjs 1`] = `
+@code: 0
+@out
+[1m[31mBefore import[39m[22m
+[1m[31mAfter import[39m[22m
+value1 - 2
+value2 - 3
+value3 - 4
+[
+  [32m'[replace:TMP_DIR]'[39m,
+  [32m'value1'[39m,
+  [32m'value2'[39m,
+  [32m'value3'[39m
+]
+[
+  [32m'[replace:TMP_DIR]'[39m,
+  [32m'value1'[39m,
+  [32m'value2'[39m,
+  [32m'value3'[39m
+]
+
+@err
+
+`;
+
 exports[`Gushio run other script acceptance_sample_run_other_script.cjs 1`] = `
 @code: 0
 @out

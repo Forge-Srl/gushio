@@ -221,8 +221,13 @@ describe('Runner', () => {
         runner.console = {verbose: jest.fn(), isVerbose: true}
         runner.options = {trace: 'trace'}
 
-        dependenciesUtils.buildPatchedImport.mockImplementationOnce((path, allowedDeps) => {
-            expect(path).toBe('gushioFolder')
+        mockedPath.dirname = jest.fn().mockImplementationOnce(p => {
+            expect(p).toStrictEqual('scriptPath')
+            return 'scriptPath123'
+        })
+        dependenciesUtils.buildPatchedImport.mockImplementationOnce((scriptPath, depsPath, allowedDeps) => {
+            expect(scriptPath).toBe('scriptPath123')
+            expect(depsPath).toBe('gushioFolder')
             expect(allowedDeps).toStrictEqual(['dep1', 'dep2'])
             return 'patched'
         })

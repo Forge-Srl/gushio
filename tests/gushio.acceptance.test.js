@@ -280,6 +280,19 @@ describe('Gushio', () => {
     })
 
     test.each([
+        'acceptance_sample_import_dependency_file.cjs',
+        'acceptance_sample_import_dependency_file.mjs'
+    ])('run other script %s', (file) => {
+        const scriptPath = absoluteScript(file)
+        // force clear run because inner script will run twice and has dependencies
+        const result = runScript(tmpDir, scriptPath, undefined, '-c')
+        expectToMatchCustomSnapshot(result, [
+            [tmpDir, 'TMP_DIR'],
+            [scriptPath, 'SCRIPT_PATH'],
+        ])
+    })
+
+    test.each([
         'acceptance_sample_trace_flag.cjs',
         'acceptance_sample_trace_flag.mjs'
     ])('run script with trace %s', (file) => {

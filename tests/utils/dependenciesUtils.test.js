@@ -88,11 +88,12 @@ describe('dependenciesUtils', () => {
     })
 
     describe('buildPatchedImport', () => {
-        const folder = 'localFolder'
+        const scriptFolder = 'scriptFolder'
+        const depsFolder = 'localFolder'
         let patchedImport
 
         beforeEach(() => {
-            patchedImport = buildPatchedImport(folder, ['installed-fake-module'])
+            patchedImport = buildPatchedImport(scriptFolder, depsFolder, ['installed-fake-module'])
         })
 
         test('not found', async () => {
@@ -150,7 +151,7 @@ describe('dependenciesUtils', () => {
             {main: 'index.js', module: 'other_ignored.js'},
         ])('found in local folder %p', async (pkgStructure) => {
             const moduleMock = {default: 'theModule'}
-            const moduleMockName = URL.fileURLToPath(`file://${os.platform() === 'win32' ? '' : 'localhost/'}${folder}/node_modules/a-fake-module/index.js`)
+            const moduleMockName = URL.fileURLToPath(`file://${os.platform() === 'win32' ? '' : 'localhost/'}${depsFolder}/node_modules/a-fake-module/index.js`)
             const moduleMockFactory = () => moduleMock
             const moduleMockOptions = {virtual: true}
 
@@ -158,7 +159,7 @@ describe('dependenciesUtils', () => {
             jest.unstable_mockModule(moduleMockName, moduleMockFactory, moduleMockOptions)
 
             fsExtra.readJson = jest.fn().mockImplementationOnce((path) => {
-                expect(path).toBe(`${folder}/node_modules/a-fake-module/package.json`)
+                expect(path).toBe(`${depsFolder}/node_modules/a-fake-module/package.json`)
                 return pkgStructure
             })
             fsExtra.pathExists = jest.fn().mockImplementation((path) => path.endsWith('.js'))
@@ -167,6 +168,19 @@ describe('dependenciesUtils', () => {
             // call again to assert caching
             expect(JSON.stringify(await patchedImport('a-fake-module'))).toStrictEqual(JSON.stringify(moduleMock))
             expect(fsExtra.readJson).toHaveBeenCalledTimes(1)
+        })
+
+        test('custom local file', async () => {
+            const moduleMock = {default: 'theModule'}
+            const moduleMockFactory = () => moduleMock
+            const moduleMockOptions = {virtual: true}
+
+            const scriptName = `${scriptFolder}/some-script.js`
+
+            jest.mock(scriptName, moduleMockFactory, moduleMockOptions)
+            jest.unstable_mockModule(scriptName, moduleMockFactory, moduleMockOptions)
+
+            expect(JSON.stringify(await patchedImport('./some-script.js'))).toStrictEqual(JSON.stringify(moduleMock))
         })
     })
 

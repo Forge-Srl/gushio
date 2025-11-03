@@ -90,7 +90,7 @@ const packageEntryPoint = async (pathToPackageFolder) => {
     return os.platform() === 'win32' ? `file://${completePath}` : `file://localhost/${completePath}`
 }
 
-export const buildPatchedImport = (folder, allowedDependencies = [], silent) => {
+export const buildPatchedImport = (scriptFolder, dependenciesFolder, allowedDependencies = [], silent) => {
     const importCache = new Map()
     const storeAndGet = (id, value) => {
         importCache.set(id, value)
@@ -100,6 +100,10 @@ export const buildPatchedImport = (folder, allowedDependencies = [], silent) => 
     importCache.set('shelljs', shell)
 
     return async id => {
+        if (id.startsWith('./')) {
+            id = path.join(scriptFolder, id)
+        }
+
         if (importCache.has(id)) {
             return importCache.get(id)
         }
@@ -108,7 +112,7 @@ export const buildPatchedImport = (folder, allowedDependencies = [], silent) => 
             return storeAndGet(id, await import(id))
         } catch (e) {
             try {
-                const entryPoint = await packageEntryPoint(`${folder}/node_modules/${id}`)
+                const entryPoint = await packageEntryPoint(`${dependenciesFolder}/node_modules/${id}`)
                 return storeAndGet(id, await import(entryPoint))
             } catch (e) {
                 if (allowedDependencies.includes(id)) {

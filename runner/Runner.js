@@ -86,10 +86,15 @@ export class Runner {
     }
 
     buildCombinedFunctionWrapper(dependencies, gushioFolder) {
-        const patchedImport = buildPatchedImport(gushioFolder, dependencies, !this.console.isVerbose)
+        const scriptPath = Runner.isUrlHTTP(this.scriptPath) ? '' : this.scriptPath
+        const patchedImport = buildPatchedImport(
+            path.dirname(scriptPath),
+            gushioFolder,
+            dependencies,
+            !this.console.isVerbose,
+        )
         const buildSimilarRunner = async (scriptPath, workingDir) =>
             await this.similarRunnerFromPath(scriptPath, workingDir)
-        const scriptPath = Runner.isUrlHTTP(this.scriptPath) ? '' : this.scriptPath
 
         return FunctionWrapper.combine(
             patchedStringWrapper(),
