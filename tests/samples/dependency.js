@@ -2,7 +2,7 @@ const $ = await gushio.import('shelljs')
 const stack = [$.pwd().stdout]
 
 export function getAll() {
-    return stack
+    return stack.join(', ')
 }
 
 export function testExport(x) {

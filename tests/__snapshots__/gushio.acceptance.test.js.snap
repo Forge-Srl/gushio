@@ -210,18 +210,8 @@ exports[`Gushio run other script acceptance_sample_import_dependency_file.cjs 1`
 value1 - 2
 value2 - 3
 value3 - 4
-[
-  [32m'[replace:TMP_DIR]'[39m,
-  [32m'value1'[39m,
-  [32m'value2'[39m,
-  [32m'value3'[39m
-]
-[
-  [32m'[replace:TMP_DIR]'[39m,
-  [32m'value1'[39m,
-  [32m'value2'[39m,
-  [32m'value3'[39m
-]
+[replace:TMP_DIR], value1, value2, value3
+[replace:TMP_DIR], value1, value2, value3
 
 @err
 
@@ -235,18 +225,8 @@ exports[`Gushio run other script acceptance_sample_import_dependency_file.mjs 1`
 value1 - 2
 value2 - 3
 value3 - 4
-[
-  [32m'[replace:TMP_DIR]'[39m,
-  [32m'value1'[39m,
-  [32m'value2'[39m,
-  [32m'value3'[39m
-]
-[
-  [32m'[replace:TMP_DIR]'[39m,
-  [32m'value1'[39m,
-  [32m'value2'[39m,
-  [32m'value3'[39m
-]
+[replace:TMP_DIR], value1, value2, value3
+[replace:TMP_DIR], value1, value2, value3
 
 @err
 
