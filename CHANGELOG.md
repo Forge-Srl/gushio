@@ -1,5 +1,20 @@
 Gushio - CHANGELOG
 ---
+### [0.7.5](https://github.com/Forge-Srl/gushio/compare/release/0.7.4...release/0.7.5) (2025-11-04)
+
+
+### Features
+
+* add support for import of other js local files (not npm dependencies) ([078834f](https://github.com/Forge-Srl/gushio/commit/078834fc4d2eb5180995d227bf96aaed19679c16))
+
+
+### Bug Fixes
+
+* console color on inspected objects ([eb06e74](https://github.com/Forge-Srl/gushio/commit/eb06e74013e3295c42f51497551e843a205a2505))
+* edge case in package entry point detection ([1f8f48b](https://github.com/Forge-Srl/gushio/commit/1f8f48ba623c275c2798e2e075f2d68fc7b0c4f1))
+* local dependency on windows ([9553c32](https://github.com/Forge-Srl/gushio/commit/9553c326221e6b8c512ffaa112d189622b788466))
+* local dependency on windows again ([5796414](https://github.com/Forge-Srl/gushio/commit/57964147c7768cab962188eb0d336624a02a421b))
+
 ### [0.7.4](https://github.com/Forge-Srl/gushio/compare/release/0.7.3...release/0.7.4) (2023-11-17)
 
 
