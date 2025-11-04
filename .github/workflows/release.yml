@@ -23,6 +23,9 @@ jobs:
           path: node_modules
           key: ${{ runner.os }}-npm-${{ hashFiles('package.json') }}
           restore-keys: ${{ runner.os }}-npm
+        # Ensure npm 11.5.1 or later is installed
+      - name: Update npm
+        run: npm install -g npm@latest
       - name: Build and test
         run: |
           npm ci
