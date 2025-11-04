@@ -101,7 +101,10 @@ export const buildPatchedImport = (scriptFolder, dependenciesFolder, allowedDepe
 
     return async id => {
         if (id.startsWith('./')) {
-            id = path.join(scriptFolder, id).replaceAll(path.sep, '/')
+            id = path.join(scriptFolder, id)
+            if (os.platform() === 'win32') {
+                id = `file://${id}`
+            }
         }
 
         if (importCache.has(id)) {

@@ -176,7 +176,7 @@ describe('dependenciesUtils', () => {
             const moduleMockFactory = () => moduleMock
             const moduleMockOptions = {virtual: true}
 
-            const scriptName = `${scriptFolder}/some-script.js`
+            const scriptName = `${os.platform() === 'win32' ? 'file://' : ''}${path.join(scriptFolder, 'some-script.js')}`
 
             jest.mock(scriptName, moduleMockFactory, moduleMockOptions)
             jest.unstable_mockModule(scriptName, moduleMockFactory, moduleMockOptions)
