@@ -9,6 +9,9 @@ on:
   # Allows to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+permissions:
+  id-token: write
+
 jobs:
   build_and_test:
     strategy:
@@ -20,12 +23,12 @@ jobs:
       NODEJS: ${{ matrix.node_version }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node_version }}
       - name: Cache NPM packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: node_modules
           key: ${{ runner.os }}-${{ matrix.node_version }}-npm-${{ hashFiles('package.json') }}
@@ -36,7 +39,8 @@ jobs:
           npm test
           npm run lint
       - name: Track test coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
+          use_oidc: true
           env_vars: OS,NODEJS
           fail_ci_if_error: false
