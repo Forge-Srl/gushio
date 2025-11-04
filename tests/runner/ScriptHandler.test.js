@@ -1,19 +1,4 @@
 import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect} from '@jest/globals'
-import {
-    ArgumentChoicesNotArrayError,
-    ArgumentParserNotAFunctionError,
-    CliArgumentsNotArrayError,
-    CliOptionsNotArrayError,
-    DependenciesNotArrayError,
-    DuplicateDependencyError,
-    MissingArgumentNameError,
-    MissingDependencyNameError,
-    MissingOptionFlagsError,
-    OptionChoicesNotArrayError,
-    OptionParserNotAFunctionError,
-    RunFunctionNotExportedError,
-    RunIsNotAFunctionError,
-} from '../../runner/errors.js'
 import crypto from 'crypto'
 
 describe('ScriptHandler', () => {
@@ -36,7 +21,7 @@ describe('ScriptHandler', () => {
 
         InputValueDelayedParser = (await import('../../runner/InputValueDelayedParser.js')).InputValueDelayedParser
         ScriptHandler = (await import('../../runner/ScriptHandler.js')).ScriptHandler
-        errors = await import('../../runner/errors')
+        errors = await import('../../runner/errors.js')
         handler = new ScriptHandler(scriptPath, null)
     })
 
@@ -183,7 +168,7 @@ describe('ScriptHandler', () => {
                 run: undefined,
             }
             expect(() => handler.normalizeRunFunction())
-                .toThrow(new RunFunctionNotExportedError(scriptPath))
+                .toThrow(new errors.RunFunctionNotExportedError(scriptPath))
         })
 
         test('not a function', () => {
@@ -191,7 +176,7 @@ describe('ScriptHandler', () => {
                 run: 'not a function',
             }
             expect(() => handler.normalizeRunFunction())
-                .toThrow(new RunIsNotAFunctionError(scriptPath))
+                .toThrow(new errors.RunIsNotAFunctionError(scriptPath))
         })
 
         test('function', () => {
@@ -299,7 +284,7 @@ describe('ScriptHandler', () => {
                         arguments: 10,
                     },
                 }
-                expect(() => handler.normalizeCliObject()).toThrow(new CliArgumentsNotArrayError(scriptPath))
+                expect(() => handler.normalizeCliObject()).toThrow(new errors.CliArgumentsNotArrayError(scriptPath))
             })
 
             test('missing name field', () => {
@@ -312,7 +297,7 @@ describe('ScriptHandler', () => {
                         ],
                     },
                 }
-                expect(() => handler.normalizeCliObject()).toThrow(new MissingArgumentNameError(scriptPath))
+                expect(() => handler.normalizeCliObject()).toThrow(new errors.MissingArgumentNameError(scriptPath))
             })
 
             test('choices not an Array', () => {
@@ -324,7 +309,7 @@ describe('ScriptHandler', () => {
                         ],
                     },
                 }
-                expect(() => handler.normalizeCliObject()).toThrow(new ArgumentChoicesNotArrayError(scriptPath, 'bar'))
+                expect(() => handler.normalizeCliObject()).toThrow(new errors.ArgumentChoicesNotArrayError(scriptPath, 'bar'))
             })
 
             test('parser not a function', () => {
@@ -336,7 +321,7 @@ describe('ScriptHandler', () => {
                         ],
                     },
                 }
-                expect(() => handler.normalizeCliObject()).toThrow(new ArgumentParserNotAFunctionError(scriptPath, 'bar'))
+                expect(() => handler.normalizeCliObject()).toThrow(new errors.ArgumentParserNotAFunctionError(scriptPath, 'bar'))
             })
 
             test('valid', () => {
@@ -374,7 +359,7 @@ describe('ScriptHandler', () => {
                         options: 10,
                     },
                 }
-                expect(() => handler.normalizeCliObject()).toThrow(new CliOptionsNotArrayError(scriptPath))
+                expect(() => handler.normalizeCliObject()).toThrow(new errors.CliOptionsNotArrayError(scriptPath))
             })
 
             test('missing flags field', () => {
@@ -387,7 +372,7 @@ describe('ScriptHandler', () => {
                         ],
                     },
                 }
-                expect(() => handler.normalizeCliObject()).toThrow(new MissingOptionFlagsError(scriptPath))
+                expect(() => handler.normalizeCliObject()).toThrow(new errors.MissingOptionFlagsError(scriptPath))
             })
 
             test('choices not an Array', () => {
@@ -399,7 +384,7 @@ describe('ScriptHandler', () => {
                         ],
                     },
                 }
-                expect(() => handler.normalizeCliObject()).toThrow(new OptionChoicesNotArrayError(scriptPath, 'bar'))
+                expect(() => handler.normalizeCliObject()).toThrow(new errors.OptionChoicesNotArrayError(scriptPath, 'bar'))
             })
 
             test('parser not a function', () => {
@@ -411,7 +396,7 @@ describe('ScriptHandler', () => {
                         ],
                     },
                 }
-                expect(() => handler.normalizeCliObject()).toThrow(new OptionParserNotAFunctionError(scriptPath, 'bar'))
+                expect(() => handler.normalizeCliObject()).toThrow(new errors.OptionParserNotAFunctionError(scriptPath, 'bar'))
             })
 
             test('valid', () => {
@@ -453,7 +438,7 @@ describe('ScriptHandler', () => {
             handler.scriptObject = {
                 deps: 'not an array',
             }
-            expect(() => handler.normalizeDependencies()).toThrow(new DependenciesNotArrayError(scriptPath))
+            expect(() => handler.normalizeDependencies()).toThrow(new errors.DependenciesNotArrayError(scriptPath))
         })
 
         test('dependency name missing', () => {
@@ -464,7 +449,7 @@ describe('ScriptHandler', () => {
                     {name: 'dep2'},
                 ],
             }
-            expect(() => handler.normalizeDependencies()).toThrow(new MissingDependencyNameError(scriptPath))
+            expect(() => handler.normalizeDependencies()).toThrow(new errors.MissingDependencyNameError(scriptPath))
         })
 
         test('dependency duplicate without alias', () => {
@@ -475,7 +460,7 @@ describe('ScriptHandler', () => {
                     {name: 'dep1'},
                 ],
             }
-            expect(() => handler.normalizeDependencies()).toThrow(new DuplicateDependencyError(scriptPath, 'dep1'))
+            expect(() => handler.normalizeDependencies()).toThrow(new errors.DuplicateDependencyError(scriptPath, 'dep1'))
         })
 
         test('valid', () => {

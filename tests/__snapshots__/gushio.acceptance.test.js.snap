@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Gushio arguments check acceptance_sample_arguments_check.cjs 1`] = `
 @code: 0
