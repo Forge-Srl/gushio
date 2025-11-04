@@ -1,6 +1,7 @@
 import {jest, describe, test, beforeAll, beforeEach, afterEach, afterAll, expect} from '@jest/globals'
 import * as URL from 'url'
 import os from 'os'
+import path from 'path'
 
 describe('dependenciesUtils', () => {
     let shelljs, fsExtra, fetch, Arborist, mockRequireFromString, transformCode, requireStrategy, buildPatchedImport,
