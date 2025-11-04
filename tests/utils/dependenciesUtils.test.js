@@ -89,7 +89,7 @@ describe('dependenciesUtils', () => {
     })
 
     describe('buildPatchedImport', () => {
-        const scriptFolder = 'scriptFolder'
+        const scriptFolder = os.platform() === 'win32' ? 'D:\\scriptFolder' : '/scriptFolder'
         const depsFolder = 'localFolder'
         let patchedImport
 
