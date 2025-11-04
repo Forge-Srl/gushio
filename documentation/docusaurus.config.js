@@ -11,11 +11,14 @@ const config = {
   url: 'https://forge-srl.github.io',
   baseUrl: '/gushio/',
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
   organizationName: 'forge-srl',
   projectName: 'gushio',
-
+  markdown: {
+    hooks: {
+      onBrokenMarkdownLinks: 'warn',
+    }
+  },
   presets: [
     [
       'classic',
